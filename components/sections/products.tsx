@@ -1,5 +1,9 @@
+import Link from "next/link";
+import { ShoppingBag } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 import { Section, SectionHeader } from "@/components/section";
-import { MediaCard, CardCta } from "@/components/cards";
+import { MediaCard } from "@/components/cards";
+import { cn } from "@/lib/utils";
 import { products } from "@/lib/content/site";
 
 const inr = new Intl.NumberFormat("en-IN", {
@@ -22,21 +26,26 @@ export function Products() {
         {products.map((product) => (
           <MediaCard
             key={product.name}
-            href="/products"
             image={product.image}
             alt={product.alt}
-            ariaLabel={product.name}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
           >
             <h3 className="font-display text-lg font-semibold text-forest">
               {product.name}
             </h3>
-            <p className="mt-1 text-base font-semibold text-brand-700">
+            <p className="mt-1 flex-1 text-base font-semibold text-brand-700">
               {inr.format(product.price)}
             </p>
-            <span className="mt-4">
-              <CardCta label="Add to Cart" />
-            </span>
+            <Link
+              href="/products"
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "mt-4 h-11 w-full text-sm font-semibold",
+              )}
+            >
+              <ShoppingBag className="size-4" />
+              Add to Cart
+            </Link>
           </MediaCard>
         ))}
       </div>

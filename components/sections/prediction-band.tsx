@@ -37,7 +37,7 @@ export function PredictionBand() {
           href="/predictions"
           className={cn(
             buttonVariants({ size: "lg" }),
-            "mt-8 h-12 rounded-full px-7 text-sm font-semibold shadow-sm hover:bg-gold-600",
+            "mt-8 h-12 px-7 text-sm font-semibold shadow-sm",
           )}
         >
           Get Your Prediction

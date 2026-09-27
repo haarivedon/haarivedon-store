@@ -18,7 +18,7 @@ export function Hero() {
       />
       <LeafSprig
         aria-hidden="true"
-        className="pointer-events-none absolute right-2 bottom-0 w-40 rotate-[200deg] opacity-80 sm:w-56"
+        className="pointer-events-none absolute right-4 bottom-5 w-44 opacity-80 drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)] sm:w-56"
       />
 
       <div className="relative mx-auto grid max-w-screen-2xl items-center gap-8 px-4 pt-14 pb-0 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pt-16">
@@ -42,7 +42,7 @@ export function Hero() {
               href="/book"
               className={cn(
                 buttonVariants({ size: "lg" }),
-                "h-12 rounded-full px-6 text-sm font-semibold shadow-sm hover:bg-gold-600",
+                "h-12 px-6 text-sm font-semibold shadow-sm",
               )}
             >
               Book a Session
@@ -52,7 +52,7 @@ export function Hero() {
               href="/services"
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
-                "h-12 rounded-full border-ivory/30 bg-transparent px-6 text-sm font-semibold text-ivory hover:bg-ivory/10 hover:text-ivory",
+                "h-12 px-6 text-sm font-semibold border-ivory/40 text-ivory hover:bg-ivory hover:text-forest",
               )}
             >
               Explore Services

@@ -33,7 +33,7 @@ export function Testimonials() {
                 key={t.name}
                 className="pl-4 sm:basis-1/2 lg:basis-1/3"
               >
-                <figure className="flex h-full flex-col rounded-2xl border border-border bg-card p-6">
+                <figure className="flex h-full flex-col rounded-none border border-border bg-card p-6">
                   <div className="flex gap-0.5" aria-label={`${t.rating} out of 5 stars`}>
                     {Array.from({ length: t.rating }).map((_, i) => (
                       <Star
@@ -54,8 +54,8 @@ export function Testimonials() {
             ))}
           </CarouselContent>
           <div className="mt-8 flex items-center justify-center gap-3">
-            <CarouselPrevious className="static translate-y-0 rounded-full border-forest/20 text-forest hover:bg-sage/50" />
-            <CarouselNext className="static translate-y-0 rounded-full border-forest/20 text-forest hover:bg-sage/50" />
+            <CarouselPrevious className="static translate-y-0 rounded-none border-forest/30 text-forest hover:bg-sage/50" />
+            <CarouselNext className="static translate-y-0 rounded-none border-forest/30 text-forest hover:bg-sage/50" />
           </div>
         </Carousel>
       </div>

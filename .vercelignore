@@ -1,0 +1,16 @@
+# Raw client source assets — never deploy (web-optimized derivatives live in public/)
+client_stuff/
+.client_stuff/
+
+# Local tooling / agent installs
+.agents/
+.claude/
+skills-lock.json
+
+# Build artifacts & deps (Vercel rebuilds these)
+node_modules/
+.next/
+out/
+build/
+coverage/
+*.tsbuildinfo
