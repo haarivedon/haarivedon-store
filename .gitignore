@@ -10,6 +10,9 @@
 !.yarn/releases
 !.yarn/versions
 
+.client_stuff/*
+client_stuff/
+
 # testing
 /coverage
 
@@ -32,6 +35,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+
+# agent tooling (local skill installs)
+/.agents
+/.claude
+/skills-lock.json
 
 # vercel
 .vercel
