@@ -55,7 +55,7 @@ const LEAVES: [number, number, number, number, number][] = [
 export function LeafSprig({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 170 165"
+      viewBox="-12 -14 196 190"
       className={className}
       fill="none"
       aria-hidden="true"

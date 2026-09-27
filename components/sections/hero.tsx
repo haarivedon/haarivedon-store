@@ -4,6 +4,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Icon } from "@/components/icon";
 import { Eyebrow } from "@/components/section-heading";
 import { LeafSprig } from "@/components/decor";
+import { Diya } from "@/components/diya";
 import { HeroPortrait } from "@/components/sections/hero-portrait";
 import { cn } from "@/lib/utils";
 import { heroHighlights } from "@/lib/content/site";
@@ -14,14 +15,22 @@ export function Hero() {
       {/* Corner foliage, kept faint on the dark ground */}
       <LeafSprig
         aria-hidden="true"
-        className="pointer-events-none absolute -top-6 -left-8 w-44 -scale-x-100 opacity-90 drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)] sm:w-64"
+        className="pointer-events-none absolute top-0 left-0 w-44 -scale-x-100 opacity-90 drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)] sm:w-56"
       />
       <LeafSprig
         aria-hidden="true"
-        className="pointer-events-none absolute right-4 bottom-5 w-44 opacity-80 drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)] sm:w-56"
+        className="pointer-events-none absolute right-0 bottom-0 w-44 opacity-80 drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)] sm:w-56"
       />
 
-      <div className="relative mx-auto grid max-w-screen-2xl items-center gap-8 px-4 pt-14 pb-0 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pt-16">
+      {/* Glowing diya with rising smoke — bottom-left accent on the dark ground */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 left-3 z-0 hidden w-[9rem] lg:block xl:left-6 xl:w-[10.5rem]"
+      >
+        <Diya priority />
+      </div>
+
+      <div className="relative z-10 mx-auto grid max-w-screen-2xl items-center gap-8 px-4 pt-14 pb-0 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pt-16">
         {/* Copy */}
         <div className="pb-16 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700 lg:pb-24">
           <Eyebrow tone="light">Welcome to Haarivedon</Eyebrow>

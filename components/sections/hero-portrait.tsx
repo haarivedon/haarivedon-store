@@ -41,12 +41,12 @@ export function HeroPortrait() {
       />
       {/* Zodiac wheel — fixed behind the slides; screen blend keeps only the gold */}
       <Image
-        src="/images/zodiac-wheel.jpg"
+        src="/images/zodiac-wheel.webp"
         alt=""
         aria-hidden="true"
         width={800}
         height={799}
-        className="pointer-events-none absolute top-1/2 left-1/2 size-[24rem] -translate-x-1/2 -translate-y-[60%] mix-blend-screen opacity-80 motion-safe:animate-[spin_80s_linear_infinite] sm:size-[30rem]"
+        className="pointer-events-none absolute top-1/2 left-1/2 size-[24rem] -translate-x-1/2 -translate-y-[60%] opacity-80 motion-safe:animate-[spin_80s_linear_infinite] sm:size-[30rem]"
       />
 
       {/* Slides — cross-fade, all anchored to a common baseline */}
