@@ -7,7 +7,7 @@ import { IncenseBurner } from "@/components/incense-burner";
 import { cn } from "@/lib/utils";
 
 // Muted warm-grey smoke reads against the light botanical wash.
-const SMOKE_ON_LIGHT = { r: 122, g: 124, b: 116 };
+const SMOKE_ON_LIGHT = { r: 152, g: 154, b: 145 };
 
 export function BookingBand() {
   return (
