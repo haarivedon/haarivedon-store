@@ -149,6 +149,24 @@ export function SiteHeader() {
               Book a Session
               <ArrowRight className="size-4" />
             </Link>
+
+            {/* Contact — surfaced on mobile where the top bar hides it */}
+            <div className="mt-3 flex flex-col gap-1 border-t border-border pt-3">
+              <a
+                href={site.phoneHref}
+                className="flex min-h-11 items-center gap-3 rounded-xl px-4 text-sm font-medium text-charcoal/85 hover:bg-sage/50 hover:text-forest"
+              >
+                <Phone className="size-4 text-brand-700" />
+                {site.phone}
+              </a>
+              <a
+                href={`mailto:${site.email}`}
+                className="flex min-h-11 items-center gap-3 rounded-xl px-4 text-sm font-medium text-charcoal/85 hover:bg-sage/50 hover:text-forest"
+              >
+                <Mail className="size-4 text-brand-700" />
+                {site.email}
+              </a>
+            </div>
           </nav>
         </div>
       )}

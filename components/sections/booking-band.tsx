@@ -70,15 +70,15 @@ export function BookingBand() {
       {/* Incense burner with live smoke — decorative accent, lower-left corner */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 left-0 z-0 hidden w-[14rem] opacity-95 md:block lg:left-6 lg:w-[17rem]"
+        className="pointer-events-none absolute bottom-0 -left-3 z-0 w-[8rem] opacity-90 sm:left-0 sm:w-[12rem] md:w-[14rem] lg:left-6 lg:w-[17rem]"
       >
         <IncenseBurner smokeColor={SMOKE_ON_LIGHT} intensity={1.2} />
       </div>
 
       {/* Content aligned to the page container */}
-      <div className="relative z-10 mx-auto grid min-h-[380px] max-w-screen-2xl items-center gap-6 px-6 sm:min-h-[440px] sm:px-12 md:grid-cols-2 lg:min-h-[500px] lg:px-16">
-        <div className="max-w-md py-10">
-          <h2 className="font-display text-3xl leading-tight font-semibold tracking-tight text-forest sm:text-4xl lg:text-[2.75rem]">
+      <div className="relative z-10 mx-auto grid max-w-screen-2xl items-center gap-6 px-4 sm:min-h-[440px] sm:gap-8 sm:px-12 md:grid-cols-2 lg:min-h-[500px] lg:px-16">
+        <div className="max-w-md pt-12 pb-4 sm:py-10">
+          <h2 className="font-display text-[1.75rem] leading-[1.2] font-semibold tracking-tight text-forest sm:text-4xl lg:text-[2.75rem]">
             Sometimes, clarity begins with a conversation.
           </h2>
           <p className="mt-4 max-w-sm text-base leading-relaxed text-charcoal/80">
@@ -89,7 +89,7 @@ export function BookingBand() {
             href="/book"
             className={cn(
               buttonVariants({ size: "lg" }),
-              "mt-6 h-12 px-7 text-sm font-semibold shadow-sm",
+              "mt-6 h-12 w-full justify-center px-7 text-sm font-semibold shadow-sm sm:w-auto",
             )}
           >
             Book Your Session
@@ -98,7 +98,7 @@ export function BookingBand() {
         </div>
 
         {/* Founder cutout with a faint mandala behind, standing at the bottom */}
-        <div className="relative flex h-full min-h-[280px] items-end justify-center md:justify-end">
+        <div className="relative flex h-full min-h-[240px] items-end justify-end sm:min-h-[280px]">
           <Mandala
             aria-hidden="true"
             className="pointer-events-none absolute top-1/2 left-1/2 hidden size-80 -translate-x-1/2 -translate-y-1/2 text-forest/12 lg:block"

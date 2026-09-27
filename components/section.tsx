@@ -28,7 +28,7 @@ export function Section({
     <section id={id} className={cn("relative", backgrounds[background], className)}>
       <div
         className={cn(
-          "mx-auto max-w-screen-2xl px-4 py-20 sm:px-6 lg:py-24",
+          "mx-auto max-w-screen-2xl px-4 py-14 sm:px-6 sm:py-20 lg:py-24",
           containerClassName,
         )}
       >
