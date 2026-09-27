@@ -14,10 +14,10 @@ import { testimonials } from "@/lib/content/site";
 export function Testimonials() {
   return (
     <section className="bg-ivory">
-      <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-24">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:py-24">
         <div className="flex flex-col items-center text-center">
           <Eyebrow>Testimonials</Eyebrow>
-          <h2 className="mt-5 max-w-2xl font-display text-3xl leading-tight font-medium tracking-tight text-forest italic sm:text-4xl">
+          <h2 className="mt-4 max-w-2xl font-display text-[1.75rem] leading-[1.2] font-medium tracking-tight text-forest italic sm:mt-5 sm:text-4xl">
             &ldquo;A journey toward clarity begins with understanding
             yourself.&rdquo;
           </h2>

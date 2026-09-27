@@ -10,7 +10,7 @@ import { aboutPillars } from "@/lib/content/site";
 export function About() {
   return (
     <section id="about" className="bg-ivory">
-      <div className="mx-auto grid max-w-screen-2xl items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14 lg:py-24">
+      <div className="mx-auto grid max-w-screen-2xl items-center gap-8 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14 lg:py-24">
         {/* Portrait */}
         <div className="relative mx-auto w-full max-w-sm">
           <div className="relative aspect-[4/5] overflow-hidden rounded-t-full rounded-b-3xl border border-sage shadow-[0_28px_55px_-30px_rgba(33,74,46,0.4)]">
@@ -47,7 +47,7 @@ export function About() {
             <ArrowRight className="size-4" />
           </Link>
 
-          <dl className="mt-10 grid gap-5 sm:grid-cols-3">
+          <dl className="mt-8 grid gap-5 sm:grid-cols-3">
             {aboutPillars.map((pillar) => (
               <div key={pillar.title} className="flex flex-col gap-2">
                 <div className="grid size-11 place-items-center rounded-full bg-sage/60 text-forest">

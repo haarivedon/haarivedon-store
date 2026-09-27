@@ -32,26 +32,26 @@ export function Hero() {
 
       <div className="relative z-10 mx-auto grid max-w-screen-2xl items-center gap-8 px-4 pt-14 pb-0 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pt-16">
         {/* Copy */}
-        <div className="pb-16 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700 lg:pb-24">
+        <div className="pb-10 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700 lg:pb-24">
           <Eyebrow tone="light">Welcome to Haarivedon</Eyebrow>
 
-          <h1 className="mt-5 font-display text-5xl leading-[1.05] font-semibold tracking-tight text-ivory sm:text-6xl lg:text-[4.25rem]">
+          <h1 className="mt-4 font-display text-[2.5rem] leading-[1.08] font-semibold tracking-tight text-ivory sm:mt-5 sm:text-6xl lg:text-[4.25rem]">
             Find Clarity.
             <br />
             Discover Your Path.
           </h1>
 
-          <p className="mt-6 max-w-md text-lg leading-relaxed text-ivory/75">
+          <p className="mt-5 max-w-md text-base leading-relaxed text-ivory/75 sm:text-lg">
             Ancient wisdom and personalized guidance for life&rsquo;s important
             decisions. Let&rsquo;s explore your journey together.
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <Link
               href="/book"
               className={cn(
                 buttonVariants({ size: "lg" }),
-                "h-12 px-6 text-sm font-semibold shadow-sm",
+                "h-12 w-full justify-center px-6 text-sm font-semibold shadow-sm sm:w-auto",
               )}
             >
               Book a Session
@@ -61,14 +61,14 @@ export function Hero() {
               href="/services"
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
-                "h-12 px-6 text-sm font-semibold border-ivory/40 text-ivory hover:bg-ivory hover:text-forest",
+                "h-12 w-full justify-center px-6 text-sm font-semibold border-ivory/40 text-ivory hover:bg-ivory hover:text-forest sm:w-auto",
               )}
             >
               Explore Services
             </Link>
           </div>
 
-          <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-3">
+          <ul className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
             {heroHighlights.map((h) => (
               <li
                 key={h.label}
