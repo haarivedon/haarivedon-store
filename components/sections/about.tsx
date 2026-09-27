@@ -40,7 +40,7 @@ export function About() {
             href="/about"
             className={cn(
               buttonVariants({ size: "lg" }),
-              "mt-7 h-12 rounded-full px-6 text-sm font-semibold shadow-sm hover:bg-gold-600",
+              "mt-7 h-12 px-6 text-sm font-semibold shadow-sm",
             )}
           >
             Discover My Journey

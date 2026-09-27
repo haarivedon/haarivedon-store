@@ -27,6 +27,7 @@
   --color-gold-600: #e6c53c;
   --color-soft-yellow: #fff4bf;
   --color-terracotta: #b8654a;
+  --color-terracotta-700: #7a3620; /* deep terracotta — accessible for button text/border */
   --color-charcoal: #20261f;
 
   --font-display: var(--font-fraunces);
