@@ -31,12 +31,14 @@ aesthetic: `https://astroarunpandit.org/`, refined toward a calmer, botanical lo
 | Styling    | Tailwind CSS v4 + shadcn/ui (Base UI) | shadcn `style: base-rhea` uses `@base-ui/react`, **not** Radix. |
 | Icons      | `lucide-react`                        | No emoji as icons. |
 | Validation | `zod` (v4)                            | Every API input and form is validated with a shared schema. |
-| Database   | MongoDB via `mongoose` (v9)           | Cached connection; models guard against hot-reload re-registration. |
+| Database   | MongoDB via **Prisma** (v6)           | `prisma/schema.prisma` is the source of truth; cached `PrismaClient` in `lib/db/prisma.ts`. |
 | Fonts      | Fraunces (display) · Mulish (body) · Tangerine (signature accent only) | Loaded via `next/font/google` in `app/layout.tsx`. |
 
 ## Directory layout
 
 ```
+prisma/
+  schema.prisma         # MongoDB models (Booking, PredictionRequest, Product, ...)
 app/
   layout.tsx            # fonts, metadata, <html>/<body> shell
   page.tsx              # Home / landing page
@@ -47,8 +49,7 @@ components/
   layout/               # SiteHeader, SiteFooter, shared chrome
   sections/             # landing page sections (Hero, Services, Products, ...)
 lib/
-  db/mongoose.ts        # cached MongoDB connection
-  models/               # mongoose models (Booking, Prediction, Product, Service, ...)
+  db/prisma.ts          # cached PrismaClient (hot-reload safe)
   validations/          # zod schemas, shared client + server
   content/site.ts       # marketing copy & data (single source; easy client edits)
   utils.ts              # cn() helper
@@ -63,14 +64,19 @@ lib/
 - **Validation flow**: define a zod schema in `lib/validations/`, import it in
   both the client form and the Route Handler. Handlers `safeParse` and return
   `422` with `z.treeifyError` on failure.
-- **DB access**: always `await connectToDatabase()` before a model call inside a
-  handler. Never import models into Client Components.
-- **Models**: export with the `models.X ?? model("X", schema)` guard.
+- **DB access**: import the shared client — `import { prisma } from "@/lib/db/prisma"`
+  — and use it inside Route Handlers only. Never import `prisma` into Client
+  Components. After editing `schema.prisma`, run `pnpm db:generate` (and
+  `pnpm db:push` to sync the database).
+- **Models**: defined in `prisma/schema.prisma` (MongoDB). Enum-like fields with
+  hyphenated values (sessionType, status, focusArea) are stored as `String` and
+  constrained by the zod schema.
 - **Server-first**: default to Server Components; add `"use client"` only for
   interactivity (forms, carousels, menus).
 - **Accessibility floor**: 4.5:1 contrast, visible focus rings, keyboard nav,
   `prefers-reduced-motion` respected, alt text on imagery, 44px touch targets.
-- **Env**: `MONGODB_URI`, `MONGODB_DB`. See `.env.example`. `.env*` is gitignored.
+- **Env**: `DATABASE_URL` (Prisma MongoDB connection string; MongoDB needs a
+  replica set). See `.env.example`. `.env*` is gitignored.
 - **Assets**: source client assets live in `client_stuff/` (gitignored — raw
   photoshoot + brand frames). Web-optimized derivatives are committed under
   `public/images/` (founder portraits, zodiac wheel). Product and blog imagery
