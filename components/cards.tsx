@@ -91,10 +91,10 @@ export function MediaCard({
         {chip ? <div className="absolute top-3 left-3">{chip}</div> : null}
       </div>
       {children ? (
-        <div className="flex flex-1 flex-col p-5">{children}</div>
+        <div className="flex flex-1 flex-col p-4 sm:p-5">{children}</div>
       ) : null}
       {footer ? (
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-border p-5">
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-border p-4 sm:p-5">
           {footer}
         </div>
       ) : null}
@@ -133,17 +133,17 @@ export function IconCard({
     <Card className={cn(cardShell)}>
       <div
         className={cn(
-          "flex h-full flex-col p-6",
+          "flex h-full flex-col p-4 sm:p-6",
           align === "center" && "items-center text-center",
         )}
       >
-        <div className="grid size-12 place-items-center rounded-lg bg-forest text-gold transition-colors group-hover:bg-brand group-hover:text-forest">
+        <div className="grid size-10 place-items-center rounded-lg bg-forest text-gold transition-colors group-hover:bg-brand group-hover:text-forest sm:size-12">
           {icon}
         </div>
-        <h3 className="mt-5 font-display text-lg font-semibold text-forest">
+        <h3 className="mt-4 font-display text-base font-semibold text-forest sm:mt-5 sm:text-lg">
           {title}
         </h3>
-        <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+        <p className="mt-2 flex-1 text-[0.8rem] leading-relaxed text-muted-foreground sm:text-sm">
           {description}
         </p>
         {cta ? (

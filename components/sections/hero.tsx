@@ -30,59 +30,67 @@ export function Hero() {
         <Diya priority />
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-screen-2xl items-center gap-8 px-4 pt-14 pb-0 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pt-16">
-        {/* Copy */}
-        <div className="pb-10 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700 lg:pb-24">
-          <Eyebrow tone="light">Welcome to Haarivedon</Eyebrow>
+      <div className="relative z-10 mx-auto grid max-w-screen-2xl items-center gap-x-8 px-4 pt-14 pb-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pt-16 lg:pb-0">
+        {/* Copy column — on mobile its children flow straight into the grid
+            (display:contents) so the portrait can sit between the heading and
+            the CTAs; on lg it collapses back into a normal left column. */}
+        <div className="contents lg:block lg:self-center lg:pb-24">
+          {/* Heading */}
+          <div className="order-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700 lg:order-none">
+            <Eyebrow tone="light">Welcome to Haarivedon</Eyebrow>
 
-          <h1 className="mt-4 font-display text-[2.5rem] leading-[1.08] font-semibold tracking-tight text-ivory sm:mt-5 sm:text-6xl lg:text-[4.25rem]">
-            Find Clarity.
-            <br />
-            Discover Your Path.
-          </h1>
+            <h1 className="mt-3 font-display text-[2.15rem] leading-[1.1] font-semibold tracking-tight text-ivory sm:mt-5 sm:text-6xl lg:text-[4.25rem]">
+              Find Clarity.
+              <br />
+              Discover Your Path.
+            </h1>
 
-          <p className="mt-5 max-w-md text-base leading-relaxed text-ivory/75 sm:text-lg">
-            Ancient wisdom and personalized guidance for life&rsquo;s important
-            decisions. Let&rsquo;s explore your journey together.
-          </p>
-
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <Link
-              href="/book"
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "h-12 w-full justify-center px-6 text-sm font-semibold shadow-sm sm:w-auto",
-              )}
-            >
-              Book a Session
-              <ArrowRight className="size-4" />
-            </Link>
-            <Link
-              href="/services"
-              className={cn(
-                buttonVariants({ variant: "outline", size: "lg" }),
-                "h-12 w-full justify-center px-6 text-sm font-semibold border-ivory/40 text-ivory hover:bg-ivory hover:text-forest sm:w-auto",
-              )}
-            >
-              Explore Services
-            </Link>
+            <p className="mt-4 max-w-md text-[0.95rem] leading-relaxed text-ivory/75 sm:mt-5 sm:text-lg">
+              Ancient wisdom and personalized guidance for life&rsquo;s important
+              decisions. Let&rsquo;s explore your journey together.
+            </p>
           </div>
 
-          <ul className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
-            {heroHighlights.map((h) => (
-              <li
-                key={h.label}
-                className="flex items-center gap-2 text-sm font-medium text-ivory/85"
+          {/* CTAs + trust badges — below the portrait on mobile */}
+          <div className="order-3 mt-8 lg:order-none lg:mt-7">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <Link
+                href="/book"
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "h-12 w-full justify-center px-6 text-sm font-semibold shadow-sm sm:w-auto",
+                )}
               >
-                <Icon name={h.icon} className="size-4 text-gold" />
-                {h.label}
-              </li>
-            ))}
-          </ul>
+                Book a Session
+                <ArrowRight className="size-4" />
+              </Link>
+              <Link
+                href="/services"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "lg" }),
+                  "h-12 w-full justify-center px-6 text-sm font-semibold border-ivory/40 text-ivory hover:bg-ivory hover:text-forest sm:w-auto",
+                )}
+              >
+                Explore Services
+              </Link>
+            </div>
+
+            <ul className="mt-7 grid grid-cols-2 gap-x-4 gap-y-3 sm:flex sm:flex-wrap sm:gap-x-8">
+              {heroHighlights.map((h) => (
+                <li
+                  key={h.label}
+                  className="flex items-center gap-2 text-sm font-medium text-ivory/85"
+                >
+                  <Icon name={h.icon} className="size-4 text-gold" />
+                  {h.label}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         {/* Founder slideshow + zodiac */}
-        <div className="relative self-end">
+        <div className="relative order-2 mt-8 self-end lg:order-none lg:mt-0">
           <HeroPortrait />
 
           {/* Signature */}

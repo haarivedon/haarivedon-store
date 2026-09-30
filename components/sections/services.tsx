@@ -13,12 +13,12 @@ export function Services() {
         actionLabel="View All Services"
       />
 
-      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-5 lg:grid-cols-4">
         {services.map((service) => (
           <IconCard
             key={service.title}
             href={service.href}
-            icon={<Icon name={service.icon} className="size-6" />}
+            icon={<Icon name={service.icon} className="size-5 sm:size-6" />}
             title={service.title}
             description={service.description}
             cta="Learn More"

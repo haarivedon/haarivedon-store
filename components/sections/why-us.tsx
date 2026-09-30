@@ -17,7 +17,7 @@ export function WhyUs() {
         align="center"
       />
 
-      <div className="mx-auto mt-12 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto mt-10 grid max-w-6xl grid-cols-2 gap-3 sm:mt-12 sm:gap-5 lg:grid-cols-4">
         {whyPoints.map((point) => (
           <IconCard
             key={point.title}
