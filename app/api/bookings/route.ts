@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { connectToDatabase } from "@/lib/db/mongoose";
-import Booking from "@/lib/models/Booking";
+import { prisma } from "@/lib/db/prisma";
 import { bookingSchema } from "@/lib/validations/booking";
 
 export async function POST(request: Request) {
@@ -24,13 +23,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    await connectToDatabase();
-    const booking = await Booking.create(parsed.data);
+    const booking = await prisma.booking.create({ data: parsed.data });
     return NextResponse.json(
       {
         message:
           "Your session request has been received. We'll reach out shortly to confirm.",
-        id: booking._id,
+        id: booking.id,
       },
       { status: 201 },
     );

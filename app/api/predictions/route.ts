@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { connectToDatabase } from "@/lib/db/mongoose";
-import PredictionRequest from "@/lib/models/Prediction";
+import { prisma } from "@/lib/db/prisma";
 import { predictionSchema } from "@/lib/validations/prediction";
 
 export async function POST(request: Request) {
@@ -24,13 +23,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    await connectToDatabase();
-    const prediction = await PredictionRequest.create(parsed.data);
+    const prediction = await prisma.predictionRequest.create({
+      data: parsed.data,
+    });
     return NextResponse.json(
       {
         message:
           "Your prediction request has been received. We'll be in touch soon.",
-        id: prediction._id,
+        id: prediction.id,
       },
       { status: 201 },
     );
