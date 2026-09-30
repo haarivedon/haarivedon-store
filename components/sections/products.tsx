@@ -22,28 +22,28 @@ export function Products() {
         actionLabel="View All Products"
       />
 
-      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-5 lg:grid-cols-4">
         {products.map((product) => (
           <MediaCard
             key={product.name}
             image={product.image}
             alt={product.alt}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 300px"
           >
-            <h3 className="font-display text-lg font-semibold text-forest">
+            <h3 className="font-display text-sm font-semibold text-forest sm:text-lg">
               {product.name}
             </h3>
-            <p className="mt-1 flex-1 text-base font-semibold text-brand-700">
+            <p className="mt-1 flex-1 text-sm font-semibold text-brand-700 sm:text-base">
               {inr.format(product.price)}
             </p>
             <Link
               href="/products"
               className={cn(
                 buttonVariants({ size: "lg" }),
-                "mt-4 h-11 w-full text-sm font-semibold",
+                "mt-3 h-10 w-full gap-1.5 px-2 text-xs font-semibold sm:mt-4 sm:h-11 sm:text-sm",
               )}
             >
-              <ShoppingBag className="size-4" />
+              <ShoppingBag className="size-3.5 sm:size-4" />
               Add to Cart
             </Link>
           </MediaCard>

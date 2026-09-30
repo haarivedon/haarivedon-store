@@ -76,20 +76,25 @@ export function BookingBand() {
       </div>
 
       {/* Content aligned to the page container */}
-      <div className="relative z-10 mx-auto grid max-w-screen-2xl items-center gap-6 px-4 sm:min-h-[440px] sm:gap-8 sm:px-12 md:grid-cols-2 lg:min-h-[500px] lg:px-16">
-        <div className="max-w-md pt-12 pb-4 sm:py-10">
-          <h2 className="font-display text-[1.75rem] leading-[1.2] font-semibold tracking-tight text-forest sm:text-4xl lg:text-[2.75rem]">
-            Sometimes, clarity begins with a conversation.
-          </h2>
-          <p className="mt-4 max-w-sm text-base leading-relaxed text-charcoal/80">
-            Book your session today and take the first step toward a more
-            balanced and fulfilling life.
-          </p>
+      <div className="relative z-10 mx-auto grid max-w-screen-2xl items-center gap-x-8 gap-y-4 px-4 sm:min-h-[440px] sm:px-12 md:grid-cols-2 lg:min-h-[500px] lg:px-16">
+        {/* Copy + CTA — on mobile these flow into the grid (display:contents)
+            so the founder image can sit between the heading and the button. */}
+        <div className="contents md:block md:max-w-md md:py-10">
+          <div className="order-1 pt-12 md:order-none md:pt-0">
+            <h2 className="font-display text-[1.75rem] leading-[1.2] font-semibold tracking-tight text-forest sm:text-4xl lg:text-[2.75rem]">
+              Sometimes, clarity begins with a conversation.
+            </h2>
+            <p className="mt-4 max-w-sm text-base leading-relaxed text-charcoal/80">
+              Book your session today and take the first step toward a more
+              balanced and fulfilling life.
+            </p>
+          </div>
+
           <Link
             href="/book"
             className={cn(
               buttonVariants({ size: "lg" }),
-              "mt-6 h-12 w-full justify-center px-7 text-sm font-semibold shadow-sm sm:w-auto",
+              "order-3 mb-12 h-12 w-full justify-center px-7 text-sm font-semibold shadow-sm md:order-none md:mt-6 md:mb-0 md:w-auto",
             )}
           >
             Book Your Session
@@ -98,7 +103,7 @@ export function BookingBand() {
         </div>
 
         {/* Founder cutout with a faint mandala behind, standing at the bottom */}
-        <div className="relative flex h-full min-h-[240px] items-end justify-end sm:min-h-[280px]">
+        <div className="relative order-2 flex h-full min-h-[240px] items-end justify-center md:order-none md:min-h-[280px] md:justify-end">
           <Mandala
             aria-hidden="true"
             className="pointer-events-none absolute top-1/2 left-1/2 hidden size-80 -translate-x-1/2 -translate-y-1/2 text-forest/12 lg:block"
@@ -108,8 +113,8 @@ export function BookingBand() {
             alt="Neelam Niranjan reading, offering personalized guidance"
             width={1236}
             height={1500}
-            sizes="(max-width: 768px) 70vw, 460px"
-            className="relative h-auto max-h-[300px] w-auto object-contain sm:max-h-[380px] lg:max-h-[470px]"
+            sizes="(max-width: 768px) 60vw, 460px"
+            className="relative h-auto max-h-[280px] w-auto object-contain sm:max-h-[380px] lg:max-h-[470px]"
           />
         </div>
       </div>

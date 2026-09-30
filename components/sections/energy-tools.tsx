@@ -13,7 +13,7 @@ export function EnergyTools() {
         actionLabel="Shop All Tools"
       />
 
-      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-5 lg:grid-cols-4">
         {energyTools.map((tool) => (
           <MediaCard
             key={tool.name}
@@ -21,16 +21,16 @@ export function EnergyTools() {
             image={tool.image}
             alt={tool.alt}
             ariaLabel={tool.name}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 360px"
             chip={<CardChip>{tool.tagline}</CardChip>}
           >
-            <h3 className="font-display text-lg font-semibold text-forest">
+            <h3 className="font-display text-sm font-semibold text-forest sm:text-lg">
               {tool.name}
             </h3>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-1.5 flex-1 text-[0.8rem] leading-relaxed text-muted-foreground sm:mt-2 sm:text-sm">
               {tool.description}
             </p>
-            <span className="mt-4">
+            <span className="mt-3 sm:mt-4">
               <CardCta />
             </span>
           </MediaCard>
