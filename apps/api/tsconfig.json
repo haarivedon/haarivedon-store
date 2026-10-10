@@ -1,0 +1,11 @@
+{
+  "extends": "@repo/tsconfig/node.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "tsup.config.ts", "eslint.config.mjs"],
+  "exclude": ["node_modules", "dist"]
+}

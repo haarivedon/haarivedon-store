@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Haarivedon
 
-## Getting Started
+Turborepo monorepo: a Next.js site and a standalone typed API.
 
-First, run the development server:
+| Workspace           | What it is                                                 | Port |
+| ------------------- | ---------------------------------------------------------- | ---- |
+| `apps/web`          | Next.js 16 frontend                                        | 3000 |
+| `apps/api`          | Hono + ts-rest REST API                                    | 4000 |
+| `packages/contract` | ts-rest contract + zod schemas — the API's source of truth | —    |
+| `packages/db`       | Prisma schema and cached client (MongoDB)                  | —    |
+| `packages/tsconfig` | shared TypeScript presets                                  | —    |
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env                       # DATABASE_URL, API_PORT, CORS_ORIGIN, ADMIN_API_KEY
+cp apps/web/.env.example apps/web/.env.local   # NEXT_PUBLIC_API_URL
+pnpm db:generate
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`pnpm dev` runs both apps. The web app talks to the API over
+`NEXT_PUBLIC_API_URL`; nothing is proxied through Next.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How a route gets added
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Declare it in `packages/contract/src/contracts/<resource>.ts` (path, method,
+   zod body/query/params, response per status).
+2. Implement it in `apps/api/src/routes/<resource>.ts` — the handler signature
+   is derived from the contract, so a mismatch is a type error.
+3. Call it from the web app:
 
-## Learn More
+```ts
+import { api } from "@/lib/api/client";
 
-To learn more about Next.js, take a look at the following resources:
+const res = await api.bookings.create({ body: form });
+if (res.status === 201) router.push(`/thanks/${res.body.id}`);
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Command                                        | Does                                                  |
+| ---------------------------------------------- | ----------------------------------------------------- |
+| `pnpm dev`                                     | both apps in watch mode                               |
+| `pnpm dev:web` / `pnpm dev:api`                | one app                                               |
+| `pnpm build`                                   | `prisma generate` → `tsup` (api) → `next build` (web) |
+| `pnpm typecheck` / `pnpm lint` / `pnpm format` | across every workspace                                |
+| `pnpm db:generate` / `db:push` / `db:studio`   | Prisma, against the root `.env`                       |
 
-## Deploy on Vercel
+## Deploying
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `apps/api` → any Node host (Railway, Fly, Render, a VM). `pnpm build` emits
+  `apps/api/dist/index.js`; run it with `node dist/index.js`.
+- `apps/web` → Vercel (root directory `apps/web`), or the same Node host.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Conventions and architecture rules live in [AGENTS.md](./AGENTS.md).
