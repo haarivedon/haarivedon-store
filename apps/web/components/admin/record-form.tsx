@@ -211,6 +211,7 @@ export function RecordForm({
               key={field.name}
               field={field}
               spec={spec}
+              recordTitle={title}
               value={values[field.name]}
               error={errors[field.name]}
               highlighted={missing.some((item) => item.field === field.name)}
@@ -355,6 +356,7 @@ export function RecordForm({
 function FormField({
   field,
   spec,
+  recordTitle,
   value,
   error,
   highlighted,
@@ -363,6 +365,7 @@ function FormField({
 }: {
   field: FieldSpec;
   spec: CollectionSpec;
+  recordTitle: string;
   value: unknown;
   error?: string;
   highlighted?: boolean;
@@ -462,6 +465,7 @@ function FormField({
       return shell(
         <ImagePicker
           multiple={field.name === "images"}
+          suggestedAlt={recordTitle}
           value={
             field.name === "images"
               ? ((value as string[] | undefined) ?? [])
