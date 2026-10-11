@@ -6,7 +6,9 @@ import {
 } from "@ts-rest/serverless/fetch";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { prisma } from "@repo/db";
 import { env, isProduction } from "./env";
+import { getObject } from "./lib/storage";
 import { logger } from "./lib/logger";
 import { router } from "./router";
 
@@ -81,6 +83,36 @@ export const createApp = () => {
         performance.now() - start,
       )}ms)`,
     );
+  });
+
+  // Non-contract routes must be registered before the contract catch-all.
+  //
+  // The Kundali PDF is a file stream, not JSON, so it lives outside ts-rest.
+  // It is gated on the one-time token issued with the booking: birth details
+  // must never sit behind a guessable URL (docs/PLAN.md §3.2).
+  app.get("/api/kundali/:id/download", async (c) => {
+    const token = c.req.query("token");
+    if (!token) return c.json({ error: "Not found." }, 404);
+
+    const booking = await prisma.booking.findUnique({
+      where: { id: c.req.param("id") },
+      select: { name: true, kundaliKey: true, kundaliToken: true },
+    });
+
+    // A wrong token is answered exactly like a missing booking.
+    if (!booking?.kundaliKey || booking.kundaliToken !== token) {
+      return c.json({ error: "Not found." }, 404);
+    }
+
+    const file = await getObject(booking.kundaliKey);
+    if (!file) return c.json({ error: "Not found." }, 404);
+
+    const filename = `Kundali-${booking.name.replace(/[^\w]+/g, "-")}.pdf`;
+    return c.body(new Uint8Array(file), 200, {
+      "content-type": "application/pdf",
+      "content-disposition": `attachment; filename="${filename}"`,
+      "cache-control": "private, no-store",
+    });
   });
 
   // Everything declared in @repo/contract.

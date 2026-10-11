@@ -2,6 +2,7 @@ import { contract, type PredictionRequest } from "@repo/contract";
 import { prisma, type PredictionRequest as PredictionRecord } from "@repo/db";
 import { tsr } from "@ts-rest/serverless/fetch";
 import { assertAdmin } from "../lib/auth";
+import { clientIp, rateLimit } from "../lib/rate-limit";
 import { toPaginationMeta, toPrismaPage } from "../lib/pagination";
 
 /** Prisma record -> wire shape (dates become ISO strings). */
@@ -15,13 +16,24 @@ const serialize = (record: PredictionRecord): PredictionRequest => ({
   placeOfBirth: record.placeOfBirth,
   focusArea: record.focusArea as PredictionRequest["focusArea"],
   question: record.question,
+  internalNote: record.internalNote,
   status: record.status as PredictionRequest["status"],
   createdAt: record.createdAt.toISOString(),
   updatedAt: record.updatedAt.toISOString(),
 });
 
 export const predictionsRouter = tsr.router(contract.predictions, {
-  create: async ({ body }) => {
+  create: async ({ body }, { request }) => {
+    const limit = rateLimit(`predictions:${clientIp(request.headers)}`);
+    if (!limit.allowed) {
+      return {
+        status: 429 as const,
+        body: {
+          error: `Too many requests. Please try again in ${Math.ceil(limit.retryAfter / 60)} minutes.`,
+        },
+      };
+    }
+
     const record = await prisma.predictionRequest.create({ data: body });
 
     return {

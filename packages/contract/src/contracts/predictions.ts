@@ -22,6 +22,7 @@ export const predictionsContract = c.router({
     responses: {
       201: createdSchema,
       422: errorSchema,
+      429: errorSchema,
     },
     summary: "Submit a prediction / reading request.",
   },

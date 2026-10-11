@@ -32,6 +32,46 @@ const envSchema = z.object({
     ),
   /** Shared secret guarding the admin-only endpoints. */
   ADMIN_API_KEY: z.string().optional(),
+
+  // ── Kundali (CR-2) ──────────────────────────────────────────────────────
+  /**
+   * Chart data provider. Unset means the built-in sample provider, which
+   * produces a clearly-watermarked placeholder chart so the pipeline can be
+   * developed and demoed without a paid key (docs/PLAN.md §3.2).
+   */
+  KUNDALI_API_URL: z.string().optional(),
+  KUNDALI_API_KEY: z.string().optional(),
+  /** North Indian (diamond) or South Indian (square) chart layout. */
+  KUNDALI_CHART_STYLE: z.enum(["north", "south"]).default("north"),
+
+  // ── Object storage ──────────────────────────────────────────────────────
+  /**
+   * Generated PDFs. With no R2 credentials they are written under this
+   * directory instead — fine locally, not on a host with an ephemeral disk.
+   */
+  STORAGE_DIR: z.string().default(".data/storage"),
+  R2_ACCOUNT_ID: z.string().optional(),
+  R2_ACCESS_KEY_ID: z.string().optional(),
+  R2_SECRET_ACCESS_KEY: z.string().optional(),
+  /** Private bucket: Kundali PDFs only, never public-read. */
+  R2_PRIVATE_BUCKET: z.string().optional(),
+  /** Public bucket + its CDN host: admin media uploads (CR-3). */
+  R2_MEDIA_BUCKET: z.string().optional(),
+  R2_PUBLIC_URL: z.string().optional(),
+
+  // ── Admin platform (CR-3) ───────────────────────────────────────────────
+  BETTER_AUTH_SECRET: z.string().optional(),
+  /** The API's own public URL, e.g. https://api.haarivedon.com. */
+  BETTER_AUTH_URL: z.string().default("http://localhost:4000"),
+  /** Cookie domain shared by the web app and the API, e.g. .haarivedon.com. */
+  AUTH_COOKIE_DOMAIN: z.string().optional(),
+  /** Seeded first admin account. */
+  ADMIN_EMAIL: z.string().optional(),
+  ADMIN_PASSWORD: z.string().optional(),
+  /** Shared secret for the web app's on-publish revalidation hook. */
+  REVALIDATE_SECRET: z.string().optional(),
+  /** The web app's base URL, for revalidation callbacks. */
+  WEB_URL: z.string().default("http://localhost:3000"),
 });
 
 const parsed = envSchema.safeParse(process.env);
