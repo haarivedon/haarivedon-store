@@ -3,11 +3,25 @@
 import { useState } from "react";
 import { Download, Loader2, RefreshCw } from "lucide-react";
 import { adminApi, API_BASE } from "@/lib/api/admin-client";
+import { Select } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export type InboxKind = "bookings" | "predictions" | "enquiries";
 
 type Row = Record<string, unknown> & { id: string; createdAt: string };
+
+/** Plain-language labels for the stored status values. */
+const statusLabels: Record<string, string> = {
+  pending: "New",
+  confirmed: "Confirmed",
+  completed: "Completed",
+  cancelled: "Cancelled",
+  "in-progress": "In progress",
+  delivered: "Delivered",
+  contacted: "Contacted",
+  enrolled: "Enrolled",
+  closed: "Closed",
+};
 
 const statusOptions: Record<InboxKind, string[]> = {
   bookings: ["pending", "confirmed", "completed", "cancelled"],
@@ -58,7 +72,7 @@ export function InboxTable({ kind, rows }: { kind: InboxKind; rows: Row[] }) {
                 <KundaliBadge status={String(row.kundaliStatus ?? "")} />
               )}
               <span className="rounded-full bg-charcoal/10 px-2.5 py-1 text-xs font-semibold text-charcoal/75">
-                {String(row.status)}
+                {statusLabels[String(row.status)] ?? String(row.status)}
               </span>
               <span className="text-xs text-muted-foreground">
                 {new Date(row.createdAt).toLocaleDateString("en-IN", {
@@ -199,20 +213,17 @@ function Detail({ kind, row }: { kind: InboxKind; row: Row }) {
       )}
 
       <div className="mt-5 grid gap-4 sm:grid-cols-[12rem_1fr]">
-        <label className="flex flex-col gap-1.5 text-sm">
+        <div className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-charcoal/90">Status</span>
-          <select
+          <Select
             value={status}
-            onChange={(event) => setStatus(event.target.value)}
-            className="h-10 rounded-xl border border-border bg-background px-3 text-sm"
-          >
-            {statusOptions[kind].map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </label>
+            onValueChange={setStatus}
+            options={statusOptions[kind].map((option) => ({
+              value: option,
+              label: statusLabels[option] ?? option,
+            }))}
+          />
+        </div>
 
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-charcoal/90">

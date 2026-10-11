@@ -29,3 +29,22 @@ export function issuesToFieldErrors(issues: unknown): FieldErrors {
   }
   return errors;
 }
+
+/**
+ * Which keys of a zod object are required.
+ *
+ * Derived from the schema rather than repeated in the field config, so the
+ * asterisk in the UI and the rule the server enforces can never disagree.
+ * A key is optional exactly when the schema accepts `undefined` for it.
+ */
+export function requiredKeys(schema: unknown): Set<string> {
+  const shape = (schema as { shape?: Record<string, { safeParse: (v: unknown) => { success: boolean } }> })
+    .shape;
+  if (!shape) return new Set();
+
+  const required = new Set<string>();
+  for (const [key, field] of Object.entries(shape)) {
+    if (!field.safeParse(undefined).success) required.add(key);
+  }
+  return required;
+}
