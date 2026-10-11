@@ -50,17 +50,32 @@ model PredictionRequest {
 }
 
 /// Sacred products / energy tools shown in the shop.
+///
+/// The catalogue is five families at different depths (see docs/PLAN.md §2),
+/// so `family` is the top-level grouping, `category` the sub-tier within it
+/// (precious / semi-precious / organic for gemstones, nepali / indonesian for
+/// rudraksha), and `attributes` holds the facts only that family has — mukhi
+/// and deity, or Mohs hardness and ruling planet. The zod schema in
+/// @repo/contract discriminates on `family` so those stay type-checked.
 model Product {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   slug        String   @unique
-  description String
-  price       Int
+  // yantra | gemstone | rudraksha | mala | crystal | idol
+  family      String   @default("crystal")
+  category    String   @default("general")
+  summary     String   @default("")
+  description String   @default("")
+  // null means "enquire for price"; 0 means free.
+  price       Int?
   currency    String   @default("INR")
-  image       String
-  category    String   @default("sacred-objects")
+  images      String[]
+  attributes  Json?
   inStock     Boolean  @default(true)
   featured    Boolean  @default(false)
+  order       Int      @default(0)
+  published   Boolean  @default(false)
+  updatedBy   String   @default("")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -72,12 +87,17 @@ model Service {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   title         String
   slug          String   @unique
-  description   String
-  icon          String   @default("sparkles")
+  summary       String   @default("")
+  description   String   @default("")
+  icon          String   @default("Sparkles")
+  // null means "enquire for price".
   startingPrice Int?
   currency      String   @default("INR")
+  highlights    String[]
+  image         String   @default("")
   order         Int      @default(0)
-  published     Boolean  @default(true)
+  published     Boolean  @default(false)
+  updatedBy     String   @default("")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

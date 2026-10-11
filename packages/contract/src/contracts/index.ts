@@ -3,6 +3,8 @@ import { errorSchema } from "../schemas/common";
 import { bookingsContract } from "./bookings";
 import { healthContract } from "./health";
 import { predictionsContract } from "./predictions";
+import { productsContract } from "./products";
+import { servicesContract } from "./services";
 
 const c = initContract();
 
@@ -17,6 +19,8 @@ export const contract = c.router(
     health: healthContract,
     bookings: bookingsContract,
     predictions: predictionsContract,
+    services: servicesContract,
+    products: productsContract,
   },
   {
     pathPrefix: "/api",
@@ -29,4 +33,10 @@ export const contract = c.router(
 );
 
 export type Contract = typeof contract;
-export { bookingsContract, healthContract, predictionsContract };
+export {
+  bookingsContract,
+  healthContract,
+  predictionsContract,
+  productsContract,
+  servicesContract,
+};
