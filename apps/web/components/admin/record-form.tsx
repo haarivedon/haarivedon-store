@@ -27,6 +27,8 @@ import {
   Banner,
   FieldShell,
   FormSection,
+  RequirementLegend,
+  type Requirement,
   PriceInput,
   Repeater,
   Select,
@@ -77,6 +79,17 @@ export function RecordForm({
   const slugTouched = useRef(Boolean(recordId));
 
   const required = useMemo(() => requiredKeys(schema), [schema]);
+  const publishFields = useMemo(
+    () => new Set(spec.publishChecks.map((check) => check.field)),
+    [spec],
+  );
+
+  const requirementFor = (name: string): Requirement | undefined =>
+    required.has(name)
+      ? "required"
+      : publishFields.has(name)
+        ? "publish"
+        : undefined;
 
   // React Compiler skips memoizing this component: react-hook-form returns
   // functions it cannot safely memoize. That is expected and harmless here —
@@ -326,6 +339,8 @@ export function RecordForm({
         )}
       </section>
 
+      <RequirementLegend />
+
       {spec.sections.map((section) => (
         <FormSection
           key={section.title}
@@ -340,7 +355,7 @@ export function RecordForm({
               control={control}
               register={register}
               errors={errors}
-              required={required.has(field.name)}
+              requirement={requirementFor(field.name)}
               recordTitle={title}
               highlighted={missing.some((item) => item.field === field.name)}
               onTitleChange={
@@ -418,7 +433,7 @@ function FormField({
   control,
   register,
   errors,
-  required,
+  requirement,
   recordTitle,
   highlighted,
   onTitleChange,
@@ -429,7 +444,7 @@ function FormField({
   control: Control<Values>;
   register: ReturnType<typeof useForm<Values>>["register"];
   errors: FieldErrors<Values>;
-  required: boolean;
+  requirement?: Requirement;
   recordTitle: string;
   highlighted?: boolean;
   onTitleChange?: (value: string) => void;
@@ -444,7 +459,7 @@ function FormField({
       htmlFor={id}
       hint={field.hint}
       wide={field.wide}
-      required={required}
+      requirement={requirement}
       error={
         error ??
         (highlighted ? "Needed before this can be published." : undefined)

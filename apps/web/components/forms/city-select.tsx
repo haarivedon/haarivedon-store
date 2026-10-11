@@ -56,7 +56,6 @@ export function CitySelect({
       <Field
         label="Place of birth"
         htmlFor={`${id}-place`}
-        required
         error={errors.birthPlace}
         hint={
           resolved && !manual
@@ -132,7 +131,6 @@ export function CitySelect({
           <Field
             label="Latitude"
             htmlFor={`${id}-lat`}
-            required
             error={errors.birthLat}
           >
             <input
@@ -152,7 +150,6 @@ export function CitySelect({
           <Field
             label="Longitude"
             htmlFor={`${id}-lng`}
-            required
             error={errors.birthLng}
           >
             <input

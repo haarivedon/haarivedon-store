@@ -98,7 +98,7 @@ export function PredictionForm() {
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Full name" htmlFor="p-name" required error={errors.name}>
+        <Field label="Full name" htmlFor="p-name" error={errors.name}>
           <input
             id="p-name"
             name="name"
@@ -110,7 +110,6 @@ export function PredictionForm() {
         <Field
           label="Mobile number"
           htmlFor="p-phone"
-          required
           error={errors.phone}
         >
           <input
@@ -128,7 +127,7 @@ export function PredictionForm() {
       <Field
         label="Email"
         htmlFor="p-email"
-        required
+       
         error={errors.email}
         hint="Your reading is sent here"
       >
@@ -146,7 +145,6 @@ export function PredictionForm() {
         <Field
           label="Date of birth"
           htmlFor="p-dob"
-          required
           error={errors.dateOfBirth}
         >
           <input
@@ -162,6 +160,7 @@ export function PredictionForm() {
         <Field
           label="Time of birth"
           htmlFor="p-tob"
+          optional
           error={errors.timeOfBirth}
           hint="If you know it"
         >
@@ -170,7 +169,6 @@ export function PredictionForm() {
         <Field
           label="Place of birth"
           htmlFor="p-pob"
-          required
           error={errors.placeOfBirth}
         >
           <input
@@ -201,6 +199,7 @@ export function PredictionForm() {
       <Field
         label="Your question"
         htmlFor="p-question"
+        optional
         error={errors.question}
         hint="The more specific the question, the more useful the reading"
       >

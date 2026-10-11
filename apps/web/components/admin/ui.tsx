@@ -41,12 +41,47 @@ export function FormSection({
   );
 }
 
+/**
+ * Two kinds of "required" exist on these forms and they were being shown in
+ * two different visual languages — a red asterisk for what the save needs,
+ * and a separate checklist for what publishing needs. Both are now the same
+ * thing: a worded badge next to the label.
+ */
+export type Requirement = "required" | "publish";
+
+export function RequirementBadge({ kind }: { kind: Requirement }) {
+  return (
+    <span
+      className={cn(
+        "shrink-0 rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide",
+        kind === "required"
+          ? "bg-terracotta/12 text-terracotta"
+          : "bg-gold/30 text-[#6b5a12]",
+      )}
+    >
+      {kind === "required" ? "Required" : "Needed to publish"}
+    </span>
+  );
+}
+
+/** Explains the two badges once, at the top of a form. */
+export function RequirementLegend() {
+  return (
+    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+      <RequirementBadge kind="required" />
+      <span>must be filled in before it will save ·</span>
+      <RequirementBadge kind="publish" />
+      <span>can wait, but the page cannot go live without it.</span>
+    </p>
+  );
+}
+
 export function FieldShell({
   label,
   htmlFor,
   hint,
   error,
-  required,
+  requirement,
   wide,
   counter,
   children,
@@ -55,22 +90,23 @@ export function FieldShell({
   htmlFor: string;
   hint?: string;
   error?: string;
-  required?: boolean;
+  requirement?: Requirement;
   wide?: boolean;
   counter?: { value: number; max: number };
   children: React.ReactNode;
 }) {
   return (
     <div className={cn("flex min-w-0 flex-col gap-1.5", wide && "sm:col-span-2")}>
-      <div className="flex items-baseline justify-between gap-3">
-        <label htmlFor={htmlFor} className="text-sm font-medium text-charcoal/90">
-          {label}
-          {required && (
-            <span aria-hidden className="ml-0.5 text-terracotta">
-              *
-            </span>
-          )}
-        </label>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <span className="flex min-w-0 flex-wrap items-center gap-2">
+          <label
+            htmlFor={htmlFor}
+            className="text-sm font-medium text-charcoal/90"
+          >
+            {label}
+          </label>
+          {requirement && <RequirementBadge kind={requirement} />}
+        </span>
         {counter && (
           <span
             className={cn(

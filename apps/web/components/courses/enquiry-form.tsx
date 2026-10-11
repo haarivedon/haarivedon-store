@@ -74,7 +74,7 @@ export function CourseEnquiryForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-      <Field label="Full name" htmlFor="ce-name" required error={errors.name}>
+      <Field label="Full name" htmlFor="ce-name" error={errors.name}>
         <input
           id="ce-name"
           name="name"
@@ -83,7 +83,7 @@ export function CourseEnquiryForm({
           className={inputClass}
         />
       </Field>
-      <Field label="Email" htmlFor="ce-email" required error={errors.email}>
+      <Field label="Email" htmlFor="ce-email" error={errors.email}>
         <input
           id="ce-email"
           name="email"
@@ -93,7 +93,7 @@ export function CourseEnquiryForm({
           className={inputClass}
         />
       </Field>
-      <Field label="Mobile number" htmlFor="ce-phone" required error={errors.phone}>
+      <Field label="Mobile number" htmlFor="ce-phone" error={errors.phone}>
         <input
           id="ce-phone"
           name="phone"
@@ -107,6 +107,7 @@ export function CourseEnquiryForm({
       <Field
         label="Anything you'd like to ask?"
         htmlFor="ce-message"
+        optional
         error={errors.message}
       >
         <textarea

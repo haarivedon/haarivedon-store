@@ -49,7 +49,7 @@ export function LoginForm({ next }: { next: string }) {
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-      <Field label="Email" htmlFor="email" required error={errors.email}>
+      <Field label="Email" htmlFor="email" error={errors.email}>
         <input
           id="email"
           name="email"
@@ -60,7 +60,7 @@ export function LoginForm({ next }: { next: string }) {
           className={inputClass}
         />
       </Field>
-      <Field label="Password" htmlFor="password" required error={errors.password}>
+      <Field label="Password" htmlFor="password" error={errors.password}>
         <input
           id="password"
           name="password"
