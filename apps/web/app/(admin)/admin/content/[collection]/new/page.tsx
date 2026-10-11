@@ -21,7 +21,7 @@ export default async function NewRecordPage({
         description="Save it as a draft now and fill in the rest whenever you like."
       />
       <Panel className="p-5 sm:p-6">
-        <RecordForm spec={spec} record={spec.blank} />
+        <RecordForm collectionKey={spec.key} record={spec.blank} />
       </Panel>
     </div>
   );

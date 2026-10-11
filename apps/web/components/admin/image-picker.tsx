@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 import type { Media } from "@repo/contract";
 import { adminApi, API_BASE, uploadImage } from "@/lib/api/admin-client";
-import { Field, inputClass } from "@/components/forms/field";
+import { FieldShell, TextInput } from "@/components/admin/ui";
 import { cn } from "@/lib/utils";
 
 const absolute = (url: string) => (url.startsWith("/") ? `${API_BASE}${url}` : url);
@@ -120,22 +120,22 @@ export function ImagePicker({
         </ul>
       )}
 
-      <Field
+      <FieldShell
         label="Describe the new image"
         htmlFor="media-alt"
         hint="Needed before upload, e.g. “Rudraksha beads on a linen cloth”"
+        wide
       >
-        <input
+        <TextInput
           id="media-alt"
           value={alt}
           onChange={(event) => setAlt(event.target.value)}
-          className={inputClass}
         />
-      </Field>
+      </FieldShell>
 
       <label
         className={cn(
-          "inline-flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-medium text-charcoal shadow-sm hover:border-brand-600",
+          "inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-medium text-charcoal shadow-sm transition-colors hover:border-brand-600",
           busy && "pointer-events-none opacity-70",
         )}
       >
