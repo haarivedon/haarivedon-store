@@ -83,37 +83,3 @@ export const courseSchema = z.object({
   updatedAt: z.iso.datetime(),
 });
 export type Course = z.infer<typeof courseSchema>;
-
-export const courseEnquiryStatuses = [
-  "pending",
-  "contacted",
-  "enrolled",
-  "closed",
-] as const;
-
-/** Client -> server payload, shared by the enquiry form and the API. */
-export const createCourseEnquirySchema = z.object({
-  name: z.string().trim().min(2, "Please enter your full name.").max(100),
-  email: z.email("Please enter a valid email address."),
-  phone: z.string().trim().min(7, "Please enter a valid phone number.").max(20),
-  courseSlug: z.string().trim().min(1),
-  message: z.string().trim().max(1000).optional().default(""),
-});
-export type CreateCourseEnquiryInput = z.infer<
-  typeof createCourseEnquirySchema
->;
-
-export const courseEnquirySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  email: z.string(),
-  phone: z.string(),
-  courseSlug: z.string(),
-  courseTitle: z.string(),
-  message: z.string(),
-  status: z.enum(courseEnquiryStatuses),
-  internalNote: z.string(),
-  createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime(),
-});
-export type CourseEnquiry = z.infer<typeof courseEnquirySchema>;

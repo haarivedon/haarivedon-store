@@ -64,7 +64,12 @@ export function InboxTable({ kind, rows }: { kind: InboxKind; rows: Row[] }) {
             </span>
             {kind === "enquiries" && (
               <span className="text-sm text-charcoal/70">
-                {String(row.courseTitle ?? row.courseSlug ?? "")}
+                {String(row.itemTitle ?? row.itemSlug ?? "")}
+                {row.kind ? (
+                  <span className="ml-2 rounded-full bg-sage/60 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-forest">
+                    {String(row.kind)}
+                  </span>
+                ) : null}
               </span>
             )}
             <span className="ml-auto flex items-center gap-3">
@@ -141,7 +146,8 @@ function Detail({ kind, row }: { kind: InboxKind; row: Row }) {
       : []),
     ...(kind === "enquiries"
       ? ([
-          ["Course", String(row.courseTitle || row.courseSlug)],
+          ["About", String(row.itemTitle || row.itemSlug)],
+          ["Kind", String(row.kind ?? "—")],
           ["Message", String(row.message || "—")],
         ] as [string, string][])
       : []),

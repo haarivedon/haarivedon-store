@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { Section } from "@/components/section";
 import { PageIntro, HowItWorks } from "@/components/page-intro";
@@ -37,7 +38,15 @@ export default async function CoursesPage() {
             to hear what is running next.
           </p>
         ) : (
-          <CourseBrowser courses={courses} />
+          /* The browser reads its filters from the query string, so it needs
+             a boundary while this page is statically rendered. */
+          <Suspense
+            fallback={
+              <div className="h-24 animate-pulse rounded-2xl bg-cream/60" />
+            }
+          >
+            <CourseBrowser courses={courses} />
+          </Suspense>
         )}
       </Section>
 

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const tabs: { key: InboxKind; label: string; path: string }[] = [
   { key: "bookings", label: "Bookings", path: "/bookings" },
   { key: "predictions", label: "Prediction requests", path: "/predictions" },
-  { key: "enquiries", label: "Course enquiries", path: "/course-enquiries" },
+  { key: "enquiries", label: "Course & product enquiries", path: "/enquiries" },
 ];
 
 export async function generateMetadata({ params }: PageProps<"/admin/inbox/[type]">) {
