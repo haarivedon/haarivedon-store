@@ -52,6 +52,41 @@ const dateOfBirthSchema = z.coerce
     message: "Date of birth cannot be in the future.",
   });
 
+/**
+ * A real IANA zone name.
+ *
+ * The manual override on the booking form is free text, and an invalid value
+ * does not fail loudly: "IST" or "GMT+5" resolves to *something*, and the
+ * chart comes out wrong with no sign that anything happened.
+ *
+ * Checked by construction rather than against `Intl.supportedValuesOf`,
+ * which lists only canonical ids — Node's ICU reports the legacy
+ * "Asia/Calcutta" there, so a plain membership test rejects the correct
+ * "Asia/Kolkata". The Region/City shape is required as well, since ICU
+ * quietly accepts ambiguous abbreviations like "IST" (India? Ireland?
+ * Israel?) and resolves them to a guess.
+ */
+export const timeZoneSchema = z
+  .string()
+  .trim()
+  .default("Asia/Kolkata")
+  .refine(
+    (value) => {
+      if (value === "UTC") return true;
+      if (!/^[A-Za-z_]+\/[A-Za-z0-9_+\-\/]+$/.test(value)) return false;
+
+      try {
+        new Intl.DateTimeFormat("en-US", { timeZone: value });
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: 'Use a timezone name like "Asia/Kolkata" or "Europe/London".',
+    },
+  );
+
 /** 24-hour "HH:MM". Required — a Kundali cannot be cast without it. */
 const timeOfBirthSchema = z
   .string()
@@ -75,7 +110,7 @@ export const createBookingSchema = z.object({
   birthPlace: z.string().trim().min(2, "Please enter your place of birth."),
   birthLat: z.coerce.number().min(-90).max(90),
   birthLng: z.coerce.number().min(-180).max(180),
-  birthTz: z.string().trim().min(1).default("Asia/Kolkata"),
+  birthTz: timeZoneSchema,
   message: z.string().trim().max(1000).optional().default(""),
 });
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
