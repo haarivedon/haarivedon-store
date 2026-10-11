@@ -5,6 +5,7 @@ import {
   type SiteContentKey,
 } from "@repo/contract";
 import { CopyForm } from "@/components/admin/copy-form";
+import { PageHeader, Panel } from "@/components/admin/page-header";
 import { adminFetch, requireAdminUser } from "@/lib/admin/session";
 
 export async function generateMetadata({ params }: PageProps<"/admin/copy/[key]">) {
@@ -24,17 +25,14 @@ export default async function CopyPage({ params }: PageProps<"/admin/copy/[key]"
   );
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h1 className="font-display text-2xl font-semibold text-forest">
-        {siteContentLabels[contentKey]}
-      </h1>
-      <p className="mt-1.5 text-sm text-muted-foreground">
-        Anything left empty keeps the wording already on the site.
-      </p>
-
-      <div className="mt-6 rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
+    <div>
+      <PageHeader
+        title={siteContentLabels[contentKey]}
+        description="Anything left empty keeps the wording already on the site."
+      />
+      <Panel className="p-5 sm:p-6">
         <CopyForm contentKey={contentKey} initial={result?.data ?? {}} />
-      </div>
+      </Panel>
     </div>
   );
 }

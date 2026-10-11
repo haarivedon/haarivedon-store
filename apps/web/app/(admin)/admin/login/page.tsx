@@ -15,14 +15,14 @@ export default async function LoginPage({
   if (user) redirect(target);
 
   return (
-    <div className="mx-auto mt-10 max-w-sm">
+    <div className="mx-auto mt-16 max-w-sm px-4">
       <h1 className="font-display text-2xl font-semibold text-forest">
         Sign in
       </h1>
       <p className="mt-1.5 text-sm text-muted-foreground">
         The Haarivedon content admin.
       </p>
-      <div className="mt-6 rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
+      <div className="mt-6 rounded-2xl border border-border/70 bg-white p-6 shadow-[0_1px_2px_rgba(32,38,31,0.04)]">
         <LoginForm next={target} />
       </div>
     </div>

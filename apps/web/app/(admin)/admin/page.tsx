@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { adminFetch, requireAdminUser } from "@/lib/admin/session";
+import { PageHeader, Panel } from "@/components/admin/page-header";
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -36,20 +37,17 @@ export default async function AdminHome() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-forest">
-        Welcome back{user.name ? `, ${user.name}` : ""}
-      </h1>
-      <p className="mt-1.5 text-sm text-muted-foreground">
-        Anything you have not published yet stays invisible on the site, so you
-        can fill things in over time.
-      </p>
+      <PageHeader
+        title={`Welcome back${user.name ? `, ${user.name}` : ""}`}
+        description="Anything you have not published yet stays invisible on the site, so you can fill things in over time."
+      />
 
-      <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tiles.map((tile) => (
           <li key={tile.label}>
             <Link
               href={tile.href}
-              className="flex h-full flex-col rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
+              className="flex h-full flex-col rounded-2xl border border-border/70 bg-white p-5 shadow-[0_1px_2px_rgba(32,38,31,0.04)] transition-colors hover:border-brand-600"
             >
               <span className="font-display text-3xl font-semibold text-forest">
                 {tile.value ?? "—"}
@@ -62,7 +60,7 @@ export default async function AdminHome() {
         ))}
       </ul>
 
-      <section className="mt-10 rounded-2xl border border-border/60 bg-ivory/70 p-5">
+      <Panel className="mt-10 p-5">
         <h2 className="font-display text-lg font-semibold text-forest">
           Publishing a course
         </h2>
@@ -77,7 +75,7 @@ export default async function AdminHome() {
           If something is missing, saving will tell you exactly which field it
           is rather than publishing a half-finished page.
         </p>
-      </section>
+      </Panel>
     </div>
   );
 }

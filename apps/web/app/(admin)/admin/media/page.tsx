@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { Media } from "@repo/contract";
 import { MediaLibrary } from "@/components/admin/media-library";
+import { PageHeader } from "@/components/admin/page-header";
 import { adminFetch, requireAdminUser } from "@/lib/admin/session";
 
 export const metadata: Metadata = { title: "Images" };
@@ -11,14 +12,11 @@ export default async function MediaPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-forest">Images</h1>
-      <p className="mt-1.5 text-sm text-muted-foreground">
-        Every image needs a description before it can appear on a published
-        page — it is what screen readers read out.
-      </p>
-      <div className="mt-6">
-        <MediaLibrary initial={result?.data ?? []} />
-      </div>
+      <PageHeader
+        title="Images"
+        description="Every image needs a description before it can appear on a published page — it is what screen readers read out."
+      />
+      <MediaLibrary initial={result?.data ?? []} />
     </div>
   );
 }
