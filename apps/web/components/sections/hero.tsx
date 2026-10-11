@@ -8,8 +8,20 @@ import { Diya } from "@/components/diya";
 import { HeroPortrait } from "@/components/sections/hero-portrait";
 import { cn } from "@/lib/utils";
 import { heroHighlights } from "@/lib/content/site";
+import { getSiteContent, orFallback } from "@/lib/api/content";
 
-export function Hero() {
+/** Used until the client edits the hero through the admin. */
+const defaults = {
+  eyebrow: "Welcome to Haarivedon",
+  heading: "Find Clarity.\nDiscover Your Path.",
+  subheading:
+    "Ancient wisdom and personalized guidance for life\u2019s important decisions. Let\u2019s explore your journey together.",
+};
+
+export async function Hero() {
+  const copy = await getSiteContent("home.hero");
+  const heading = orFallback(copy.heading, defaults.heading);
+
   return (
     <section className="relative overflow-hidden bg-[radial-gradient(120%_120%_at_65%_25%,#2a5638_0%,#183626_42%,#0d1911_100%)] text-ivory">
       {/* Corner foliage, kept faint on the dark ground */}
@@ -37,17 +49,21 @@ export function Hero() {
         <div className="contents lg:block lg:self-center lg:pb-24">
           {/* Heading */}
           <div className="order-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700 lg:order-none">
-            <Eyebrow tone="light">Welcome to Haarivedon</Eyebrow>
+            <Eyebrow tone="light">
+              {orFallback(copy.eyebrow, defaults.eyebrow)}
+            </Eyebrow>
 
+            {/* A newline in the heading is a deliberate line break. */}
             <h1 className="mt-3 font-display text-[2.15rem] leading-[1.1] font-semibold tracking-tight text-ivory sm:mt-5 sm:text-6xl lg:text-[4.25rem]">
-              Find Clarity.
-              <br />
-              Discover Your Path.
+              {heading.split("\n").map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
             </h1>
 
             <p className="mt-4 max-w-md text-[0.95rem] leading-relaxed text-ivory/75 sm:mt-5 sm:text-lg">
-              Ancient wisdom and personalized guidance for life&rsquo;s
-              important decisions. Let&rsquo;s explore your journey together.
+              {orFallback(copy.subheading, defaults.subheading)}
             </p>
           </div>
 

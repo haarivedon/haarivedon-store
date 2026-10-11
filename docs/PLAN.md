@@ -349,11 +349,12 @@ API feature list and the page count:
 - Haarivedon branding: cover page, palette, logo, footer contact
 
 **Rendering.** Server-side in `apps/api`, so chart logic and API keys stay off
-the client. `@react-pdf/renderer` for layout with the chart grids drawn as SVG
-is the cleanest fit and reuses the brand tokens. Store the file in object
-storage (S3 / R2), keep its key on the `Booking` record, and serve it through a
-signed expiring link — a birth chart is personal data and must not sit on a
-public URL.
+the client. Built with **pdfkit**, not `@react-pdf/renderer` — a deviation
+from this plan: the chart grids are lines and text, which pdfkit draws
+directly, and four pages of that does not justify adding React to a Node API.
+Brand colours mirror the tokens in `globals.css`. The file goes to private
+object storage with its key on the `Booking` record — a birth chart is
+personal data and must not sit on a public URL.
 
 **Delivery.** Download link on the confirmation screen, plus email if an
 address was given. WhatsApp delivery is what the client will likely ask for
@@ -396,15 +397,25 @@ directly — that rule from AGENTS.md holds.
 
 #### Auth
 
-**Better Auth on the Hono API**, Prisma adapter, email + password, no public
-sign-up. Accounts are created by the seed script.
+**Implemented with `node:crypto`, not Better Auth** — a deviation from this
+plan, recorded with its reason. Once §3.4 trimmed the requirements to email +
+password, one role, no social login and no 2FA, what remained was a password
+hash and a session table; Better Auth's Prisma adapter against MongoDB is the
+awkward corner of that library, so the trade was a day of adapter friction
+against ~150 lines of scrypt hashing and opaque session tokens. Nothing
+bespoke: scrypt with a per-user salt, tokens stored only as a SHA-256 hash,
+server-side sessions so "log out everywhere" is a delete. Swapping a library
+in later touches one file (`apps/api/src/routes/admin/session.ts`).
+
+Email + password, no public sign-up. Accounts come from the seed script
+(`pnpm db:seed:admin`), which doubles as the password-reset path.
 
 | Decision | Value                                                                  |
 | -------- | ---------------------------------------------------------------------- |
 | Routes   | `/api/auth/*` on `apps/api`, outside the ts-rest handler               |
 | Session  | Database sessions, 30-day expiry, rolling. "Log out everywhere" button |
 | Cookie   | `httpOnly`, `secure`, `sameSite: lax`, domain `.haarivedon.com`        |
-| Password | Better Auth default hashing, 10-char minimum                           |
+| Password | scrypt (`node:crypto`), per-user salt, 10-char minimum                 |
 | Lockout  | 10 failed attempts per email per 15 min → 429                          |
 | Reset    | Emailed link, single-use, 1-hour expiry                                |
 | Roles    | **One role: admin.** Everyone who logs in can do everything            |
@@ -496,9 +507,11 @@ the responsive variants from there, so we do not store four sizes ourselves.
 | Alt text   | Required before an image can be attached to a published record    |
 | Delete     | Allowed, with a confirm dialog warning it may be in use           |
 
-Kundali PDFs (CR-2) go to a **separate private bucket**, signed 15-minute
-URLs. Personal documents never share a bucket with public media. That is the
-one place the extra bucket is worth it.
+Kundali PDFs (CR-2) go to a **separate private bucket**. Personal documents
+never share a bucket with public media. Delivery is a one-time token issued
+with the booking rather than an S3 presigned URL — same property (the file is
+never on a guessable URL), one less thing to configure, and it works unchanged
+when storage is the local filesystem in development.
 
 #### Write API
 
@@ -646,7 +659,7 @@ What has to be true before code starts:
   two or three verified sample charts. They gate Phase 4
 - Blog nav link and home `Blog` section switched off via
   `apps/web/lib/flags.ts` — the blog is deferred (§4)
-- R2 bucket, Better Auth secret and the revalidation secret created and added
+- R2 bucket, auth secret and the revalidation secret created and added
   to `turbo.json`'s `globalEnv` — otherwise turbo strips them
 - Confirm in writing who the admin users are, and that the §4 deferred items
   are out of scope
@@ -719,7 +732,7 @@ Ordered so the one genuinely risky thing — the session cookie across two
 origins — is proven first, and so the client can start entering courses before
 the rest of the admin is finished.
 
-- **Auth · 1–1.5 d.** Better Auth on the API, Prisma adapter, seeded accounts,
+- **Auth · 1–1.5 d.** Session auth on the API, seeded accounts,
   login / logout / password reset, session middleware on `/api/admin/*`, Next
   middleware on `/admin/*`. Cross-subdomain cookie proven against the real
   `api.` host before anything else is written.

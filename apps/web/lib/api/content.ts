@@ -1,5 +1,10 @@
 import type { ClientInferRequest } from "@ts-rest/core";
-import { contract } from "@repo/contract";
+import {
+  contract,
+  parseSiteContent,
+  type SiteContentKey,
+  type SiteContentValue,
+} from "@repo/contract";
 import { api } from "@/lib/api/client";
 
 /**
@@ -71,3 +76,30 @@ export async function getProduct(slug: string) {
     return null;
   }
 }
+
+/**
+ * Editable page copy (CR-3).
+ *
+ * Read through the key's schema, so an unsaved key yields its defaults and
+ * the caller can fall back to the wording in code field by field — a key the
+ * client has never touched must not blank a section (docs/PLAN.md §12).
+ */
+export async function getSiteContent<K extends SiteContentKey>(
+  key: K,
+): Promise<SiteContentValue<K>> {
+  try {
+    const response = await api.siteContent.get({
+      params: { key },
+      fetchOptions: revalidate,
+    });
+    return response.status === 200
+      ? parseSiteContent(key, response.body.data)
+      : parseSiteContent(key, {});
+  } catch {
+    return parseSiteContent(key, {});
+  }
+}
+
+/** Returns `fallback` whenever the client has left a field empty. */
+export const orFallback = (value: string | undefined, fallback: string) =>
+  value && value.trim() ? value : fallback;

@@ -9,6 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { attributeRows, formatPrice } from "@/lib/format";
 import { getProduct, getProducts } from "@/lib/api/content";
+import { ProductJsonLd } from "@/components/seo/json-ld";
 
 /**
  * Prerender the published catalogue at build time. `dynamicParams` stays on
@@ -51,6 +52,7 @@ export default async function ProductPage({
 
   return (
     <>
+      <ProductJsonLd product={product} />
       <Section background="ivory" containerClassName="py-8 sm:py-12">
         <Link
           href="/products"

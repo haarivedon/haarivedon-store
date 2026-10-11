@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatFromPrice } from "@/lib/format";
 import { getServices } from "@/lib/api/content";
+import { ServiceJsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -19,6 +20,7 @@ export default async function ServicesPage() {
 
   return (
     <>
+      {services.length > 0 && <ServiceJsonLd services={services} />}
       <Section background="cream">
         <SectionHeader
           eyebrow="Services"

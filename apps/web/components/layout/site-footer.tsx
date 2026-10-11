@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Mail, Phone } from "lucide-react";
 import { Logo } from "@/components/layout/logo";
 import { navLinks, site } from "@/lib/content/site";
+import { getSiteContent, orFallback } from "@/lib/api/content";
 
 const socials = [
   {
@@ -23,7 +24,12 @@ const socials = [
 
 const footerNav = [...navLinks, { label: "Book a Session", href: "/book" }];
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const contact = await getSiteContent("site.contact");
+  const email = orFallback(contact.email, site.email);
+  const phone = orFallback(contact.phone, site.phone);
+  const phoneHref = `tel:${phone.replace(/[^\d+]/g, "")}`;
+
   return (
     <footer className="bg-forest text-ivory/80">
       <div className="mx-auto max-w-screen-2xl px-4 py-14 sm:px-6">
@@ -83,20 +89,20 @@ export function SiteFooter() {
             <ul className="mt-4 space-y-3 text-sm">
               <li>
                 <a
-                  href={`mailto:${site.email}`}
+                  href={`mailto:${email}`}
                   className="flex items-center gap-2.5 text-ivory/65 transition-colors hover:text-gold"
                 >
                   <Mail className="size-4 shrink-0 text-gold" />
-                  {site.email}
+                  {email}
                 </a>
               </li>
               <li>
                 <a
-                  href={site.phoneHref}
+                  href={phoneHref}
                   className="flex items-center gap-2.5 text-ivory/65 transition-colors hover:text-gold"
                 >
                   <Phone className="size-4 shrink-0 text-gold" />
-                  {site.phone}
+                  {phone}
                 </a>
               </li>
             </ul>
