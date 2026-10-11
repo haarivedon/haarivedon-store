@@ -157,3 +157,60 @@ model BlogPost {
 
   @@map("blog_posts")
 }
+
+/// Courses offered (CR-1, docs/PLAN.md §3.1).
+///
+/// Basic/advanced pairs are separate records linked by `relatedSlugs`, so
+/// each is independently priced and enrollable while still cross-linking.
+/// Seeded rows carry structure only and stay unpublished until the client
+/// fills in copy, price and imagery through the admin.
+model Course {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  slug         String   @unique
+  /// One of the 14 categories in docs/PLAN.md §10.
+  category     String
+  // basic | advanced | premium
+  level        String   @default("basic")
+  // live | recorded | hybrid | workshop
+  format       String   @default("live")
+  summary      String   @default("")
+  description  String   @default("")
+  outline      String[]
+  duration     String   @default("")
+  language     String   @default("Hindi / English")
+  /// null means "enquire for price"; 0 means free.
+  price        Int?
+  currency     String   @default("INR")
+  image        String   @default("")
+  relatedSlugs String[]
+  certificate  Boolean  @default(false)
+  featured     Boolean  @default(false)
+  published    Boolean  @default(false)
+  order        Int      @default(0)
+  updatedBy    String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("courses")
+}
+
+/// Course enquiries from the course detail pages. CR-1 is a catalogue plus an
+/// enquiry form — there is no checkout (docs/PLAN.md §3.1).
+model CourseEnquiry {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  email        String
+  phone        String
+  courseSlug   String
+  courseTitle  String   @default("")
+  message      String   @default("")
+  // pending | contacted | enrolled | closed
+  status       String   @default("pending")
+  /// Admin-only, never exposed publicly.
+  internalNote String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("course_enquiries")
+}
