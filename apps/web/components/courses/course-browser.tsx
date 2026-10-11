@@ -12,7 +12,7 @@ import {
   courseLevels,
   type Course,
 } from "@repo/contract";
-import { formatPrice } from "@/lib/format";
+import { Price } from "@/components/price";
 import { cn } from "@/lib/utils";
 
 /**
@@ -264,9 +264,7 @@ function CourseCard({ course }: { course: Course }) {
         </dl>
 
         <div className="mt-auto flex items-center justify-between gap-3 pt-4">
-          <p className="text-sm font-semibold text-forest">
-            {formatPrice(course.price, course.currency)}
-          </p>
+          <Price value={course.price} currency={course.currency} />
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand-700">
             Details
             <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />

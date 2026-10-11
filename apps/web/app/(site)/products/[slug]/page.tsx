@@ -7,7 +7,8 @@ import { productFamilyLabels } from "@repo/contract";
 import { Section } from "@/components/section";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { attributeRows, formatPrice } from "@/lib/format";
+import { attributeRows } from "@/lib/format";
+import { Price } from "@/components/price";
 import { getProduct, getProducts } from "@/lib/api/content";
 import { ProductJsonLd } from "@/components/seo/json-ld";
 
@@ -93,8 +94,13 @@ export default async function ProductPage({
               </p>
             )}
 
-            <p className="mt-6 font-display text-2xl font-semibold text-forest">
-              {formatPrice(product.price, product.currency)}
+            <p className="mt-6">
+              <Price
+                value={product.price}
+                currency={product.currency}
+                size="lg"
+                asButton={false}
+              />
             </p>
             {!product.inStock && (
               <p className="mt-1 text-sm text-terracotta">
@@ -171,8 +177,8 @@ export default async function ProductPage({
                     <h3 className="font-display text-sm font-semibold text-forest">
                       {item.name}
                     </h3>
-                    <p className="mt-1 text-xs font-medium text-charcoal/70">
-                      {formatPrice(item.price, item.currency)}
+                    <p className="mt-1">
+                      <Price value={item.price} currency={item.currency} />
                     </p>
                   </div>
                 </Link>

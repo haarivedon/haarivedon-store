@@ -10,7 +10,7 @@ import {
 } from "@repo/contract";
 import { Section } from "@/components/section";
 import { CourseEnquiryForm } from "@/components/courses/enquiry-form";
-import { formatPrice } from "@/lib/format";
+import { Price } from "@/components/price";
 import { getCourse, getCourses } from "@/lib/api/content";
 import { CourseJsonLd } from "@/components/seo/json-ld";
 
@@ -173,8 +173,11 @@ export default async function CoursePage({
                         <span className="mt-1 font-display text-base font-semibold text-forest">
                           {sibling.title}
                         </span>
-                        <span className="mt-2 text-sm font-medium text-charcoal/70">
-                          {formatPrice(sibling.price, sibling.currency)}
+                        <span className="mt-2">
+                          <Price
+                            value={sibling.price}
+                            currency={sibling.currency}
+                          />
                         </span>
                       </Link>
                     </li>
@@ -186,8 +189,13 @@ export default async function CoursePage({
 
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
-              <p className="font-display text-2xl font-semibold text-forest">
-                {formatPrice(course.price, course.currency)}
+              <p>
+                <Price
+                  value={course.price}
+                  currency={course.currency}
+                  size="lg"
+                  asButton={false}
+                />
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Leave your details and we will send you the schedule and how to

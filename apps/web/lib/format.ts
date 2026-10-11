@@ -1,28 +1,8 @@
 /**
- * Money is stored as whole rupees. `null` means the client has not set a
- * price — it reads as an enquiry, never as zero (docs/PLAN.md §13).
+ * Price *display* lives in components/price.tsx, which distinguishes a set
+ * price from one that has to be asked for. This file keeps the data-shaping
+ * helpers only.
  */
-export function formatPrice(
-  price: number | null,
-  currency = "INR",
-  { enquireLabel = "Enquire for price" } = {},
-) {
-  if (price === null) return enquireLabel;
-  if (price === 0) return "Free";
-
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0,
-  }).format(price);
-}
-
-/** "starting-price" variant used on listing cards. */
-export function formatFromPrice(price: number | null, currency = "INR") {
-  if (price === null) return "Enquire for price";
-  if (price === 0) return "Free";
-  return `From ${formatPrice(price, currency)}`;
-}
 
 const attributeLabels: Record<string, string> = {
   deity: "Deity",
