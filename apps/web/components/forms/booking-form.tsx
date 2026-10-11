@@ -98,7 +98,7 @@ export function BookingForm() {
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Full name" htmlFor="name" required error={errors.name}>
+        <Field label="Full name" htmlFor="name" error={errors.name}>
           <input
             id="name"
             name="name"
@@ -112,7 +112,6 @@ export function BookingForm() {
         <Field
           label="Mobile number"
           htmlFor="phone"
-          required
           error={errors.phone}
           hint="We'll reach you on this number"
         >
@@ -131,6 +130,7 @@ export function BookingForm() {
       <Field
         label="Email"
         htmlFor="email"
+        optional
         error={errors.email}
         hint="Optional — add it if you'd like your Kundali emailed as well"
       >
@@ -148,7 +148,6 @@ export function BookingForm() {
         <Field
           label="Date of birth"
           htmlFor="dateOfBirth"
-          required
           error={errors.dateOfBirth}
         >
           <input
@@ -165,7 +164,6 @@ export function BookingForm() {
         <Field
           label="Time of birth"
           htmlFor="timeOfBirth"
-          required
           error={errors.timeOfBirth}
           hint="As exact as you can — the chart depends on it"
         >
@@ -199,6 +197,7 @@ export function BookingForm() {
       <Field
         label="Anything you'd like us to know?"
         htmlFor="message"
+        optional
         error={errors.message}
       >
         <textarea

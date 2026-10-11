@@ -9,7 +9,7 @@ export function Field({
   htmlFor,
   error,
   hint,
-  required,
+  optional,
   className,
   children,
 }: {
@@ -17,7 +17,11 @@ export function Field({
   htmlFor: string;
   error?: string;
   hint?: string;
-  required?: boolean;
+  /**
+   * Most fields on the public forms are required, so the useful signal is
+   * which ones are not — an asterisk on nearly every label says nothing.
+   */
+  optional?: boolean;
   className?: string;
   children: React.ReactNode;
 }) {
@@ -30,12 +34,12 @@ export function Field({
     <div className={cn("flex flex-col gap-1.5", className)}>
       <label
         htmlFor={htmlFor}
-        className="text-sm font-medium text-charcoal/90"
+        className="flex flex-wrap items-center gap-2 text-sm font-medium text-charcoal/90"
       >
         {label}
-        {required && (
-          <span aria-hidden className="ml-0.5 text-terracotta">
-            *
+        {optional && (
+          <span className="rounded-full bg-charcoal/8 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground">
+            Optional
           </span>
         )}
       </label>
