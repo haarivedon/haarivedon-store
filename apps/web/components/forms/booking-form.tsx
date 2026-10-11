@@ -7,6 +7,7 @@ import { createBookingSchema, sessionTypes } from "@repo/contract";
 import { api } from "@/lib/api/client";
 import { issuesToFieldErrors, toFieldErrors, type FieldErrors } from "@/lib/forms";
 import { Field, inputClass, textareaClass } from "@/components/forms/field";
+import { Select } from "@/components/ui/select";
 import {
   CitySelect,
   emptyBirthPlace,
@@ -26,6 +27,8 @@ type Submitted = { id: string; message: string; kundaliToken: string };
 
 export function BookingForm() {
   const [place, setPlace] = useState<BirthPlace>(emptyBirthPlace);
+  const [sessionType, setSessionType] =
+    useState<(typeof sessionTypes)[number]>("personal-consultation");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState<Submitted | null>(null);
@@ -39,7 +42,7 @@ export function BookingForm() {
       name: String(form.get("name") ?? ""),
       phone: String(form.get("phone") ?? ""),
       email: String(form.get("email") ?? "") || undefined,
-      sessionType: String(form.get("sessionType") ?? "personal-consultation"),
+      sessionType,
       dateOfBirth: String(form.get("dateOfBirth") ?? ""),
       timeOfBirth: String(form.get("timeOfBirth") ?? ""),
       birthPlace: place.place,
@@ -179,13 +182,18 @@ export function BookingForm() {
       <CitySelect value={place} onChange={setPlace} errors={errors} />
 
       <Field label="What would you like guidance on?" htmlFor="sessionType">
-        <select id="sessionType" name="sessionType" className={inputClass}>
-          {sessionTypes.map((type) => (
-            <option key={type} value={type}>
-              {sessionLabels[type]}
-            </option>
-          ))}
-        </select>
+        <Select
+          id="sessionType"
+          name="sessionType"
+          value={sessionType}
+          onValueChange={(next) =>
+            setSessionType(next as (typeof sessionTypes)[number])
+          }
+          options={sessionTypes.map((type) => ({
+            value: type,
+            label: sessionLabels[type],
+          }))}
+        />
       </Field>
 
       <Field

@@ -117,7 +117,7 @@ export const RESERVED_SLUGS = [
 ] as const;
 
 export const slugSchema = z
-  .string()
+  .string({ error: "Give this a web address." })
   .trim()
   .toLowerCase()
   .min(2, "A slug needs at least two characters.")
@@ -142,11 +142,15 @@ export const slugSchema = z
  * "absent" correctly means "leave it alone".
  */
 export const courseWriteSchema = z.object({
-  title: z.string().trim().min(2, "Give the course a title.").max(140),
+  title: z
+    .string({ error: "Give the course a title." })
+    .trim()
+    .min(2, "Give the course a title.")
+    .max(140),
   slug: slugSchema,
-  category: z.enum(courseCategories),
-  level: z.enum(courseLevels),
-  format: z.enum(courseFormats),
+  category: z.enum(courseCategories, { error: "Pick a subject." }),
+  level: z.enum(courseLevels, { error: "Pick a level." }),
+  format: z.enum(courseFormats, { error: "Pick a format." }),
   summary: z.string().trim().max(400).optional(),
   description: z.string().trim().max(8000).optional(),
   outline: z.array(z.string().trim().min(1).max(200)).max(60).optional(),
@@ -162,9 +166,13 @@ export const courseWriteSchema = z.object({
 });
 
 export const productWriteSchema = z.object({
-  name: z.string().trim().min(2, "Give the product a name.").max(140),
+  name: z
+    .string({ error: "Give the product a name." })
+    .trim()
+    .min(2, "Give the product a name.")
+    .max(140),
   slug: slugSchema,
-  family: z.enum(productFamilies),
+  family: z.enum(productFamilies, { error: "Pick a family." }),
   category: z.string().trim().max(60).optional(),
   summary: z.string().trim().max(400).optional(),
   description: z.string().trim().max(8000).optional(),
@@ -178,7 +186,11 @@ export const productWriteSchema = z.object({
 });
 
 export const serviceWriteSchema = z.object({
-  title: z.string().trim().min(2, "Give the service a title.").max(140),
+  title: z
+    .string({ error: "Give the service a title." })
+    .trim()
+    .min(2, "Give the service a title.")
+    .max(140),
   slug: slugSchema,
   summary: z.string().trim().max(400).optional(),
   description: z.string().trim().max(8000).optional(),
@@ -191,8 +203,16 @@ export const serviceWriteSchema = z.object({
 });
 
 export const testimonialWriteSchema = z.object({
-  name: z.string().trim().min(2, "Whose testimonial is this?").max(100),
-  quote: z.string().trim().min(10, "Add the testimonial itself.").max(1000),
+  name: z
+    .string({ error: "Whose testimonial is this?" })
+    .trim()
+    .min(2, "Whose testimonial is this?")
+    .max(100),
+  quote: z
+    .string({ error: "Add the testimonial itself." })
+    .trim()
+    .min(10, "Add the testimonial itself.")
+    .max(1000),
   rating: z.number().int().min(1).max(5).optional(),
   location: z.string().trim().max(100).optional(),
   order: z.number().int().min(0).optional(),

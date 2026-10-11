@@ -7,6 +7,7 @@ import { createPredictionSchema, focusAreas } from "@repo/contract";
 import { api } from "@/lib/api/client";
 import { issuesToFieldErrors, toFieldErrors, type FieldErrors } from "@/lib/forms";
 import { Field, inputClass, textareaClass } from "@/components/forms/field";
+import { Select } from "@/components/ui/select";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,8 @@ const focusLabels: Record<(typeof focusAreas)[number], string> = {
 };
 
 export function PredictionForm() {
+  const [focusArea, setFocusArea] =
+    useState<(typeof focusAreas)[number]>("general");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<string | null>(null);
@@ -35,7 +38,7 @@ export function PredictionForm() {
       dateOfBirth: String(form.get("dateOfBirth") ?? ""),
       timeOfBirth: String(form.get("timeOfBirth") ?? ""),
       placeOfBirth: String(form.get("placeOfBirth") ?? ""),
-      focusArea: String(form.get("focusArea") ?? "general"),
+      focusArea,
       question: String(form.get("question") ?? ""),
     });
 
@@ -181,13 +184,18 @@ export function PredictionForm() {
       </div>
 
       <Field label="What is this about?" htmlFor="p-focus">
-        <select id="p-focus" name="focusArea" className={inputClass}>
-          {focusAreas.map((area) => (
-            <option key={area} value={area}>
-              {focusLabels[area]}
-            </option>
-          ))}
-        </select>
+        <Select
+          id="p-focus"
+          name="focusArea"
+          value={focusArea}
+          onValueChange={(next) =>
+            setFocusArea(next as (typeof focusAreas)[number])
+          }
+          options={focusAreas.map((area) => ({
+            value: area,
+            label: focusLabels[area],
+          }))}
+        />
       </Field>
 
       <Field

@@ -1,4 +1,8 @@
 import {
+  courseWriteSchema,
+  productWriteSchema,
+  serviceWriteSchema,
+  testimonialWriteSchema,
   courseCategories,
   courseCategoryLabels,
   courseFormats,
@@ -498,6 +502,18 @@ export const collections: Record<CollectionSpec["key"], CollectionSpec> = {
 };
 
 export const collectionKeys = Object.keys(collections) as CollectionSpec["key"][];
+
+/**
+ * The zod schema the API validates each collection against. The form uses
+ * the same object as its resolver, so client and server agree on both the
+ * rules and the messages.
+ */
+export const writeSchemas = {
+  courses: courseWriteSchema,
+  products: productWriteSchema,
+  services: serviceWriteSchema,
+  testimonials: testimonialWriteSchema,
+} as const;
 
 /** Title-to-slug, matching the server's slug rules (docs/PLAN.md §13). */
 export function slugify(value: string): string {
