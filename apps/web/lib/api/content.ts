@@ -13,6 +13,7 @@ import { api } from "@/lib/api/client";
 const revalidate = { next: { revalidate: 300 } } as const;
 
 type ProductQuery = ClientInferRequest<typeof contract.products.list>["query"];
+type CourseQuery = ClientInferRequest<typeof contract.courses.list>["query"];
 
 export async function getServices() {
   try {
@@ -32,6 +33,30 @@ export async function getProducts(query: Partial<ProductQuery> = {}) {
     return res.status === 200 ? res.body.data : [];
   } catch {
     return [];
+  }
+}
+
+export async function getCourses(query: Partial<CourseQuery> = {}) {
+  try {
+    const res = await api.courses.list({
+      query: { page: 1, perPage: 100, ...query },
+      fetchOptions: revalidate,
+    });
+    return res.status === 200 ? res.body.data : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getCourse(slug: string) {
+  try {
+    const res = await api.courses.getBySlug({
+      params: { slug },
+      fetchOptions: revalidate,
+    });
+    return res.status === 200 ? res.body : null;
+  } catch {
+    return null;
   }
 }
 

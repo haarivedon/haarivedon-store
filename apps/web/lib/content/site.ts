@@ -151,38 +151,6 @@ export const whyPoints = [
   },
 ] as const;
 
-// Courses & mentorship offerings. Each banner is a self-contained graphic
-// (title, blurb, and feature highlights are part of the image).
-export const courses = [
-  {
-    title: "Reiki & Energy Healing",
-    level: "Level 1 – Master",
-    duration: "8 weeks",
-    learners: "1,200+ learners",
-    image: "/images/courses/reiki.jpg",
-    alt: "Reiki & Energy Healing course — learn to channel and balance energy, with certification",
-    href: "/courses/reiki",
-  },
-  {
-    title: "Vedic Astrology Foundations",
-    level: "Beginner friendly",
-    duration: "10 weeks",
-    learners: "900+ learners",
-    image: "/images/courses/vedic-astrology.jpg",
-    alt: "Vedic Astrology Foundations course — read a birth chart with confidence",
-    href: "/courses/vedic-astrology",
-  },
-  {
-    title: "Numerology & Vastu",
-    level: "All levels",
-    duration: "6 weeks",
-    learners: "750+ learners",
-    image: "/images/courses/numerology-vastu.jpg",
-    alt: "Numerology & Vastu course — decode the numbers and spaces around you",
-    href: "/courses/numerology-vastu",
-  },
-] as const;
-
 // Sacred energy-tool categories, shown on the home page.
 export const energyTools = [
   {

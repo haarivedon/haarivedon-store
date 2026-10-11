@@ -7,6 +7,7 @@
  * and the published flag are never overwritten — see docs/PLAN.md §13.
  */
 import { prisma } from "../src/client";
+import { seedCourses } from "./seed-courses";
 import { seedProducts, seedServices } from "./seed-data";
 
 async function main() {
@@ -32,6 +33,34 @@ async function main() {
     }
   }
 
+  let createdCourses = 0;
+
+  for (const course of seedCourses) {
+    const result = await prisma.course.upsert({
+      where: { slug: course.slug },
+      // Structural only: category, level, cross-links and display order.
+      update: {
+        category: course.category,
+        level: course.level,
+        relatedSlugs: course.relatedSlugs ?? [],
+        order: course.order,
+      },
+      create: {
+        title: course.title,
+        slug: course.slug,
+        category: course.category,
+        level: course.level,
+        relatedSlugs: course.relatedSlugs ?? [],
+        order: course.order,
+        outline: [],
+        published: false,
+      },
+    });
+    if (result.createdAt.getTime() === result.updatedAt.getTime()) {
+      createdCourses += 1;
+    }
+  }
+
   for (const service of seedServices) {
     await prisma.service.upsert({
       where: { slug: service.slug },
@@ -41,10 +70,12 @@ async function main() {
   }
 
   console.log(
-    `Seeded ${seedProducts.length} products (${createdProducts} new) and ${seedServices.length} services.`,
+    `Seeded ${seedProducts.length} products (${createdProducts} new), ` +
+      `${seedCourses.length} courses (${createdCourses} new) and ` +
+      `${seedServices.length} services.`,
   );
   console.log(
-    "Products seed unpublished — the client publishes each one from the admin.",
+    "Courses and products seed unpublished — the client publishes each from the admin.",
   );
 }
 

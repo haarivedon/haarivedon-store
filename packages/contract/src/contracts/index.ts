@@ -1,6 +1,7 @@
 import { initContract } from "@ts-rest/core";
 import { errorSchema } from "../schemas/common";
 import { bookingsContract } from "./bookings";
+import { coursesContract } from "./courses";
 import { healthContract } from "./health";
 import { kundaliContract } from "./kundali";
 import { predictionsContract } from "./predictions";
@@ -23,6 +24,7 @@ export const contract = c.router(
     services: servicesContract,
     products: productsContract,
     kundali: kundaliContract,
+    courses: coursesContract,
   },
   {
     pathPrefix: "/api",
@@ -37,6 +39,7 @@ export const contract = c.router(
 export type Contract = typeof contract;
 export {
   bookingsContract,
+  coursesContract,
   healthContract,
   kundaliContract,
   predictionsContract,
