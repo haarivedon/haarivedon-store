@@ -32,6 +32,33 @@ const nextConfig: NextConfig = {
    * Route Handlers" rule), and it stops mattering once R2_PUBLIC_URL is set
    * and stored URLs become absolute CDN links.
    */
+  /**
+   * Baseline response headers. Deliberately not a full Content-Security-
+   * Policy: that needs testing against the font and image pipelines, and a
+   * wrong one fails silently in users' browsers rather than in CI.
+   */
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+          },
+        ],
+      },
+      {
+        // Birth charts and the admin must never be cached by a proxy.
+        source: "/admin/:path*",
+        headers: [{ key: "Cache-Control", value: "private, no-store" }],
+      },
+    ];
+  },
+
   async rewrites() {
     return [
       {

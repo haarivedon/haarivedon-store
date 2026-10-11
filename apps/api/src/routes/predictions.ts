@@ -1,26 +1,7 @@
-import { contract, type PredictionRequest } from "@repo/contract";
-import { prisma, type PredictionRequest as PredictionRecord } from "@repo/db";
+import { contract } from "@repo/contract";
+import { prisma } from "@repo/db";
 import { tsr } from "@ts-rest/serverless/fetch";
-import { assertAdmin } from "../lib/auth";
 import { clientIp, rateLimit } from "../lib/rate-limit";
-import { toPaginationMeta, toPrismaPage } from "../lib/pagination";
-
-/** Prisma record -> wire shape (dates become ISO strings). */
-const serialize = (record: PredictionRecord): PredictionRequest => ({
-  id: record.id,
-  name: record.name,
-  email: record.email,
-  phone: record.phone,
-  dateOfBirth: record.dateOfBirth.toISOString(),
-  timeOfBirth: record.timeOfBirth,
-  placeOfBirth: record.placeOfBirth,
-  focusArea: record.focusArea as PredictionRequest["focusArea"],
-  question: record.question,
-  internalNote: record.internalNote,
-  status: record.status as PredictionRequest["status"],
-  createdAt: record.createdAt.toISOString(),
-  updatedAt: record.updatedAt.toISOString(),
-});
 
 export const predictionsRouter = tsr.router(contract.predictions, {
   create: async ({ body }, { request }) => {
@@ -46,41 +27,4 @@ export const predictionsRouter = tsr.router(contract.predictions, {
     };
   },
 
-  list: async ({ query }, { request }) => {
-    assertAdmin(request.headers);
-
-    const where = query.status ? { status: query.status } : {};
-    const [records, total] = await Promise.all([
-      prisma.predictionRequest.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        ...toPrismaPage(query),
-      }),
-      prisma.predictionRequest.count({ where }),
-    ]);
-
-    return {
-      status: 200 as const,
-      body: {
-        data: records.map(serialize),
-        meta: toPaginationMeta(query, total),
-      },
-    };
-  },
-
-  getById: async ({ params }, { request }) => {
-    assertAdmin(request.headers);
-
-    const record = await prisma.predictionRequest.findUnique({
-      where: { id: params.id },
-    });
-    if (!record) {
-      return {
-        status: 404 as const,
-        body: { error: "Prediction request not found." },
-      };
-    }
-
-    return { status: 200 as const, body: serialize(record) };
-  },
 });

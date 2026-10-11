@@ -111,15 +111,24 @@ recovery path, since no email delivery is configured.
   vendor and map its response in `HttpChartProvider`
   (`apps/api/src/lib/kundali/providers.ts`). Until then every PDF is stamped
   SAMPLE CHART on every page — deliberately, so a placeholder can never be
-  mistaken for a real reading.
+  mistaken for a real reading. This is the single biggest item before the
+  feature can be shown to a client.
 - **Storage is the local filesystem** unless the R2 vars are set. A host with
-  an ephemeral disk will lose uploads and PDFs; set them before deploying.
-- **No Lighthouse run yet.** Phase 6 built the SEO and accessibility
-  groundwork; the measured pass is Phase 7 work on a real deployment.
+  an ephemeral disk will lose uploads and generated PDFs; set them before
+  deploying.
+- **`pnpm db:seed:places` has to be run on production too**, or the birth
+  place picker falls back to ~150 bundled cities.
+- **No Lighthouse run yet.** The SEO and accessibility groundwork is in; the
+  measured pass belongs to Phase 7 on a real deployment.
 - **Rich text is a plain textarea** with blank-line paragraphs. PLAN.md §3.3
-  specifies Tiptap on the three long fields; the textarea is honest about what
-  it does and can be swapped without touching the data (paragraphs are split
-  on render).
+  specifies Tiptap on the long fields; the textarea is honest about what it
+  does and can be swapped without touching the data.
+- **`/privacy` and `/terms` describe what the code actually does** — the
+  fields collected, where they go, who sees them. They are accurate, not
+  boilerplate, but they have not been reviewed by a lawyer and should be
+  before launch.
+- **No transactional email.** Password reset is documented as
+  `pnpm db:seed:admin`; the Kundali is delivered by on-screen link only.
 
 ## What landed, and where to look
 
@@ -146,6 +155,12 @@ Two rules worth knowing before editing the admin:
 2. **Publish validation runs against the record as saved**, not the posted
    body, and rolls the publish back if it fails. That is why create writes a
    draft first and then flips it.
+3. **There is one admin surface**, `/api/admin/*`, behind a session. The
+   shared `ADMIN_API_KEY` no longer guards anything: it used to protect a
+   second copy of the booking and prediction reads, which meant two doors to
+   the same personal data and one of them opened with a static string.
+4. **Every public list filters `published: true`.** A draft must never reach
+   a public response, a sitemap or a JSON-LD block.
 
 ## Phase 6 — SEO, performance, accessibility
 

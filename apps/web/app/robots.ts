@@ -5,8 +5,11 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
-        // The admin and the revalidation hook are never indexed.
+        // Uploaded imagery is proxied through /api/media, so the blanket
+        // /api/ rule was hiding every product and course photo from image
+        // search. Allow that one path back.
+        allow: ["/", "/api/media/"],
+        // The admin and the API itself are never indexed.
         disallow: ["/admin", "/admin/", "/api/"],
       },
     ],

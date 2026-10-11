@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Download } from "lucide-react";
 import { InboxTable, type InboxKind } from "@/components/admin/inbox-table";
 import { PageHeader } from "@/components/admin/page-header";
+import { API_BASE } from "@/lib/api/admin-client";
 import { adminFetch, requireAdminUser } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +48,17 @@ export default async function InboxPage({
           result
             ? `${result.meta.total} in total. Nothing here is editable — this is what people sent you.`
             : "Could not load the inbox — is the API running?"
+        }
+        action={
+          result && result.meta.total > 0 ? (
+            <a
+              href={`${API_BASE}/api/admin/export/${tab.key}`}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-medium text-charcoal shadow-sm transition-colors hover:border-brand-600"
+            >
+              <Download className="size-4 text-brand-600" />
+              Export CSV
+            </a>
+          ) : null
         }
       />
 
