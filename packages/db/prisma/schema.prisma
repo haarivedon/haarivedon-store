@@ -11,20 +11,40 @@ datasource db {
 }
 
 /// Session booking requests submitted from the Book a Session page.
+///
+/// The client's confirmed field list (docs/PLAN.md §3.2) is name, mobile and
+/// date / time / place of birth — there is no appointment slot, so the old
+/// preferredDate/preferredTime pair is gone and `sessionType` is optional,
+/// kept only for routing the enquiry. Birth coordinates are stored alongside
+/// the place name because the Kundali calculation needs them (CR-2).
 model Booking {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  email         String
-  phone         String
-  // one of: personal-consultation | prediction-reading | guidance-session | other
-  sessionType   String
-  preferredDate DateTime
-  preferredTime String
-  message       String   @default("")
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  phone        String
+  /// Optional: not in the client's field list, but the only way to email a PDF.
+  email        String?
+  // personal-consultation | prediction-reading | guidance-session | other
+  sessionType  String   @default("personal-consultation")
+  dateOfBirth  DateTime
+  timeOfBirth  String
+  birthPlace   String
+  birthLat     Float
+  birthLng     Float
+  birthTz      String   @default("Asia/Kolkata")
+  message      String   @default("")
   // pending | confirmed | completed | cancelled
-  status        String   @default("pending")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  status       String   @default("pending")
+  // pending | ready | failed — the PDF is generated after the booking is saved.
+  kundaliStatus String  @default("pending")
+  /// Private-bucket object key; never served directly.
+  kundaliKey   String   @default("")
+  /// One-time token handed to the submitter so only they can download the PDF.
+  kundaliToken String   @default("")
+  kundaliError String   @default("")
+  /// Admin-only, never exposed publicly.
+  internalNote String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@map("bookings")
 }
@@ -43,6 +63,8 @@ model PredictionRequest {
   question     String   @default("")
   // pending | in-progress | delivered
   status       String   @default("pending")
+  /// Admin-only, never exposed publicly.
+  internalNote String   @default("")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

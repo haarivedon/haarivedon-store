@@ -1,13 +1,13 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import {
+  bookingCreatedSchema,
   bookingSchema,
   bookingStatuses,
   createBookingSchema,
   updateBookingStatusSchema,
 } from "../schemas/booking";
 import {
-  createdSchema,
   errorSchema,
   paginated,
   paginationQuerySchema,
@@ -21,8 +21,9 @@ export const bookingsContract = c.router({
     path: "/bookings",
     body: createBookingSchema,
     responses: {
-      201: createdSchema,
+      201: bookingCreatedSchema,
       422: errorSchema,
+      429: errorSchema,
     },
     summary: "Submit a session booking request.",
   },

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { phoneSchema } from "./booking";
 
 export const focusAreas = [
   "career",
@@ -18,8 +19,15 @@ export const predictionStatuses = [
 export const createPredictionSchema = z.object({
   name: z.string().trim().min(2, "Please enter your full name.").max(100),
   email: z.email("Please enter a valid email address."),
-  phone: z.string().trim().min(7, "Please enter a valid phone number.").max(20),
-  dateOfBirth: z.coerce.date(),
+  phone: phoneSchema,
+  dateOfBirth: z.coerce
+    .date()
+    .refine((d) => d.getUTCFullYear() >= 1900, {
+      message: "Please enter a date of birth after 1900.",
+    })
+    .refine((d) => d.getTime() <= Date.now(), {
+      message: "Date of birth cannot be in the future.",
+    }),
   timeOfBirth: z.string().trim().max(10).optional().default(""),
   placeOfBirth: z.string().trim().min(2, "Please enter your place of birth."),
   focusArea: z.enum(focusAreas).default("general"),
@@ -38,6 +46,8 @@ export const predictionSchema = z.object({
   placeOfBirth: z.string(),
   focusArea: z.enum(focusAreas),
   question: z.string(),
+  /** Admin-only triage note; never rendered publicly. */
+  internalNote: z.string(),
   status: z.enum(predictionStatuses),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
