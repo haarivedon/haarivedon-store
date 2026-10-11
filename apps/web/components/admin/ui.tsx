@@ -236,11 +236,16 @@ export function Toggle({
           checked ? "bg-brand-600" : "bg-charcoal/25",
         )}
       >
+        {/*
+          Anchored with `left-0.5`, not left to its static position: a button
+          centres its content, so an absolutely-positioned child with no
+          `left` starts mid-track and the knob sat right of centre when off.
+        */}
         <span
           aria-hidden
           className={cn(
-            "absolute top-0.5 size-5 rounded-full bg-white shadow transition-transform",
-            checked ? "translate-x-[1.375rem]" : "translate-x-0.5",
+            "absolute left-0.5 top-0.5 size-5 rounded-full bg-white shadow transition-transform duration-150",
+            checked ? "translate-x-5" : "translate-x-0",
           )}
         />
       </button>
