@@ -1,17 +1,33 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, ExternalLink, Loader2, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Check, ExternalLink, Loader2 } from "lucide-react";
 import { adminApi } from "@/lib/api/admin-client";
 import {
+  allFields,
+  collections,
   slugify,
   type CollectionSpec,
   type FieldSpec,
 } from "@/lib/admin/collections";
 import { issuesToFieldErrors, type FieldErrors } from "@/lib/forms";
-import { Field, inputClass, textareaClass } from "@/components/forms/field";
 import { ImagePicker } from "@/components/admin/image-picker";
+import {
+  Banner,
+  FieldShell,
+  FormSection,
+  PriceInput,
+  Repeater,
+  Select,
+  SlugInput,
+  StickyActions,
+  TextArea,
+  TextInput,
+  Toggle,
+  controlClass,
+} from "@/components/admin/ui";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -19,21 +35,25 @@ type Values = Record<string, unknown>;
 type Missing = { field: string; message: string };
 
 /**
- * One form for every collection, built from the field config.
+ * One form for every collection, built from the section config.
  *
- * Saving is permissive and publishing is strict: the API returns the list of
- * fields that are missing, and it is rendered as a checklist rather than a
- * toast that disappears (docs/PLAN.md §3.3).
+ * Saving is permissive and publishing is strict. The checklist shows what
+ * publishing still needs *before* the attempt, so the editor is not told off
+ * after the fact — the server stays the authority and returns the same list
+ * if something slips through (docs/PLAN.md §3.3).
  */
 export function RecordForm({
-  spec,
+  collectionKey,
   record,
   recordId,
 }: {
-  spec: CollectionSpec;
+  collectionKey: CollectionSpec["key"];
   record: Values;
   recordId?: string;
 }) {
+  // The config is imported here rather than passed in: `publishChecks` holds
+  // functions, and functions cannot cross the server/client boundary.
+  const spec = collections[collectionKey];
   const router = useRouter();
   const [values, setValues] = useState<Values>(record);
   const [published, setPublished] = useState(Boolean(record.published));
@@ -42,21 +62,27 @@ export function RecordForm({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [conflict, setConflict] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const slugTouched = useRef(Boolean(recordId));
 
   const set = (name: string, value: unknown) => {
     setValues((previous) => ({ ...previous, [name]: value }));
     setSaved(false);
+    setDirty(true);
   };
 
-  /** Slug follows the title until someone edits it by hand. */
+  /** The slug follows the title until someone edits it by hand. */
   const setTitle = (name: string, value: string) => {
     set(name, value);
-    if (!slugTouched.current && spec.fields.some((f) => f.kind === "slug")) {
-      const slugField = spec.fields.find((f) => f.kind === "slug")!.name;
-      set(slugField, slugify(value));
-    }
+    const slugField = allFields(spec).find((field) => field.kind === "slug");
+    if (!slugTouched.current && slugField) set(slugField.name, slugify(value));
   };
+
+  const checks = useMemo(
+    () => spec.publishChecks.map((check) => ({ ...check, done: check.done(values) })),
+    [spec, values],
+  );
+  const outstanding = checks.filter((check) => !check.done);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -82,10 +108,9 @@ export function RecordForm({
 
       if (response.status === 200 || response.status === 201) {
         setSaved(true);
+        setDirty(false);
         const created = response.body as { id: string };
-        if (!recordId) {
-          router.push(`/admin/content/${spec.key}/${created.id}`);
-        }
+        if (!recordId) router.push(`/admin/content/${spec.key}/${created.id}`);
         router.refresh();
         return;
       }
@@ -103,11 +128,13 @@ export function RecordForm({
         };
         if (body.missing?.length) {
           setMissing(body.missing);
-          // The record stays as it was: the server rolls the publish back.
+          // The server rolled the publish back; reflect that here.
           setPublished(false);
         } else {
-          setErrors(issuesToFieldErrors(body.issues));
-          if (body.error) setErrors((e) => ({ ...e, _: body.error! }));
+          const fieldErrors = issuesToFieldErrors(body.issues);
+          setErrors(
+            body.error ? { ...fieldErrors, _: body.error } : fieldErrors,
+          );
         }
         return;
       }
@@ -115,7 +142,9 @@ export function RecordForm({
       const body = response.body as { error?: string } | undefined;
       setErrors({ _: body?.error ?? "That didn't save. Please try again." });
     } catch {
-      setErrors({ _: "We couldn't reach the server. Your changes are still here." });
+      setErrors({
+        _: "We couldn't reach the server. Your changes are still on screen.",
+      });
     } finally {
       setSaving(false);
     }
@@ -129,13 +158,22 @@ export function RecordForm({
     if (response.status === 200) router.push(`/admin/content/${spec.key}`);
   }
 
+  const title = String(values[spec.titleField] ?? "");
+  const slug = typeof values.slug === "string" ? values.slug : "";
+  const viewHref =
+    spec.key === "services"
+      ? "/services"
+      : spec.key === "testimonials"
+        ? "/"
+        : `/${spec.key}/${slug}`;
+
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-6">
       {conflict && (
         <Banner tone="warn">
-          This was changed somewhere else after you opened it — maybe in another
-          tab. Reload the page to see the current version, then re-apply your
-          edit.{" "}
+          <strong className="block">Someone else changed this</strong>
+          This record was edited elsewhere — maybe in another tab — after you
+          opened it. Reload to see the current version, then re-apply your edit.{" "}
           <button
             type="button"
             onClick={() => router.refresh()}
@@ -149,69 +187,136 @@ export function RecordForm({
       {missing.length > 0 && (
         <Banner tone="warn">
           <strong className="block">
-            Not ready to publish yet — {missing.length} thing
-            {missing.length === 1 ? "" : "s"} to finish:
+            Saved as a draft — {missing.length} thing
+            {missing.length === 1 ? "" : "s"} still needed before publishing:
           </strong>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             {missing.map((item) => (
               <li key={item.field}>{item.message}</li>
             ))}
           </ul>
-          <span className="mt-2 block text-xs">
-            Your other changes were saved. The page is still a draft.
-          </span>
         </Banner>
       )}
 
       {errors._ && <Banner tone="error">{errors._}</Banner>}
-      {saved && !missing.length && (
-        <Banner tone="ok">
-          Saved{published ? " and live on the site." : " as a draft."}
-        </Banner>
-      )}
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        {spec.fields.map((field) => (
-          <FormField
-            key={field.name}
-            field={field}
-            spec={spec}
-            value={values[field.name]}
-            error={errors[field.name]}
-            highlighted={missing.some((item) => item.field === field.name)}
-            onChange={(value) =>
-              field.name === spec.titleField
-                ? setTitle(field.name, String(value))
-                : set(field.name, value)
-            }
-            onSlugEdit={() => {
-              slugTouched.current = true;
-            }}
-          />
-        ))}
-      </div>
+      {spec.sections.map((section) => (
+        <FormSection
+          key={section.title}
+          title={section.title}
+          description={section.description}
+        >
+          {section.fields.map((field) => (
+            <FormField
+              key={field.name}
+              field={field}
+              spec={spec}
+              value={values[field.name]}
+              error={errors[field.name]}
+              highlighted={missing.some((item) => item.field === field.name)}
+              onChange={(value) =>
+                field.name === spec.titleField
+                  ? setTitle(field.name, String(value))
+                  : set(field.name, value)
+              }
+              onSlugEdit={() => {
+                slugTouched.current = true;
+              }}
+            />
+          ))}
+        </FormSection>
+      ))}
 
-      <div className="flex flex-wrap items-center gap-4 border-t border-border/60 pt-5">
-        <label className="flex items-center gap-2.5 text-sm font-medium text-charcoal">
-          <input
-            type="checkbox"
+      <FormSection
+        title="Visibility"
+        description="Nothing is visible on the site until you publish it."
+      >
+        <div className="sm:col-span-2">
+          <Toggle
             checked={published}
-            onChange={(event) => {
-              setPublished(event.target.checked);
+            onChange={(next) => {
+              setPublished(next);
               setSaved(false);
+              setDirty(true);
             }}
-            className="size-4 accent-[var(--color-forest)]"
+            label="Published"
+            description={
+              published
+                ? "Live on the site."
+                : "Hidden — only you can see it."
+            }
           />
-          Published
-          <span className="font-normal text-muted-foreground">
-            {published ? "— visible on the site" : "— hidden from the site"}
-          </span>
-        </label>
 
+          {outstanding.length > 0 && (
+            <div className="mt-4 rounded-xl border border-border bg-[#faf9f3] p-4">
+              <p className="text-sm font-medium text-charcoal/90">
+                Before this can be published
+              </p>
+              <ul className="mt-2.5 space-y-1.5">
+                {checks.map((check) => (
+                  <li
+                    key={check.field}
+                    className="flex items-center gap-2 text-sm"
+                  >
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "grid size-4 shrink-0 place-items-center rounded-full border",
+                        check.done
+                          ? "border-brand-600 bg-brand-600 text-white"
+                          : "border-charcoal/30",
+                      )}
+                    >
+                      {check.done && <Check className="size-3" />}
+                    </span>
+                    <span
+                      className={
+                        check.done
+                          ? "text-muted-foreground line-through"
+                          : "text-charcoal/85"
+                      }
+                    >
+                      {check.label}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </FormSection>
+
+      <StickyActions
+        status={
+          saved ? (
+            <span className="font-medium text-forest">
+              Saved{published ? " and live on the site." : " as a draft."}
+            </span>
+          ) : dirty ? (
+            <span className="text-muted-foreground">Unsaved changes</span>
+          ) : recordId && published && slug ? (
+            <a
+              href={viewHref}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 font-medium text-brand-700 underline underline-offset-2"
+            >
+              <ExternalLink className="size-3.5" />
+              View on the site
+            </a>
+          ) : null
+        }
+      >
+        <Link
+          href={`/admin/content/${spec.key}`}
+          className="rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-medium text-charcoal hover:border-brand-600"
+        >
+          Cancel
+        </Link>
         <button
           type="submit"
           disabled={saving}
-          className={cn(buttonVariants({ size: "lg" }), "ml-auto disabled:opacity-70")}
+          className={cn(buttonVariants({ size: "sm" }), "h-11 px-5 disabled:opacity-70")}
         >
           {saving ? (
             <>
@@ -219,24 +324,10 @@ export function RecordForm({
               Saving…
             </>
           ) : (
-            "Save"
+            `Save ${spec.singular}`
           )}
         </button>
-
-        {recordId && values.slug ? (
-          <a
-            href={`/${spec.key === "services" ? "services" : spec.key}/${
-              spec.key === "services" ? "" : values.slug
-            }`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 underline underline-offset-2"
-          >
-            <ExternalLink className="size-3.5" />
-            View page
-          </a>
-        ) : null}
-      </div>
+      </StickyActions>
 
       {recordId && (
         <details className="rounded-xl border border-terracotta/30 bg-terracotta/5 p-4">
@@ -244,48 +335,20 @@ export function RecordForm({
             Delete this {spec.singular}
           </summary>
           <p className="mt-2 text-sm text-charcoal/80">
-            This removes &ldquo;{String(values[spec.titleField] ?? "")}&rdquo;
-            permanently. If you only want it off the site, switch Published off
-            instead.
+            This removes “{title}” permanently. If you only want it off the
+            site, switch Published off instead.
           </p>
           <button
             type="button"
             onClick={onDelete}
             disabled={saving}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-terracotta px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+            className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-terracotta px-4 text-sm font-semibold text-white disabled:opacity-60"
           >
-            <Trash2 className="size-4" />
             Delete permanently
           </button>
         </details>
       )}
     </form>
-  );
-}
-
-function Banner({
-  tone,
-  children,
-}: {
-  tone: "ok" | "warn" | "error";
-  children: React.ReactNode;
-}) {
-  const tones = {
-    ok: "border-brand-600/40 bg-brand-600/10 text-forest",
-    warn: "border-gold/60 bg-gold/15 text-charcoal",
-    error: "border-terracotta/40 bg-terracotta/10 text-terracotta",
-  } as const;
-
-  return (
-    <div
-      role={tone === "ok" ? "status" : "alert"}
-      className={cn("rounded-xl border px-4 py-3 text-sm", tones[tone])}
-    >
-      {tone === "warn" && (
-        <AlertTriangle aria-hidden className="mb-1.5 inline size-4" />
-      )}{" "}
-      {children}
-    </div>
   );
 }
 
@@ -307,96 +370,93 @@ function FormField({
   onSlugEdit: () => void;
 }) {
   const id = `f-${field.name}`;
+  const text = typeof value === "string" ? value : "";
 
   const shell = (children: React.ReactNode) => (
-    <Field
+    <FieldShell
       label={field.label}
       htmlFor={id}
       hint={field.hint}
-      error={error ?? (highlighted ? "Needed before this can be published." : undefined)}
-      className={field.wide ? "sm:col-span-2" : undefined}
+      wide={field.wide}
+      error={
+        error ?? (highlighted ? "Needed before this can be published." : undefined)
+      }
+      counter={
+        field.max && (field.kind === "text" || field.kind === "textarea" || field.kind === "richtext")
+          ? { value: text.length, max: field.max }
+          : undefined
+      }
     >
       {children}
-    </Field>
+    </FieldShell>
   );
 
   switch (field.kind) {
     case "switch":
       return (
         <div className={field.wide ? "sm:col-span-2" : undefined}>
-          <label className="flex items-center gap-2.5 text-sm font-medium text-charcoal/90">
-            <input
-              id={id}
-              type="checkbox"
-              checked={Boolean(value)}
-              onChange={(event) => onChange(event.target.checked)}
-              className="size-4 accent-[var(--color-forest)]"
-            />
-            {field.label}
-          </label>
+          <Toggle
+            checked={Boolean(value)}
+            onChange={onChange}
+            label={field.label}
+            description={field.hint}
+          />
         </div>
       );
 
     case "select":
       return shell(
-        <select
+        <Select
           id={id}
           value={String(value ?? "")}
           onChange={(event) => onChange(event.target.value)}
-          className={inputClass}
-        >
-          {field.options?.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>,
+          options={field.options ?? []}
+        />,
       );
 
     case "textarea":
     case "richtext":
       return shell(
-        <textarea
+        <TextArea
           id={id}
-          value={String(value ?? "")}
+          rows={field.kind === "richtext" ? 10 : 3}
+          value={text}
+          placeholder={field.placeholder}
           onChange={(event) => onChange(event.target.value)}
-          className={cn(textareaClass, field.kind === "richtext" && "min-h-48")}
-          placeholder={
-            field.kind === "richtext"
-              ? "Leave a blank line between paragraphs."
-              : undefined
-          }
         />,
       );
 
     case "number":
       return shell(
-        <input
+        <TextInput
           id={id}
-          type="number"
-          value={Number(value ?? 0)}
-          onChange={(event) => onChange(Number(event.target.value))}
-          className={inputClass}
+          inputMode="numeric"
+          value={String(value ?? 0)}
+          onChange={(event) =>
+            onChange(Number(event.target.value.replace(/[^\d]/g, "") || 0))
+          }
         />,
       );
 
     case "price":
       return shell(
-        <input
+        <PriceInput
           id={id}
-          type="number"
-          min={0}
-          value={value === null || value === undefined ? "" : Number(value)}
-          onChange={(event) =>
-            onChange(event.target.value === "" ? null : Number(event.target.value))
-          }
-          placeholder="Enquire for price"
-          className={inputClass}
+          value={typeof value === "number" ? value : null}
+          onChange={onChange}
         />,
       );
 
     case "list":
-      return shell(<ListField value={value} onChange={onChange} />);
+      return shell(
+        <Repeater
+          rows={(value as string[] | undefined) ?? []}
+          onChange={onChange}
+          placeholder={field.placeholder}
+          emptyHint={field.emptyHint}
+          addLabel="Add a row"
+        />,
+      );
 
     case "image":
       return shell(
@@ -405,8 +465,8 @@ function FormField({
           value={
             field.name === "images"
               ? ((value as string[] | undefined) ?? [])
-              : value
-                ? [String(value)]
+              : text
+                ? [text]
                 : []
           }
           onChange={(next) =>
@@ -417,106 +477,26 @@ function FormField({
 
     case "slug":
       return shell(
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            /{spec.key === "testimonials" ? "" : spec.key}/
-          </span>
-          <input
-            id={id}
-            value={String(value ?? "")}
-            onChange={(event) => {
-              onSlugEdit();
-              onChange(event.target.value);
-            }}
-            className={inputClass}
-          />
-        </div>,
+        <SlugInput
+          id={id}
+          prefix={spec.slugPrefix ?? "/"}
+          value={text}
+          onChange={(next) => {
+            onSlugEdit();
+            onChange(next);
+          }}
+        />,
       );
 
     default:
       return shell(
         <input
           id={id}
-          value={String(value ?? "")}
+          value={text}
+          placeholder={field.placeholder}
           onChange={(event) => onChange(event.target.value)}
-          className={inputClass}
+          className={controlClass}
         />,
       );
   }
-}
-
-/** Repeatable rows, stored as a string array — not rich text (PLAN.md §3.3). */
-function ListField({
-  value,
-  onChange,
-}: {
-  value: unknown;
-  onChange: (next: string[]) => void;
-}) {
-  const rows = (value as string[] | undefined) ?? [];
-
-  const update = (index: number, next: string) =>
-    onChange(rows.map((row, i) => (i === index ? next : row)));
-
-  return (
-    <div className="flex flex-col gap-2">
-      {rows.map((row, index) => (
-        <div key={index} className="flex items-center gap-2">
-          <input
-            value={row}
-            onChange={(event) => update(index, event.target.value)}
-            className={inputClass}
-            aria-label={`Row ${index + 1}`}
-          />
-          <div className="flex shrink-0 gap-1">
-            <button
-              type="button"
-              onClick={() => {
-                if (index === 0) return;
-                const next = [...rows];
-                [next[index - 1], next[index]] = [next[index]!, next[index - 1]!];
-                onChange(next);
-              }}
-              disabled={index === 0}
-              aria-label={`Move row ${index + 1} up`}
-              className="grid size-9 place-items-center rounded-lg border border-border text-charcoal/70 disabled:opacity-40"
-            >
-              ↑
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                if (index === rows.length - 1) return;
-                const next = [...rows];
-                [next[index], next[index + 1]] = [next[index + 1]!, next[index]!];
-                onChange(next);
-              }}
-              disabled={index === rows.length - 1}
-              aria-label={`Move row ${index + 1} down`}
-              className="grid size-9 place-items-center rounded-lg border border-border text-charcoal/70 disabled:opacity-40"
-            >
-              ↓
-            </button>
-            <button
-              type="button"
-              onClick={() => onChange(rows.filter((_, i) => i !== index))}
-              aria-label={`Remove row ${index + 1}`}
-              className="grid size-9 place-items-center rounded-lg border border-border text-terracotta"
-            >
-              <Trash2 className="size-4" />
-            </button>
-          </div>
-        </div>
-      ))}
-
-      <button
-        type="button"
-        onClick={() => onChange([...rows, ""])}
-        className="inline-flex w-fit items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-charcoal hover:border-brand-600"
-      >
-        <Plus className="size-4 text-brand-600" />
-        Add a row
-      </button>
-    </div>
-  );
 }

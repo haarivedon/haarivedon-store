@@ -6,8 +6,15 @@ import type { SiteContentKey } from "@repo/contract";
 import { adminApi } from "@/lib/api/admin-client";
 import { copyFields, readPath, writePath } from "@/lib/admin/copy-fields";
 import type { FieldSpec } from "@/lib/admin/collections";
-import { Field, inputClass, textareaClass } from "@/components/forms/field";
 import { ImagePicker } from "@/components/admin/image-picker";
+import {
+  Banner,
+  FieldShell,
+  Repeater,
+  StickyActions,
+  TextArea,
+  TextInput,
+} from "@/components/admin/ui";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -58,24 +65,10 @@ export function CopyForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
-      {saved && (
-        <p
-          role="status"
-          className="rounded-xl border border-brand-600/40 bg-brand-600/10 px-4 py-3 text-sm text-forest"
-        >
-          Saved. The site updates within a few minutes.
-        </p>
-      )}
-      {error && (
-        <p
-          role="alert"
-          className="rounded-xl border border-terracotta/40 bg-terracotta/10 px-4 py-3 text-sm text-terracotta"
-        >
-          {error}
-        </p>
-      )}
+      {saved && <Banner tone="ok">Saved. The site updates within a minute.</Banner>}
+      {error && <Banner tone="error">{error}</Banner>}
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-x-5 gap-y-5 sm:grid-cols-2">
         {fields.map((field) => (
           <CopyField
             key={field.name}
@@ -86,20 +79,32 @@ export function CopyForm({
         ))}
       </div>
 
-      <button
-        type="submit"
-        disabled={saving}
-        className={cn(buttonVariants({ size: "lg" }), "self-start disabled:opacity-70")}
+      <StickyActions
+        status={
+          saved ? (
+            <span className="font-medium text-forest">Saved</span>
+          ) : (
+            <span className="text-muted-foreground">
+              Empty fields keep the wording already on the site
+            </span>
+          )
+        }
       >
-        {saving ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Saving…
-          </>
-        ) : (
-          "Save"
-        )}
-      </button>
+        <button
+          type="submit"
+          disabled={saving}
+          className={cn(buttonVariants({ size: "sm" }), "h-11 px-5 disabled:opacity-70")}
+        >
+          {saving ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Saving…
+            </>
+          ) : (
+            "Save"
+          )}
+        </button>
+      </StickyActions>
     </form>
   );
 }
@@ -114,23 +119,23 @@ function CopyField({
   onChange: (value: unknown) => void;
 }) {
   const id = `c-${field.name.replace(/\./g, "-")}`;
-  const rows = (value as string[] | undefined) ?? [];
+  const text = typeof value === "string" ? value : "";
 
   const shell = (children: React.ReactNode) => (
-    <Field
+    <FieldShell
       label={field.label}
       htmlFor={id}
       hint={field.hint}
-      className={field.wide ? "sm:col-span-2" : undefined}
+      wide={field.wide}
     >
       {children}
-    </Field>
+    </FieldShell>
   );
 
   if (field.kind === "image") {
     return shell(
       <ImagePicker
-        value={value ? [String(value)] : []}
+        value={text ? [text] : []}
         onChange={(next) => onChange(next[0] ?? "")}
       />,
     );
@@ -138,54 +143,33 @@ function CopyField({
 
   if (field.kind === "list") {
     return shell(
-      <div className="flex flex-col gap-2">
-        {rows.map((row, index) => (
-          <div key={index} className="flex gap-2">
-            <input
-              value={row}
-              aria-label={`${field.label} row ${index + 1}`}
-              onChange={(event) =>
-                onChange(rows.map((r, i) => (i === index ? event.target.value : r)))
-              }
-              className={inputClass}
-            />
-            <button
-              type="button"
-              onClick={() => onChange(rows.filter((_, i) => i !== index))}
-              className="shrink-0 rounded-lg border border-border px-3 text-sm text-terracotta"
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={() => onChange([...rows, ""])}
-          className="w-fit rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium hover:border-brand-600"
-        >
-          Add a row
-        </button>
-      </div>,
+      <Repeater
+        rows={(value as string[] | undefined) ?? []}
+        onChange={onChange}
+        placeholder={field.placeholder}
+        emptyHint={field.emptyHint}
+      />,
     );
   }
 
   if (field.kind === "textarea" || field.kind === "richtext") {
     return shell(
-      <textarea
+      <TextArea
         id={id}
-        value={String(value ?? "")}
+        rows={field.kind === "richtext" ? 10 : 3}
+        value={text}
+        placeholder={field.placeholder}
         onChange={(event) => onChange(event.target.value)}
-        className={cn(textareaClass, field.kind === "richtext" && "min-h-48")}
       />,
     );
   }
 
   return shell(
-    <input
+    <TextInput
       id={id}
-      value={String(value ?? "")}
+      value={text}
+      placeholder={field.placeholder}
       onChange={(event) => onChange(event.target.value)}
-      className={inputClass}
     />,
   );
 }

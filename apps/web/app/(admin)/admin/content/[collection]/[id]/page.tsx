@@ -28,7 +28,7 @@ export default async function EditRecordPage({
         }
       />
       <Panel className="p-5 sm:p-6">
-        <RecordForm spec={spec} record={record} recordId={id} />
+        <RecordForm collectionKey={spec.key} record={record} recordId={id} />
       </Panel>
     </div>
   );

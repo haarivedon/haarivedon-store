@@ -13,8 +13,8 @@ import {
 /**
  * Admin field descriptors.
  *
- * One config per collection drives both the list columns and the edit form,
- * so adding a field is one entry rather than three files.
+ * One config per collection drives the list columns, the edit form and the
+ * publish checklist, so adding a field is one entry rather than three files.
  */
 export type FieldKind =
   | "text"
@@ -33,10 +33,32 @@ export type FieldSpec = {
   label: string;
   kind: FieldKind;
   hint?: string;
+  placeholder?: string;
   options?: { value: string; label: string }[];
   /** Full width in the two-column form grid. */
   wide?: boolean;
+  /** Soft limit, shown as a counter. */
+  max?: number;
+  /** Empty-state copy for a repeater. */
+  emptyHint?: string;
 };
+
+/** Fields are grouped so one long form reads as a few short ones. */
+export type SectionSpec = {
+  title: string;
+  description?: string;
+  fields: FieldSpec[];
+};
+
+/** Mirrors the server's publish rules so the editor sees them before saving. */
+export type PublishCheck = {
+  field: string;
+  label: string;
+  done: (record: Record<string, unknown>) => boolean;
+};
+
+const filled = (value: unknown) =>
+  typeof value === "string" ? value.trim().length > 0 : Boolean(value);
 
 export type CollectionSpec = {
   key: "courses" | "products" | "services" | "testimonials";
@@ -44,10 +66,18 @@ export type CollectionSpec = {
   singular: string;
   /** Field holding the display name. */
   titleField: string;
-  fields: FieldSpec[];
+  /** URL prefix shown inside the slug control. */
+  slugPrefix?: string;
+  sections: SectionSpec[];
+  /** What must be filled in before publishing. */
+  publishChecks: PublishCheck[];
   /** Blank record used by the "new" form. */
   blank: Record<string, unknown>;
 };
+
+/** Flattens the sections — used where the form needs every field. */
+export const allFields = (spec: CollectionSpec): FieldSpec[] =>
+  spec.sections.flatMap((section) => section.fields);
 
 const option = <T extends string>(
   values: readonly T[],
@@ -60,59 +90,136 @@ export const collections: Record<CollectionSpec["key"], CollectionSpec> = {
     label: "Courses",
     singular: "course",
     titleField: "title",
-    fields: [
-      { name: "title", label: "Title", kind: "text" },
-      { name: "slug", label: "Web address", kind: "slug", hint: "/courses/…" },
+    slugPrefix: "/courses/",
+    sections: [
       {
-        name: "category",
-        label: "Category",
-        kind: "select",
-        options: option(courseCategories, courseCategoryLabels),
+        title: "Basics",
+        description: "What the course is called, and where it sits.",
+        fields: [
+          { name: "title", label: "Title", kind: "text", max: 140 },
+          { name: "slug", label: "Web address", kind: "slug" },
+          {
+            name: "category",
+            label: "Subject",
+            kind: "select",
+            options: option(courseCategories, courseCategoryLabels),
+          },
+          {
+            name: "level",
+            label: "Level",
+            kind: "select",
+            hint: "Foundation needs no background; Advanced builds on one",
+            options: option(courseLevels, courseLevelLabels),
+          },
+        ],
       },
       {
-        name: "level",
-        label: "Level",
-        kind: "select",
-        options: option(courseLevels, courseLevelLabels),
+        title: "Practical details",
+        description: "What someone needs to know before enquiring.",
+        fields: [
+          {
+            name: "format",
+            label: "Format",
+            kind: "select",
+            options: option(courseFormats, courseFormatLabels),
+          },
+          {
+            name: "duration",
+            label: "Duration",
+            kind: "text",
+            placeholder: "6 weeks",
+            hint: "However you'd describe it — weeks, sessions, hours",
+          },
+          { name: "language", label: "Language", kind: "text" },
+          {
+            name: "price",
+            label: "Price",
+            kind: "price",
+            hint: "Leave empty to show “Enquire for price”",
+          },
+          {
+            name: "certificate",
+            label: "Certificate on completion",
+            kind: "switch",
+            wide: true,
+          },
+        ],
       },
       {
-        name: "format",
-        label: "Format",
-        kind: "select",
-        options: option(courseFormats, courseFormatLabels),
+        title: "Description",
+        description: "The words someone reads on the course page.",
+        fields: [
+          {
+            name: "summary",
+            label: "Short summary",
+            kind: "textarea",
+            max: 400,
+            placeholder: "One or two lines, shown on the course card.",
+            hint: "Shown on the card and in search results",
+            wide: true,
+          },
+          {
+            name: "description",
+            label: "Full description",
+            kind: "richtext",
+            max: 8000,
+            placeholder: "Leave a blank line between paragraphs.",
+            wide: true,
+          },
+          {
+            name: "outline",
+            label: "What this course covers",
+            kind: "list",
+            placeholder: "e.g. Reading a birth chart",
+            emptyHint:
+              "No topics yet. Add one per row — they appear as a list on the course page.",
+            wide: true,
+          },
+        ],
       },
-      { name: "duration", label: "Duration", kind: "text", hint: "e.g. 6 weeks" },
-      { name: "language", label: "Language", kind: "text" },
       {
-        name: "price",
-        label: "Price (₹)",
-        kind: "price",
-        hint: "Leave empty for “Enquire for price”",
+        title: "Image",
+        description:
+          "Shown on the card and at the top of the page. It needs a description before the course can go live.",
+        fields: [
+          { name: "image", label: "Course image", kind: "image", wide: true },
+        ],
       },
       {
-        name: "summary",
-        label: "Short summary",
-        kind: "textarea",
-        hint: "One or two lines, shown on the card",
-        wide: true,
+        title: "Placement",
+        fields: [
+          {
+            name: "featured",
+            label: "Show on the home page",
+            kind: "switch",
+            wide: true,
+          },
+          {
+            name: "order",
+            label: "Display order",
+            kind: "number",
+            hint: "Lower numbers come first",
+          },
+        ],
+      },
+    ],
+    publishChecks: [
+      { field: "summary", label: "A short summary", done: (r) => filled(r.summary) },
+      {
+        field: "description",
+        label: "A full description",
+        done: (r) => filled(r.description),
       },
       {
-        name: "description",
-        label: "Description",
-        kind: "richtext",
-        wide: true,
+        field: "duration",
+        label: "How long it runs",
+        done: (r) => filled(r.duration),
       },
       {
-        name: "outline",
-        label: "What this course covers",
-        kind: "list",
-        hint: "One topic per row",
-        wide: true,
+        field: "image",
+        label: "An image, with a description",
+        done: (r) => filled(r.image),
       },
-      { name: "image", label: "Image", kind: "image", wide: true },
-      { name: "certificate", label: "Certificate on completion", kind: "switch" },
-      { name: "featured", label: "Show on the home page", kind: "switch" },
-      { name: "order", label: "Display order", kind: "number" },
     ],
     blank: {
       title: "",
@@ -140,38 +247,103 @@ export const collections: Record<CollectionSpec["key"], CollectionSpec> = {
     label: "Products",
     singular: "product",
     titleField: "name",
-    fields: [
-      { name: "name", label: "Name", kind: "text" },
-      { name: "slug", label: "Web address", kind: "slug", hint: "/products/…" },
+    slugPrefix: "/products/",
+    sections: [
       {
-        name: "family",
-        label: "Family",
-        kind: "select",
-        options: option(productFamilies, productFamilyLabels),
+        title: "Basics",
+        fields: [
+          { name: "name", label: "Name", kind: "text", max: 140 },
+          { name: "slug", label: "Web address", kind: "slug" },
+          {
+            name: "family",
+            label: "Family",
+            kind: "select",
+            options: option(productFamilies, productFamilyLabels),
+          },
+          {
+            name: "category",
+            label: "Sub-category",
+            kind: "text",
+            hint: `Gemstones: ${productCategories.gemstone.join(", ")}`,
+          },
+        ],
       },
       {
-        name: "category",
-        label: "Sub-category",
-        kind: "text",
-        hint: `e.g. ${productCategories.gemstone.join(", ")}`,
+        title: "Price and stock",
+        fields: [
+          {
+            name: "price",
+            label: "Price",
+            kind: "price",
+            hint: "Leave empty to show “Enquire for price”",
+          },
+          {
+            name: "inStock",
+            label: "In stock",
+            kind: "switch",
+            hint: "Off shows “Enquire” instead of a buy prompt",
+          },
+        ],
       },
       {
-        name: "price",
-        label: "Price (₹)",
-        kind: "price",
-        hint: "Leave empty for “Enquire for price”",
+        title: "Description",
+        fields: [
+          {
+            name: "summary",
+            label: "Short summary",
+            kind: "textarea",
+            max: 400,
+            placeholder: "One or two lines, shown on the card.",
+            wide: true,
+          },
+          {
+            name: "description",
+            label: "Full description",
+            kind: "richtext",
+            max: 8000,
+            placeholder: "Leave a blank line between paragraphs.",
+            hint: "Say what it is and what it is traditionally used for — as tradition, not as a promised outcome",
+            wide: true,
+          },
+        ],
       },
-      { name: "inStock", label: "In stock", kind: "switch" },
       {
-        name: "summary",
-        label: "Short summary",
-        kind: "textarea",
-        wide: true,
+        title: "Images",
+        description: "The first image is the one shown on the listing.",
+        fields: [
+          { name: "images", label: "Product images", kind: "image", wide: true },
+        ],
       },
-      { name: "description", label: "Description", kind: "richtext", wide: true },
-      { name: "images", label: "Images", kind: "image", wide: true },
-      { name: "featured", label: "Show on the home page", kind: "switch" },
-      { name: "order", label: "Display order", kind: "number" },
+      {
+        title: "Placement",
+        fields: [
+          {
+            name: "featured",
+            label: "Show on the home page",
+            kind: "switch",
+            wide: true,
+          },
+          {
+            name: "order",
+            label: "Display order",
+            kind: "number",
+            hint: "Lower numbers come first",
+          },
+        ],
+      },
+    ],
+    publishChecks: [
+      { field: "summary", label: "A short summary", done: (r) => filled(r.summary) },
+      {
+        field: "description",
+        label: "A full description",
+        done: (r) => filled(r.description),
+      },
+      {
+        field: "images",
+        label: "At least one image, with a description",
+        done: (r) => Array.isArray(r.images) && r.images.length > 0,
+      },
     ],
     blank: {
       name: "",
@@ -195,26 +367,71 @@ export const collections: Record<CollectionSpec["key"], CollectionSpec> = {
     label: "Services",
     singular: "service",
     titleField: "title",
-    fields: [
-      { name: "title", label: "Title", kind: "text" },
-      { name: "slug", label: "Anchor", kind: "slug", hint: "/services#…" },
+    slugPrefix: "/services#",
+    sections: [
       {
-        name: "icon",
-        label: "Icon",
-        kind: "text",
-        hint: "A lucide icon name, e.g. Sparkles",
+        title: "Basics",
+        fields: [
+          { name: "title", label: "Title", kind: "text", max: 140 },
+          { name: "slug", label: "Anchor", kind: "slug" },
+          {
+            name: "icon",
+            label: "Icon",
+            kind: "text",
+            hint: "A lucide icon name, e.g. Sparkles",
+          },
+          {
+            name: "startingPrice",
+            label: "Starting price",
+            kind: "price",
+            hint: "Leave empty to show “Enquire for price”",
+          },
+        ],
       },
       {
-        name: "startingPrice",
-        label: "Starting price (₹)",
-        kind: "price",
-        hint: "Leave empty for “Enquire for price”",
+        title: "Description",
+        fields: [
+          {
+            name: "summary",
+            label: "Short summary",
+            kind: "textarea",
+            max: 400,
+            placeholder: "One or two lines, shown on the card.",
+            wide: true,
+          },
+          {
+            name: "description",
+            label: "Full description",
+            kind: "richtext",
+            max: 8000,
+            wide: true,
+          },
+          {
+            name: "highlights",
+            label: "What it includes",
+            kind: "list",
+            placeholder: "e.g. A written summary afterwards",
+            emptyHint:
+              "No points yet. Each row becomes a bullet under “What it includes”.",
+            wide: true,
+          },
+        ],
       },
-      { name: "summary", label: "Short summary", kind: "textarea", wide: true },
-      { name: "description", label: "Description", kind: "richtext", wide: true },
-      { name: "highlights", label: "What's included", kind: "list", wide: true },
-      { name: "image", label: "Image", kind: "image", wide: true },
-      { name: "order", label: "Display order", kind: "number" },
+      {
+        title: "Image and placement",
+        fields: [
+          { name: "image", label: "Image", kind: "image", wide: true },
+          {
+            name: "order",
+            label: "Display order",
+            kind: "number",
+            hint: "Lower numbers come first",
+          },
+        ],
+      },
+    ],
+    publishChecks: [
+      { field: "summary", label: "A short summary", done: (r) => filled(r.summary) },
     ],
     blank: {
       title: "",
@@ -235,16 +452,39 @@ export const collections: Record<CollectionSpec["key"], CollectionSpec> = {
     label: "Testimonials",
     singular: "testimonial",
     titleField: "name",
-    fields: [
-      { name: "name", label: "Name", kind: "text" },
-      { name: "location", label: "Location", kind: "text" },
+    sections: [
       {
-        name: "rating",
-        label: "Rating (1–5)",
-        kind: "number",
+        title: "Who said it",
+        fields: [
+          { name: "name", label: "Name", kind: "text", max: 100 },
+          { name: "location", label: "Location", kind: "text" },
+          { name: "rating", label: "Rating out of 5", kind: "number" },
+          {
+            name: "order",
+            label: "Display order",
+            kind: "number",
+            hint: "Lower numbers come first",
+          },
+        ],
       },
-      { name: "quote", label: "What they said", kind: "textarea", wide: true },
-      { name: "order", label: "Display order", kind: "number" },
+      {
+        title: "The testimonial",
+        description:
+          "Publish only with their permission, and keep their words as they wrote them.",
+        fields: [
+          {
+            name: "quote",
+            label: "What they said",
+            kind: "textarea",
+            max: 1000,
+            wide: true,
+          },
+        ],
+      },
+    ],
+    publishChecks: [
+      { field: "quote", label: "Their words", done: (r) => filled(r.quote) },
+      { field: "name", label: "Their name", done: (r) => filled(r.name) },
     ],
     blank: {
       name: "",
