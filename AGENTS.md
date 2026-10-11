@@ -13,6 +13,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 # Haarivedon — Project Architecture & Conventions
 
 > Read this before making changes. These rules are binding for all contributors and agents.
+>
+> Then read **`docs/BUILD.md`** — local setup (MongoDB needs a replica set),
+> what is built so far, the next task per phase, and how to verify one.
+> **`docs/PLAN.md`** holds the scope and the decisions behind it: §3 the three
+> change requests, §3.4 and §4 what is deliberately not built, §13 the
+> edge-case decisions.
 
 ## What this is
 
@@ -125,7 +131,7 @@ pnpm dev:api
 pnpm build          # turbo build: prisma generate -> tsup (api) -> next build (web)
 pnpm typecheck      # every workspace
 pnpm lint
-pnpm db:generate | db:push | db:studio
+pnpm db:generate | db:push | db:seed | db:studio
 ```
 
 ## Known gaps
@@ -133,7 +139,7 @@ pnpm db:generate | db:push | db:studio
 - `@ts-rest/open-api` still requires zod v3, so OpenAPI generation is not wired
   up. Generate it from the zod v4 schemas (`z.toJSONSchema`) if it is needed.
 - `apps/web/components/ui/carousel.tsx` (shadcn-generated) trips
-  `react-hooks/set-state-in-effect`; `pnpm lint` fails on it. Pre-existing.
+  `react-hooks/set-state-in-effect` in some lint configurations. Pre-existing.
 - No realtime layer here (not needed for this site). The
   `../freelance-starter` template carries a ready Socket.IO setup if a future
   requirement needs one.

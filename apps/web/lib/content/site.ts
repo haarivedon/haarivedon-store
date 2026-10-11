@@ -1,3 +1,5 @@
+import { features } from "@/lib/flags";
+
 /**
  * Central content source for the marketing site.
  * Copy lives here so pages stay declarative and content is easy to hand back
@@ -20,7 +22,8 @@ export const navLinks = [
   { label: "Courses", href: "/courses" },
   { label: "Products", href: "/products" },
   { label: "Predictions", href: "/predictions" },
-  { label: "Blog", href: "/blog" },
+  // The blog is deferred, so its entry is filtered out rather than removed.
+  ...(features.blog ? [{ label: "Blog", href: "/blog" }] : []),
 ] as const;
 
 export const marqueeWords = [

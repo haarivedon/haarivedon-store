@@ -40,7 +40,17 @@ const registry = {
 
 export type IconName = keyof typeof registry;
 
-export function Icon({ name, ...props }: { name: IconName } & LucideProps) {
-  const Cmp = registry[name];
+const isKnown = (name: string): name is IconName => name in registry;
+
+/**
+ * Icon names also arrive from the database (a service picks one in the
+ * admin), so an unknown name falls back to Sparkles instead of crashing the
+ * page that renders it.
+ */
+export function Icon({
+  name,
+  ...props
+}: { name: IconName | string } & LucideProps) {
+  const Cmp = isKnown(name) ? registry[name] : Sparkles;
   return <Cmp {...props} />;
 }

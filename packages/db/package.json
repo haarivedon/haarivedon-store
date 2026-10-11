@@ -16,7 +16,8 @@
     "db:pull": "dotenv -e ../../.env -- prisma db pull",
     "db:studio": "dotenv -e ../../.env -- prisma studio",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf node_modules .turbo"
+    "clean": "rm -rf node_modules .turbo",
+    "db:seed": "dotenv -e ../../.env -- tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3"
@@ -26,6 +27,7 @@
     "@types/node": "^26.6.5",
     "dotenv-cli": "^11.0.0",
     "prisma": "6.19.3",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   }
 }

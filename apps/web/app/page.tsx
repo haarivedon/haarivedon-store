@@ -1,5 +1,3 @@
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
 import { Hero } from "@/components/sections/hero";
 import { TrustStrip } from "@/components/sections/trust-strip";
 import { About } from "@/components/sections/about";
@@ -12,28 +10,25 @@ import { EnergyTools } from "@/components/sections/energy-tools";
 import { WhyUs } from "@/components/sections/why-us";
 import { Testimonials } from "@/components/sections/testimonials";
 import { Blog } from "@/components/sections/blog";
+import { features } from "@/lib/flags";
 
 export default function Home() {
   return (
     <>
-      <SiteHeader />
-      <main className="flex-1">
-        <Hero />
-        <TrustStrip />
-        <About />
-        <Services />
-        <Courses />
-        <PredictionBand />
-        <div className="bg-ivory py-6 sm:py-10">
-          <BookingBand />
-        </div>
-        <Products />
-        <EnergyTools />
-        <WhyUs />
-        <Testimonials />
-        <Blog />
-      </main>
-      <SiteFooter />
+      <Hero />
+      <TrustStrip />
+      <About />
+      <Services />
+      <Courses />
+      <PredictionBand />
+      <div className="bg-ivory py-6 sm:py-10">
+        <BookingBand />
+      </div>
+      <Products />
+      <EnergyTools />
+      <WhyUs />
+      <Testimonials />
+      {features.blog && <Blog />}
     </>
   );
 }
