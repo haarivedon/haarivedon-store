@@ -7,7 +7,7 @@ import { Icon } from "@/components/icon";
 import { ServiceJsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { formatFromPrice } from "@/lib/format";
+import { Price } from "@/components/price";
 import { getServices } from "@/lib/api/content";
 
 export const metadata: Metadata = {
@@ -92,8 +92,13 @@ export default async function ServicesPage() {
                   )}
 
                   <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-5">
-                    <p className="font-display text-base font-semibold text-forest">
-                      {formatFromPrice(service.startingPrice, service.currency)}
+                    <p>
+                      <Price
+                        value={service.startingPrice}
+                        currency={service.currency}
+                        from
+                        asButton={false}
+                      />
                     </p>
                     <Link
                       href="/book"

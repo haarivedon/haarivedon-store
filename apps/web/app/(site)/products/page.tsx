@@ -4,7 +4,7 @@ import Link from "next/link";
 import { productFamilies, productFamilyLabels } from "@repo/contract";
 import { Section } from "@/components/section";
 import { PageIntro } from "@/components/page-intro";
-import { formatPrice } from "@/lib/format";
+import { Price } from "@/components/price";
 import { getProducts } from "@/lib/api/content";
 
 export const metadata: Metadata = {
@@ -142,8 +142,11 @@ export default async function ProductsPage() {
                           {product.summary}
                         </p>
                       )}
-                      <p className="mt-auto pt-3 text-sm font-semibold text-forest">
-                        {formatPrice(product.price, product.currency)}
+                      <p className="mt-auto pt-3">
+                        <Price
+                          value={product.price}
+                          currency={product.currency}
+                        />
                       </p>
                     </div>
                   </Link>

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Clock, GraduationCap } from "lucide-react";
 import { courseFormatLabels, courseLevelLabels } from "@repo/contract";
 import { Section, SectionHeader } from "@/components/section";
-import { formatPrice } from "@/lib/format";
+import { Price } from "@/components/price";
 import { getCourses } from "@/lib/api/content";
 
 /**
@@ -83,8 +83,8 @@ export async function Courses() {
                 )}
               </dl>
 
-              <p className="mt-auto pt-4 text-sm font-semibold text-forest">
-                {formatPrice(course.price, course.currency)}
+              <p className="mt-auto pt-4">
+                <Price value={course.price} currency={course.currency} />
               </p>
             </div>
           </Link>
