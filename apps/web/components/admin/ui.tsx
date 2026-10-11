@@ -42,36 +42,30 @@ export function FormSection({
 }
 
 /**
- * Two kinds of "required" exist on these forms and they were being shown in
- * two different visual languages — a red asterisk for what the save needs,
- * and a separate checklist for what publishing needs. Both are now the same
- * thing: a worded badge next to the label.
+ * Field requirement.
+ *
+ * Two rules sit behind this — the schema the save validates against, and the
+ * checks publishing runs — but they are shown as one word, because to the
+ * person filling the form the distinction is noise: everything marked here
+ * has to be filled in before the page is of any use.
  */
 export type Requirement = "required" | "publish";
 
-export function RequirementBadge({ kind }: { kind: Requirement }) {
+export function RequirementBadge() {
   return (
-    <span
-      className={cn(
-        "shrink-0 rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide",
-        kind === "required"
-          ? "bg-terracotta/12 text-terracotta"
-          : "bg-gold/30 text-[#6b5a12]",
-      )}
-    >
-      {kind === "required" ? "Required" : "Needed to publish"}
+    <span className="shrink-0 rounded-full bg-terracotta/12 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-terracotta">
+      Required
     </span>
   );
 }
 
-/** Explains the two badges once, at the top of a form. */
+/** One line of context, above the first section. */
 export function RequirementLegend() {
   return (
-    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-      <RequirementBadge kind="required" />
-      <span>must be filled in before it will save ·</span>
-      <RequirementBadge kind="publish" />
-      <span>can wait, but the page cannot go live without it.</span>
+    <p className="text-xs text-muted-foreground">
+      <span className="font-semibold text-terracotta">Required</span> fields
+      have to be filled in before this can go live. You can save a draft
+      without them and come back.
     </p>
   );
 }
@@ -105,7 +99,7 @@ export function FieldShell({
           >
             {label}
           </label>
-          {requirement && <RequirementBadge kind={requirement} />}
+          {requirement && <RequirementBadge />}
         </span>
         {counter && (
           <span
