@@ -288,3 +288,27 @@ model Media {
 
   @@map("media")
 }
+
+/// Birth-place lookup.
+///
+/// Searched server-side rather than shipped to the browser: the bundled list
+/// that used to back the picker had to stay small enough to download with the
+/// page, which capped it at a couple of hundred cities. Imported by
+/// `pnpm db:seed:places` so the dataset never enters the repository.
+model Place {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  /// Lower-cased name, for prefix matching without a case-insensitive scan.
+  search     String
+  /// State or province.
+  region     String   @default("")
+  country    String   @default("IN")
+  lat        Float
+  lng        Float
+  timezone   String   @default("Asia/Kolkata")
+  /// Bigger places sort first, so "Kanpur" beats "Kanpur Dehat".
+  population Int      @default(0)
+
+  @@index([search, population])
+  @@map("places")
+}

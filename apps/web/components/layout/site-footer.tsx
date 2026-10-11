@@ -112,6 +112,18 @@ export async function SiteFooter() {
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-ivory/10 pt-6 text-xs text-ivory/50 sm:flex-row">
           <p>© 2026 Haarivedon. All rights reserved.</p>
           <div className="flex gap-5">
+            <span className="text-ivory/45">
+              Place data ©{" "}
+              <a
+                href="https://www.geonames.org"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="hover:text-gold"
+              >
+                GeoNames
+              </a>{" "}
+              (CC BY 4.0)
+            </span>
             <Link href="/privacy" className="hover:text-gold">
               Privacy Policy
             </Link>

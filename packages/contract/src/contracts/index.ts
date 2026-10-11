@@ -6,6 +6,7 @@ import { coursesContract } from "./courses";
 import { enquiriesContract } from "./enquiries";
 import { healthContract } from "./health";
 import { kundaliContract } from "./kundali";
+import { placesContract } from "./places";
 import { predictionsContract } from "./predictions";
 import { productsContract } from "./products";
 import { servicesContract } from "./services";
@@ -24,6 +25,7 @@ export const contract = c.router(
     health: healthContract,
     bookings: bookingsContract,
     predictions: predictionsContract,
+    places: placesContract,
     services: servicesContract,
     products: productsContract,
     kundali: kundaliContract,
@@ -50,6 +52,7 @@ export {
   enquiriesContract,
   healthContract,
   kundaliContract,
+  placesContract,
   predictionsContract,
   productsContract,
   servicesContract,

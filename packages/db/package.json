@@ -18,7 +18,8 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf node_modules .turbo",
     "db:seed": "dotenv -e ../../.env -- tsx prisma/seed.ts",
-    "db:seed:admin": "dotenv -e ../../.env -- tsx prisma/seed-admin.ts"
+    "db:seed:admin": "dotenv -e ../../.env -- tsx prisma/seed-admin.ts",
+    "db:seed:places": "dotenv -e ../../.env -- tsx prisma/seed-places.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3"

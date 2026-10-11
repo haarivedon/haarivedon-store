@@ -31,8 +31,26 @@ cp .env.example .env            # then set:
 cp apps/web/.env.example apps/web/.env.local
 
 pnpm db:push && pnpm db:seed
+pnpm db:seed:places             # birth-place gazetteer, see below
 pnpm dev                        # web :3000, api :4000
 ```
+
+### Birth places
+
+`pnpm db:seed:places` downloads the GeoNames gazetteer and imports it (India
+by default, `COUNTRIES=IN,NP,LK` for more). ~7,000 Indian towns — every
+administrative seat plus anywhere with a recorded population.
+
+The dataset is never committed: it is tens of megabytes, changes monthly, and
+carries a CC BY 4.0 attribution requirement, which the site footer satisfies.
+Without running it the API falls back to ~150 bundled cities, so a fresh
+checkout still works.
+
+Two things that are easy to get wrong here, both learned the hard way:
+filtering on population drops real district towns (GeoNames records 0 for
+many Indian entries), and searching the display name misses anything with
+diacritics — "Hoshiārpur" never matches "hoshiarpur". The importer keys on
+the ASCII name, folded.
 
 `pnpm db:seed` is idempotent and safe to re-run: it matches on `slug` and
 updates structural fields only, so client edits survive (PLAN.md §13).
