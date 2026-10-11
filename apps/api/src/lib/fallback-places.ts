@@ -1,18 +1,19 @@
 /**
- * Bundled birth-place lookup.
+ * Fallback birth places.
  *
- * Kundali maths needs coordinates, not a place name, and a silent mis-geocode
- * produces a wrong chart — worse than asking. So: an offline list of Indian
- * cities (covering the overwhelming majority of this practice's bookings)
- * plus a manual latitude/longitude override in the form for anywhere else.
- * No geocoding API, no per-call cost, no network dependency (PLAN.md §3.2).
- *
- * All of India is a single timezone, so `Asia/Kolkata` is the default and
- * only the override needs a timezone field.
+ * Used only when the `places` collection is empty — a fresh checkout that
+ * has not run `pnpm db:seed:places` yet. The real list is imported into the
+ * database, where it is not limited by what a browser can download.
  */
-export const INDIA_TZ = "Asia/Kolkata";
+type FallbackPlace = {
+  name: string;
+  region: string;
+  search: string;
+  lat: number;
+  lng: number;
+};
 
-// "Name|State|lat|lng" — compact on purpose; parsed once at module load.
+// "Name|State|lat|lng"
 const RAW = `
 Mumbai|Maharashtra|19.0760|72.8777
 Delhi|Delhi|28.6139|77.2090
@@ -169,45 +170,18 @@ Sambalpur|Odisha|21.4669|83.9812
 Korba|Chhattisgarh|22.3595|82.7501
 `;
 
-export type City = {
-  name: string;
-  state: string;
-  lat: number;
-  lng: number;
-  /** "Mumbai, Maharashtra" — what gets stored as the birth place. */
-  label: string;
-};
-
-export const cities: City[] = RAW.trim()
+export const fallbackPlaces: FallbackPlace[] = RAW.trim()
   .split("\n")
   .map((line) => {
-    const [name, state, lat, lng] = line.split("|");
+    const [name, region, lat, lng] = line.split("|");
     return {
       name: name!,
-      state: state!,
+      region: region!,
+      search: name!
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase(),
       lat: Number(lat),
       lng: Number(lng),
-      label: `${name}, ${state}`,
     };
-  })
-  .sort((a, b) => a.name.localeCompare(b.name));
-
-/** Case-insensitive prefix-then-substring match, best matches first. */
-export function searchCities(query: string, limit = 8): City[] {
-  const q = query.trim().toLowerCase();
-  if (q.length < 2) return [];
-
-  const starts: City[] = [];
-  const contains: City[] = [];
-
-  for (const city of cities) {
-    const name = city.name.toLowerCase();
-    if (name.startsWith(q)) starts.push(city);
-    else if (name.includes(q) || city.state.toLowerCase().includes(q)) {
-      contains.push(city);
-    }
-    if (starts.length >= limit) break;
-  }
-
-  return [...starts, ...contains].slice(0, limit);
-}
+  });
