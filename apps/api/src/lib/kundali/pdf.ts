@@ -19,6 +19,15 @@ const IVORY = "#FFFDF4";
 type Doc = typeof PDFDocument.prototype;
 
 /** House numbers at each cell of a 4×4 South Indian square chart. */
+/**
+ * pdfkit's built-in fonts are WinAnsi-encoded, so anything outside Latin-1
+ * draws as a replacement box. Stick to ASCII plus the few punctuation marks
+ * WinAnsi does carry (· — –). Learned the hard way: "ᴿ" and "→" both came
+ * out as garbage in the first render.
+ */
+const RETROGRADE = "(R)";
+const RANGE = " – ";
+
 const SOUTH_CELLS: (number | null)[][] = [
   [12, 1, 2, 3],
   [11, null, null, 4],
@@ -55,6 +64,9 @@ export function renderKundaliPdf(
 }
 
 function heading(doc: Doc, text: string, sub?: string) {
+  // Writing table columns leaves the cursor at the last column; without this
+  // the next section renders in a narrow strip on the right.
+  doc.x = doc.page.margins.left;
   doc.fillColor(FOREST).fontSize(18).text(text);
   if (sub) {
     doc.moveDown(0.2).fillColor(MUTED).fontSize(9).text(sub);
@@ -150,38 +162,45 @@ function northChart(
     .lineTo(x + m, y)
     .stroke();
 
-  // House label anchors, in house order 1..12.
-  const q = size / 4;
+  // Anchor per house, in house order 1..12. The inner diamond holds 1, 4, 7
+  // and 10 at the midpoints; each corner square is split by a diagonal into
+  // the two houses either side of it.
   const anchors: [number, number][] = [
-    [m, q * 0.6],
-    [q * 0.6, q * 0.35],
-    [q * 0.35, q * 0.6],
-    [q, m],
-    [q * 0.35, size - q * 0.6],
-    [q * 0.6, size - q * 0.35],
-    [m, size - q * 0.6],
-    [size - q * 0.6, size - q * 0.35],
-    [size - q * 0.35, size - q * 0.6],
-    [size - q, m],
-    [size - q * 0.35, q * 0.6],
-    [size - q * 0.6, q * 0.35],
+    [size / 2, size / 4], // 1  — top of the diamond
+    [size / 4, size / 8], // 2  — top-left corner, upper half
+    [size / 8, size / 4], // 3  — top-left corner, lower half
+    [size / 4, size / 2], // 4  — left of the diamond
+    [size / 8, (size * 3) / 4], // 5  — bottom-left, upper half
+    [size / 4, (size * 7) / 8], // 6  — bottom-left, lower half
+    [size / 2, (size * 3) / 4], // 7  — bottom of the diamond
+    [(size * 3) / 4, (size * 7) / 8], // 8  — bottom-right, lower half
+    [(size * 7) / 8, (size * 3) / 4], // 9  — bottom-right, upper half
+    [(size * 3) / 4, size / 2], // 10 — right of the diamond
+    [(size * 7) / 8, size / 4], // 11 — top-right, lower half
+    [(size * 3) / 4, size / 8], // 12 — top-right, upper half
   ];
 
   anchors.forEach(([ax, ay], index) => {
     const house = index + 1;
     const occupants = planets
       .filter((planet) => planet.house === house && planet.body !== "Ascendant")
-      .map((planet) => abbreviate(planet.body) + (planet.retrograde ? "ᴿ" : ""));
+      .map(
+        (planet) =>
+          abbreviate(planet.body) + (planet.retrograde ? RETROGRADE : ""),
+      );
 
     doc
       .fillColor(MUTED)
       .fontSize(6)
-      .text(String(house), x + ax - 14, y + ay - 12, { width: 28, align: "center" });
+      .text(String(house), x + ax - 14, y + ay - 11, {
+        width: 28,
+        align: "center",
+      });
     doc
       .fillColor(CHARCOAL)
-      .fontSize(7)
-      .text(occupants.join(" "), x + ax - 28, y + ay - 3, {
-        width: 56,
+      .fontSize(6.5)
+      .text(occupants.join(" "), x + ax - 30, y + ay - 2, {
+        width: 60,
         align: "center",
       });
   });
@@ -207,7 +226,7 @@ function southChart(
 
       const occupants = planets
         .filter((p) => p.house === house && p.body !== "Ascendant")
-        .map((p) => abbreviate(p.body) + (p.retrograde ? "ᴿ" : ""));
+        .map((p) => abbreviate(p.body) + (p.retrograde ? RETROGRADE : ""));
 
       doc
         .fillColor(MUTED)
@@ -250,7 +269,7 @@ function charts(doc: Doc, chart: ChartData) {
     .fillColor(MUTED)
     .fontSize(7.5)
     .text(
-      "Su Sun · Mo Moon · Ma Mars · Me Mercury · Ju Jupiter · Ve Venus · Sa Saturn · Ra Rahu · Ke Ketu · ᴿ retrograde",
+      "Su Sun · Mo Moon · Ma Mars · Me Mercury · Ju Jupiter · Ve Venus · Sa Saturn · Ra Rahu · Ke Ketu · (R) retrograde",
       48,
       legendY,
       { width: 499 },
@@ -324,11 +343,15 @@ function dashas(doc: Doc, chart: ChartData) {
   for (const period of chart.mahadashas) {
     const y = doc.y;
     doc.fillColor(CHARCOAL).fontSize(10).text(period.lord, 48, y);
-    doc.fillColor(MUTED).fontSize(9).text(`${period.start} → ${period.end}`, 170, y);
+    doc
+      .fillColor(MUTED)
+      .fontSize(9)
+      .text(`${period.start}${RANGE}${period.end}`, 170, y);
     doc.y = y + 18;
   }
 
   doc.moveDown(2);
+  doc.x = doc.page.margins.left;
   doc
     .fillColor(MUTED)
     .fontSize(9)
