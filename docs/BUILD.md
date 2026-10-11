@@ -56,83 +56,78 @@ appear in a public response.
 
 ## State
 
-| Phase | Scope                           | Status                                |
-| ----- | ------------------------------- | ------------------------------------- |
-| 0     | Setup, flags, sign-offs         | code done; client sign-offs open      |
-| 1     | About, Services, Products       | **done**                              |
-| 2     | Book, Predictions               | next — blocked on PLAN.md §7 item 4   |
-| 3     | Courses (CR-1)                  | not started                           |
-| 4     | Kundali PDF (CR-2)              | not started — blocked on §7 items 6–7 |
-| 5     | Admin platform (CR-3)           | not started — blocked on §7 item 1    |
-| 6     | SEO, performance, accessibility | not started                           |
-| 7     | Deploy and handover             | not started                           |
+| Phase | Scope                           | Status                                 |
+| ----- | ------------------------------- | -------------------------------------- |
+| 0     | Setup, flags, sign-offs         | code done; client sign-offs open       |
+| 1     | About, Services, Products       | **done**                               |
+| 2     | Book, Predictions               | **done**                               |
+| 3     | Courses (CR-1)                  | **done**                               |
+| 4     | Kundali PDF (CR-2)              | **done** — sample chart provider       |
+| 5     | Admin platform (CR-3)           | **done**                               |
+| 6     | SEO, performance, accessibility | **done** — Lighthouse pass outstanding |
+| 7     | Deploy and handover             | not started                            |
 
-Phase 1 landed: `Product` gained `family` / `attributes` / `images` /
-`published`, `Service` gained `summary` / `highlights` / `published`, public
-read endpoints for both, the structure-only seed (61 products, 4 services),
-and `/about`, `/services`, `/products`, `/products/[slug]`. The site chrome
-moved to `app/layout.tsx`, and the blog sits behind `apps/web/lib/flags.ts`.
+What is left is not code: the §7 client sign-offs, a real chart-data provider
+key, R2 credentials, the DNS decision, and the deploy itself.
 
-## Phase 2 — Book and Predictions
+### Local admin
 
-Blocked on the exact prediction fields (§7 item 4). The booking half is not
-blocked: §3.2 has the confirmed field list.
+```bash
+ADMIN_EMAIL=you@example.com ADMIN_PASSWORD="a long passphrase" pnpm db:seed:admin
+pnpm dev     # then sign in at http://localhost:3000/admin
+```
 
-1. **Schema** — `packages/db/prisma/schema.prisma`. `Booking` gains
-   `dateOfBirth`, `timeOfBirth`, `birthPlace`, `birthLat`, `birthLng`,
-   `birthTz`, and `kundaliStatus` (`pending | ready | failed`) so Phase 4 is
-   additive. `email` becomes optional; `sessionType`, `preferredDate` and
-   `preferredTime` leave the required set. `pnpm db:generate && pnpm db:push`.
-2. **Contract** — `packages/contract/src/schemas/booking.ts`. Mirror the field
-   changes. Mobile normalises to E.164 before storage; date of birth is bounded
-   between 1900 and today; time of birth is required (§13).
-3. **API** — `apps/api/src/routes/bookings.ts` follows the existing
-   `serialize()` pattern. Add the rate limit to both public POSTs.
-4. **Pages** — `app/book/page.tsx` and `app/predictions/page.tsx`. Client
-   components for the forms, zod resolver off the shared schema, field-level
-   errors from the API's 422 `issues`, and a confirmation state keyed by the
-   returned id so a refresh does not resubmit.
-5. **Birth place** — bundled Indian city list with a manual lat/lng/timezone
-   override behind a "can't find your city?" disclosure (§3.2). Do not add a
-   geocoding API.
+Re-running that command resets the password of that account — the documented
+recovery path, since no email delivery is configured.
 
-## Phase 3 — Courses (CR-1)
+### Two deviations from the plan, both recorded in PLAN.md
 
-1. `Course` and `CourseEnquiry` models exactly as written in PLAN.md §3.1.
-2. Seed the 70 courses from PLAN.md §10: title, slug, category, level and
-   `relatedSlugs` only, `published: false`. Extend
-   `packages/db/prisma/seed-data.ts` the way the product rows are built there.
-3. Contract + routes for `GET /api/courses`, `GET /api/courses/:slug`,
-   `POST /api/course-enquiries`, and the admin-guarded enquiry list.
-4. `/courses` groups by the 14 categories with client-side category and level
-   filters over an already-loaded index — no request per filter click. Flat
-   `/courses/[slug]` URLs.
-5. Detail page cross-links basic/advanced pairs through `relatedSlugs`,
-   dropping any link whose target is missing or unpublished.
-6. Switch the home `Courses` section from the hardcoded `courses` array in
-   `lib/content/site.ts` to `?featured=true`.
+- **Auth is `node:crypto`, not Better Auth** (PLAN.md §3.3). scrypt hashing
+  plus server-side sessions in `apps/api/src/routes/admin/session.ts`.
+- **The Kundali PDF is pdfkit, not `@react-pdf/renderer`** (PLAN.md §3.2),
+  so the API does not take a React dependency for four pages of lines and text.
 
-## Phase 4 — Kundali PDF (CR-2)
+### Known gaps
 
-Do not start before the §7 item 6 sign-offs (chart style, language, contents,
-and verified sample charts). Order matters here:
+- **Chart data is a sample provider.** Set `KUNDALI_API_URL` to a licensed
+  vendor and map its response in `HttpChartProvider`
+  (`apps/api/src/lib/kundali/providers.ts`). Until then every PDF is stamped
+  SAMPLE CHART on every page — deliberately, so a placeholder can never be
+  mistaken for a real reading.
+- **Storage is the local filesystem** unless the R2 vars are set. A host with
+  an ephemeral disk will lose uploads and PDFs; set them before deploying.
+- **No Lighthouse run yet.** Phase 6 built the SEO and accessibility
+  groundwork; the measured pass is Phase 7 work on a real deployment.
+- **Rich text is a plain textarea** with blank-line paragraphs. PLAN.md §3.3
+  specifies Tiptap on the three long fields; the textarea is honest about what
+  it does and can be swapped without touching the data (paragraphs are split
+  on render).
 
-1. Chart source behind one module in `apps/api` — licensed API for v1, swappable
-   later. Verify against the client's sample charts **before** any layout work.
-2. PDF with `@react-pdf/renderer`, charts drawn as SVG, brand tokens reused.
-3. Private R2 bucket, signed 15-minute URLs, key stored on `Booking`.
-4. Generation is async with three attempts. A failure must still leave a saved,
-   confirmed booking and a Re-generate action in the admin (§13).
+## What landed, and where to look
 
-## Phase 5 — Admin platform (CR-3)
+| Area               | Entry point                                             |
+| ------------------ | ------------------------------------------------------- |
+| Booking + Kundali  | `apps/api/src/routes/bookings.ts`, `src/lib/kundali/*`  |
+| Birth-place lookup | `apps/web/lib/content/cities.ts` (156 cities, offline)  |
+| Courses (CR-1)     | `apps/api/src/routes/courses.ts`, `app/courses/*`       |
+| Admin auth         | `apps/api/src/routes/admin/session.ts`                  |
+| Admin CRUD         | `apps/api/src/routes/admin/collection.ts` (one factory) |
+| Image pipeline     | `apps/api/src/routes/admin/upload.ts`                   |
+| Admin UI           | `apps/web/app/(admin)/admin/*`, `components/admin/*`    |
+| Field config       | `apps/web/lib/admin/collections.ts`, `copy-fields.ts`   |
+| Editable page copy | `packages/contract/src/schemas/site-content.ts`         |
+| SEO                | `app/sitemap.ts`, `app/robots.ts`, `components/seo/*`   |
 
-Follow PLAN.md §3.3 and the phase breakdown in §5 in that order. The first task
-is the only risky one: prove the Better Auth session cookie works from
-`apps/web` against the real `api.` subdomain before writing any admin UI. If
-the DNS decision (§7 item 1) has not happened, do not start Phase 5.
+Two rules worth knowing before editing the admin:
 
-Collections are courses, products, services, testimonials, media — **not
-blog** (§4). Page copy is the six `SiteContent` keys in §12, not fourteen.
+1. **Never put `.default()` in an admin write schema.** A PATCH body is
+   `schema.partial()`, and zod still fills a defaulted key when it is absent —
+   so a default there silently resets every field the editor did not send.
+   Prisma already declares column defaults, so "absent" means "leave alone".
+   This bit once; the comment in `schemas/admin.ts` says so.
+2. **Publish validation runs against the record as saved**, not the posted
+   body, and rolls the publish back if it fails. That is why create writes a
+   draft first and then flips it.
 
 ## Phase 6 — SEO, performance, accessibility
 

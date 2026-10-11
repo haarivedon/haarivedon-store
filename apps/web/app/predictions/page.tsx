@@ -1,11 +1,21 @@
 import type { Metadata } from "next";
 import { Section, SectionHeader } from "@/components/section";
 import { PredictionForm } from "@/components/forms/prediction-form";
+import { getSiteContent, orFallback } from "@/lib/api/content";
 
 export const metadata: Metadata = {
   title: "Predictions & Readings",
   description:
     "Request a personal reading based on your birth details — a considered answer to the question you're carrying, not a generic forecast.",
+};
+
+/** Used until the client fills this page in through the admin. */
+const defaults = {
+  heading: "A reading of your own chart",
+  intro:
+    "Bring one real question. A reading is most useful when it is specific — about a decision you are weighing, not about the whole of your life at once.",
+  turnaround:
+    "Readings are prepared individually, so they are not instant. We will confirm the timeline when we acknowledge your request.",
 };
 
 const receive = [
@@ -16,14 +26,17 @@ const receive = [
   "A written response you can return to",
 ];
 
-export default function PredictionsPage() {
+export default async function PredictionsPage() {
+  const copy = await getSiteContent("predictions.page");
+  const items = copy.receive.length ? copy.receive : receive;
+
   return (
     <>
       <Section background="cream" containerClassName="pb-8 sm:pb-10">
         <SectionHeader
           eyebrow="Predictions"
-          title="A reading of your own chart"
-          description="Bring one real question. A reading is most useful when it is specific — about a decision you are weighing, not about the whole of your life at once."
+          title={orFallback(copy.heading, defaults.heading)}
+          description={orFallback(copy.intro, defaults.intro)}
           align="center"
         />
       </Section>
@@ -35,7 +48,7 @@ export default function PredictionsPage() {
               What you receive
             </h2>
             <ul className="mt-4 space-y-3 text-sm text-charcoal/80">
-              {receive.map((item) => (
+              {items.map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <span aria-hidden className="mt-0.5 text-gold">
                     ✦
@@ -50,8 +63,7 @@ export default function PredictionsPage() {
                 How long it takes
               </h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                Readings are prepared individually, so they are not instant.
-                We will confirm the timeline when we acknowledge your request.
+                {orFallback(copy.turnaround, defaults.turnaround)}
               </p>
             </div>
 

@@ -9,6 +9,7 @@ import { cors } from "hono/cors";
 import { prisma } from "@repo/db";
 import { env, isProduction } from "./env";
 import { getObject } from "./lib/storage";
+import { handleUpload } from "./routes/admin/upload";
 import { logger } from "./lib/logger";
 import { router } from "./router";
 
@@ -86,6 +87,32 @@ export const createApp = () => {
   });
 
   // Non-contract routes must be registered before the contract catch-all.
+  //
+  // Multipart upload: ts-rest handlers take JSON bodies, so the image
+  // pipeline sits outside the contract (docs/PLAN.md §3.3).
+  app.post("/api/admin/media/upload", async (c) => {
+    const result = await handleUpload(c.req.raw as Request);
+    return result.ok
+      ? c.json(result.media, 201)
+      : c.json({ error: result.error }, result.status);
+  });
+
+  // Media served from disk when no R2 bucket is configured (local dev only).
+  app.get("/api/media/:file", async (c) => {
+    const file = c.req.param("file");
+    if (!/^[a-f0-9]{24}\.webp$/.test(file)) {
+      return c.json({ error: "Not found." }, 404);
+    }
+
+    const bytes = await getObject(`media/${file}`, { bucket: env.R2_MEDIA_BUCKET });
+    if (!bytes) return c.json({ error: "Not found." }, 404);
+
+    return c.body(new Uint8Array(bytes), 200, {
+      "content-type": "image/webp",
+      "cache-control": "public, max-age=31536000, immutable",
+    });
+  });
+
   //
   // The Kundali PDF is a file stream, not JSON, so it lives outside ts-rest.
   // It is gated on the one-time token issued with the booking: birth details

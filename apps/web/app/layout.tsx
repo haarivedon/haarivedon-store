@@ -3,6 +3,9 @@ import { Fraunces, Mulish, Tangerine } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { SiteHeader } from "@/components/layout/site-header";
+import { OrganizationJsonLd } from "@/components/seo/json-ld";
+import { getSiteContent, orFallback } from "@/lib/api/content";
+import { site } from "@/lib/content/site";
 import { SiteFooter } from "@/components/layout/site-footer";
 
 const fraunces = Fraunces({
@@ -49,7 +52,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const contact = await getSiteContent("site.contact");
   return (
     <html
       lang="en"
@@ -61,6 +65,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       )}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <OrganizationJsonLd
+          phone={orFallback(contact.phone, site.phone)}
+          email={orFallback(contact.email, site.email)}
+        />
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <SiteFooter />

@@ -135,6 +135,7 @@ model Testimonial {
   location  String   @default("")
   published Boolean  @default(true)
   order     Int      @default(0)
+  updatedBy String   @default("")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -213,4 +214,68 @@ model CourseEnquiry {
   updatedAt    DateTime @updatedAt
 
   @@map("course_enquiries")
+}
+
+/// Admin accounts for the CMS (CR-3, docs/PLAN.md §3.3).
+///
+/// One role: everyone who can log in can do everything. A two-person practice
+/// does not need a permission matrix, and every role check is a place to get
+/// authorization wrong (§3.4).
+model AdminUser {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  email        String         @unique
+  name         String         @default("")
+  /// scrypt, stored as "scrypt:<salt-hex>:<hash-hex>".
+  passwordHash String
+  /// Set when an account is suspended; blocks login and kills its sessions.
+  disabledAt   DateTime?
+  lastLoginAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  sessions     AdminSession[]
+
+  @@map("admin_users")
+}
+
+/// Server-side sessions, so logging out everywhere is a delete.
+model AdminSession {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  /// SHA-256 of the cookie token — a database leak must not yield live sessions.
+  tokenHash String     @unique
+  userId    String     @db.ObjectId
+  user      AdminUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  userAgent String     @default("")
+  ip        String     @default("")
+  createdAt DateTime   @default(now())
+
+  @@index([userId])
+  @@map("admin_sessions")
+}
+
+/// Editable page copy (CR-3). One row per key, validated by the zod schema
+/// for that key in @repo/contract — six keys, listed in docs/PLAN.md §12.
+model SiteContent {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String   @unique
+  data      Json
+  updatedBy String   @default("")
+  updatedAt DateTime @updatedAt
+
+  @@map("site_content")
+}
+
+/// Uploaded imagery. Files live in object storage; this is the index.
+model Media {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String   @unique
+  url       String
+  alt       String   @default("")
+  width     Int      @default(0)
+  height    Int      @default(0)
+  bytes     Int      @default(0)
+  mimeType  String   @default("image/webp")
+  createdAt DateTime @default(now())
+
+  @@map("media")
 }

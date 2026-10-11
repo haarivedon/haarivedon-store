@@ -12,6 +12,7 @@ import { Section } from "@/components/section";
 import { CourseEnquiryForm } from "@/components/courses/enquiry-form";
 import { formatPrice } from "@/lib/format";
 import { getCourse, getCourses } from "@/lib/api/content";
+import { CourseJsonLd } from "@/components/seo/json-ld";
 
 export async function generateStaticParams() {
   const courses = await getCourses();
@@ -60,6 +61,7 @@ export default async function CoursePage({
 
   return (
     <>
+      <CourseJsonLd course={course} />
       <Section background="ivory" containerClassName="py-8 sm:py-12">
         <Link
           href="/courses"

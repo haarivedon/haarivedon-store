@@ -7,6 +7,7 @@ import { Icon, type IconName } from "@/components/icon";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { aboutPillars, site } from "@/lib/content/site";
+import { getSiteContent, orFallback } from "@/lib/api/content";
 
 export const metadata: Metadata = {
   title: "About Neelam Niranjan",
@@ -14,16 +15,29 @@ export const metadata: Metadata = {
     "The story, mission and areas of expertise behind Haarivedon — ancient wisdom offered with compassion, for the questions you carry today.",
 };
 
-const expertise = [
-  "Vedic astrology and kundali reading",
-  "Numerology and name correction",
-  "Vastu and space harmonisation",
-  "Energy healing and Reiki",
-  "Remedial rituals and yantras",
-  "Personal and relationship guidance",
-];
+/** Used until the client fills the About page in through the admin. */
+const defaults = {
+  heading: "Guidance rooted in tradition, offered with care",
+  intro: `${site.name} is the practice of Neelam Niranjan — a space for people who are carrying a question and want a considered answer, not a quick one.`,
+  story:
+    "Every consultation begins by listening. The traditional sciences — astrology, numerology, vastu, energy work — are tools, and which one serves you depends entirely on what you bring to the conversation.\n\nThe intent is never to hand you a verdict. It is to show you the pattern you are standing in, and the choices that are genuinely yours to make.",
+  expertise: [
+    "Vedic astrology and kundali reading",
+    "Numerology and name correction",
+    "Vastu and space harmonisation",
+    "Energy healing and Reiki",
+    "Remedial rituals and yantras",
+    "Personal and relationship guidance",
+  ],
+  portrait: "/images/founder-about.jpg",
+};
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const copy = await getSiteContent("about.page");
+  const expertise = copy.expertise.length ? copy.expertise : defaults.expertise;
+  const story = orFallback(copy.story, defaults.story);
+  const portrait = orFallback(copy.portrait, defaults.portrait);
+
   return (
     <>
       <Section background="cream">
@@ -31,21 +45,13 @@ export default function AboutPage() {
           <div>
             <SectionHeader
               eyebrow="About"
-              title={<>Guidance rooted in tradition, offered with care</>}
-              description={`${site.name} is the practice of Neelam Niranjan — a space for people who are carrying a question and want a considered answer, not a quick one.`}
+              title={orFallback(copy.heading, defaults.heading)}
+              description={orFallback(copy.intro, defaults.intro)}
             />
             <div className="mt-6 space-y-4 text-charcoal/80">
-              <p>
-                Every consultation begins by listening. The traditional
-                sciences — astrology, numerology, vastu, energy work — are
-                tools, and which one serves you depends entirely on what you
-                bring to the conversation.
-              </p>
-              <p>
-                The intent is never to hand you a verdict. It is to show you
-                the pattern you are standing in, and the choices that are
-                genuinely yours to make.
-              </p>
+              {story.split("\n\n").map((paragraph) => (
+                <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+              ))}
             </div>
             <Link
               href="/book"
@@ -58,7 +64,7 @@ export default function AboutPage() {
 
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-border/60 shadow-sm">
             <Image
-              src="/images/founder-about.jpg"
+              src={portrait}
               alt="Neelam Niranjan, founder of Haarivedon"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
@@ -94,6 +100,33 @@ export default function AboutPage() {
           ))}
         </div>
       </Section>
+
+      {(copy.mission || copy.philosophy) && (
+        <Section background="ivory">
+          <div className="grid gap-8 md:grid-cols-2">
+            {copy.mission && (
+              <div>
+                <h2 className="font-display text-xl font-semibold text-forest">
+                  Our mission
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-charcoal/80">
+                  {copy.mission}
+                </p>
+              </div>
+            )}
+            {copy.philosophy && (
+              <div>
+                <h2 className="font-display text-xl font-semibold text-forest">
+                  Our philosophy
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-charcoal/80">
+                  {copy.philosophy}
+                </p>
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
 
       <Section background="sage">
         <SectionHeader
