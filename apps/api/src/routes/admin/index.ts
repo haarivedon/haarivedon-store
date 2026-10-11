@@ -7,7 +7,7 @@ import {
   type AdminService,
   type AdminTestimonial,
   type Booking,
-  type CourseEnquiry,
+  type Enquiry,
   type Media,
   type PredictionRequest,
 } from "@repo/contract";
@@ -16,7 +16,7 @@ import {
   type Prisma,
   type Booking as BookingRecord,
   type Course as CourseRecord,
-  type CourseEnquiry as EnquiryRecord,
+  type Enquiry as EnquiryRecord,
   type Media as MediaRecord,
   type PredictionRequest as PredictionRecord,
   type Product as ProductRecord,
@@ -173,15 +173,16 @@ const prediction = (r: PredictionRecord): PredictionRequest => ({
   updatedAt: r.updatedAt.toISOString(),
 });
 
-const enquiry = (r: EnquiryRecord): CourseEnquiry => ({
+const enquiry = (r: EnquiryRecord): Enquiry => ({
   id: r.id,
+  kind: r.kind as Enquiry["kind"],
   name: r.name,
   email: r.email,
   phone: r.phone,
-  courseSlug: r.courseSlug,
-  courseTitle: r.courseTitle,
+  itemSlug: r.itemSlug,
+  itemTitle: r.itemTitle,
   message: r.message,
-  status: r.status as CourseEnquiry["status"],
+  status: r.status as Enquiry["status"],
   internalNote: r.internalNote,
   createdAt: r.createdAt.toISOString(),
   updatedAt: r.updatedAt.toISOString(),
@@ -479,16 +480,17 @@ export const adminRouter = tsr.router(contract.admin, {
     await requireAdmin(request.headers);
     const where = {
       ...(query.status ? { status: query.status } : {}),
-      ...searchFilter(query.search, ["name", "email", "phone", "courseTitle"]),
+      ...(query.kind ? { kind: query.kind } : {}),
+      ...searchFilter(query.search, ["name", "email", "phone", "itemTitle"]),
     };
 
     const [records, total] = await Promise.all([
-      prisma.courseEnquiry.findMany({
+      prisma.enquiry.findMany({
         where,
         orderBy: { createdAt: "desc" },
         ...toPrismaPage(query),
       }),
-      prisma.courseEnquiry.count({ where }),
+      prisma.enquiry.count({ where }),
     ]);
 
     return {
@@ -499,12 +501,12 @@ export const adminRouter = tsr.router(contract.admin, {
 
   updateEnquiry: async ({ params, body }, { request }) => {
     await requireAdmin(request.headers);
-    const existing = await prisma.courseEnquiry.findUnique({
+    const existing = await prisma.enquiry.findUnique({
       where: { id: params.id },
     });
     if (!existing) return { status: 404 as const, body: { error: "Not found." } };
 
-    const updated = await prisma.courseEnquiry.update({
+    const updated = await prisma.enquiry.update({
       where: { id: params.id },
       data: body,
     });

@@ -2,20 +2,31 @@
 
 import { useState } from "react";
 import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
-import { createCourseEnquirySchema } from "@repo/contract";
+import { createEnquirySchema, type EnquiryKind } from "@repo/contract";
 import { api } from "@/lib/api/client";
 import { issuesToFieldErrors, toFieldErrors, type FieldErrors } from "@/lib/forms";
 import { Field, inputClass, textareaClass } from "@/components/forms/field";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-/** CR-1 is a catalogue plus an enquiry — there is no checkout (PLAN.md §3.1). */
-export function CourseEnquiryForm({
-  courseSlug,
-  courseTitle,
+/**
+ * "Ask about this" for a course or a product.
+ *
+ * Neither has a checkout (PLAN.md §3.1, SRS §3.5), and sending someone to
+ * the generic booking form instead — which asks for birth details — answers
+ * a different question entirely. The form sits on the item's own page and
+ * says which item it is about.
+ */
+export function EnquiryForm({
+  kind,
+  itemSlug,
+  itemTitle,
+  submitLabel,
 }: {
-  courseSlug: string;
-  courseTitle: string;
+  kind: EnquiryKind;
+  itemSlug: string;
+  itemTitle: string;
+  submitLabel?: string;
 }) {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -26,11 +37,12 @@ export function CourseEnquiryForm({
     if (submitting) return;
 
     const form = new FormData(event.currentTarget);
-    const parsed = createCourseEnquirySchema.safeParse({
+    const parsed = createEnquirySchema.safeParse({
+      kind,
+      itemSlug,
       name: String(form.get("name") ?? ""),
       email: String(form.get("email") ?? ""),
       phone: String(form.get("phone") ?? ""),
-      courseSlug,
       message: String(form.get("message") ?? ""),
     });
 
@@ -42,7 +54,7 @@ export function CourseEnquiryForm({
     setErrors({});
     setSubmitting(true);
     try {
-      const response = await api.courses.createEnquiry({ body: parsed.data });
+      const response = await api.enquiries.create({ body: parsed.data });
 
       if (response.status === 201) {
         setDone(response.body.message);
@@ -114,7 +126,7 @@ export function CourseEnquiryForm({
           id="ce-message"
           name="message"
           className={cn(textareaClass, "min-h-20")}
-          placeholder={`Your question about ${courseTitle}`}
+          placeholder={`Your question about ${itemTitle}`}
         />
       </Field>
 
@@ -136,7 +148,7 @@ export function CourseEnquiryForm({
           </>
         ) : (
           <>
-            Enquire about this course
+            {submitLabel ?? `Ask about this ${kind}`}
             <ArrowRight className="size-4" />
           </>
         )}

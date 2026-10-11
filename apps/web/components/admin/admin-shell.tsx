@@ -119,7 +119,7 @@ export function AdminShell({
         },
         {
           href: "/admin/inbox/enquiries",
-          label: "Course enquiries",
+          label: "Enquiries",
           icon: BookOpen,
           badge: counts.enquiries,
         },

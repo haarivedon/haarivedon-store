@@ -3,6 +3,7 @@ import { tsr } from "@ts-rest/serverless/fetch";
 import { adminRouter } from "./routes/admin";
 import { bookingsRouter } from "./routes/bookings";
 import { coursesRouter } from "./routes/courses";
+import { enquiriesRouter } from "./routes/enquiries";
 import { healthRouter } from "./routes/health";
 import { kundaliRouter } from "./routes/kundali";
 import { predictionsRouter } from "./routes/predictions";
@@ -19,6 +20,7 @@ export const router = tsr.router(contract, {
   products: productsRouter,
   kundali: kundaliRouter,
   courses: coursesRouter,
+  enquiries: enquiriesRouter,
   siteContent: siteContentRouter,
   admin: adminRouter,
 });

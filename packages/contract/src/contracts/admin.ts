@@ -18,7 +18,11 @@ import {
   testimonialWriteSchema,
 } from "../schemas/admin";
 import { bookingSchema } from "../schemas/booking";
-import { courseEnquirySchema, courseEnquiryStatuses } from "../schemas/course";
+import {
+  enquiryKinds,
+  enquirySchema,
+  enquiryStatuses,
+} from "../schemas/enquiry";
 import { predictionSchema, predictionStatuses } from "../schemas/prediction";
 import { bookingStatuses } from "../schemas/booking";
 import { siteContentKeySchema } from "../schemas/site-content";
@@ -267,23 +271,24 @@ export const adminContract = c.router({
   },
   enquiries: {
     method: "GET",
-    path: "/admin/course-enquiries",
+    path: "/admin/enquiries",
     query: paginationQuerySchema.extend({
-      status: z.enum(courseEnquiryStatuses).optional(),
+      status: z.enum(enquiryStatuses).optional(),
+      kind: z.enum(enquiryKinds).optional(),
       search: z.string().optional(),
     }),
-    responses: { 200: paginated(courseEnquirySchema), 401: errorSchema },
-    summary: "Course enquiry inbox.",
+    responses: { 200: paginated(enquirySchema), 401: errorSchema },
+    summary: "Course and product enquiry inbox.",
   },
   updateEnquiry: {
     method: "PATCH",
-    path: "/admin/course-enquiries/:id",
+    path: "/admin/enquiries/:id",
     pathParams: z.object({ id: z.string() }),
     body: z.object({
-      status: z.enum(courseEnquiryStatuses).optional(),
+      status: z.enum(enquiryStatuses).optional(),
       internalNote: z.string().trim().max(2000).optional(),
     }),
-    responses: { 200: courseEnquirySchema, 401: errorSchema, 404: errorSchema },
+    responses: { 200: enquirySchema, 401: errorSchema, 404: errorSchema },
     summary: "Set an enquiry's status or internal note.",
   },
 });

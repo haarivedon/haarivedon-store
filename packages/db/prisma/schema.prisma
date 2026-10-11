@@ -196,15 +196,23 @@ model Course {
   @@map("courses")
 }
 
-/// Course enquiries from the course detail pages. CR-1 is a catalogue plus an
-/// enquiry form — there is no checkout (docs/PLAN.md §3.1).
-model CourseEnquiry {
+/// Enquiries about a specific course or product.
+///
+/// One model rather than one per kind: the fields are identical, the inbox
+/// wants them in one list, and "ask about this" is the same act whichever
+/// page it starts from. Products and courses are catalogue items with no
+/// checkout (docs/PLAN.md §3.1, SRS §3.5) — this is how someone asks.
+model Enquiry {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  // course | product
+  kind         String
   name         String
   email        String
   phone        String
-  courseSlug   String
-  courseTitle  String   @default("")
+  /// Slug of the course or product being asked about.
+  itemSlug     String
+  /// Denormalised so the inbox reads correctly even if the item is renamed.
+  itemTitle    String   @default("")
   message      String   @default("")
   // pending | contacted | enrolled | closed
   status       String   @default("pending")
@@ -213,7 +221,8 @@ model CourseEnquiry {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  @@map("course_enquiries")
+  @@index([kind, status])
+  @@map("enquiries")
 }
 
 /// Admin accounts for the CMS (CR-3, docs/PLAN.md §3.3).

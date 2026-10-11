@@ -2,14 +2,10 @@ import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import {
   courseCategories,
-  courseEnquirySchema,
-  courseEnquiryStatuses,
   courseLevels,
   courseSchema,
-  createCourseEnquirySchema,
 } from "../schemas/course";
 import {
-  createdSchema,
   errorSchema,
   paginated,
   paginationQuerySchema,
@@ -44,28 +40,5 @@ export const coursesContract = c.router({
       404: errorSchema,
     },
     summary: "Fetch one published course by slug.",
-  },
-  createEnquiry: {
-    method: "POST",
-    path: "/course-enquiries",
-    body: createCourseEnquirySchema,
-    responses: {
-      201: createdSchema,
-      404: errorSchema,
-      422: errorSchema,
-      429: errorSchema,
-    },
-    summary: "Submit an enquiry about a course.",
-  },
-  listEnquiries: {
-    method: "GET",
-    path: "/course-enquiries",
-    query: paginationQuerySchema.extend({
-      status: z.enum(courseEnquiryStatuses).optional(),
-    }),
-    responses: {
-      200: paginated(courseEnquirySchema),
-    },
-    summary: "List course enquiries (admin).",
   },
 });

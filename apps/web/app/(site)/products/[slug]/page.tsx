@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { productFamilyLabels } from "@repo/contract";
 import { Section } from "@/components/section";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { EnquiryForm } from "@/components/enquiry-form";
 import { attributeRows } from "@/lib/format";
 import { Price } from "@/components/price";
 import { getProduct, getProducts } from "@/lib/api/content";
@@ -108,17 +107,6 @@ export default async function ProductPage({
               </p>
             )}
 
-            {/*
-              Display-only catalogue (SRS §3.5): no cart, no checkout. The CTA
-              routes the enquiry to the booking form.
-            */}
-            <Link
-              href="/book"
-              className={cn(buttonVariants({ size: "lg" }), "mt-6")}
-            >
-              Enquire about this
-              <ArrowRight className="size-4" />
-            </Link>
 
             {product.description && (
               <div className="mt-8 space-y-3 text-sm leading-relaxed text-charcoal/80">
@@ -141,6 +129,35 @@ export default async function ProductPage({
                 ))}
               </dl>
             )}
+
+            {/*
+              Display-only catalogue (SRS §3.5): no cart, no checkout — so
+              the action is asking about this specific item, on its own page.
+            */}
+            <div
+              id="enquire"
+              className="mt-8 rounded-2xl border border-border/60 bg-cream/40 p-5"
+            >
+              <h2 className="font-display text-lg font-semibold text-forest">
+                Ask about this {productFamilyLabels[product.family].toLowerCase().replace(/s$/, "")}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Price, availability, sizes, or which one suits you — leave your
+                details and we will come back to you about{" "}
+                <strong className="font-medium text-charcoal">
+                  {product.name}
+                </strong>
+                .
+              </p>
+              <div className="mt-4">
+                <EnquiryForm
+                  kind="product"
+                  itemSlug={product.slug}
+                  itemTitle={product.name}
+                  submitLabel="Send my question"
+                />
+              </div>
+            </div>
 
             <p className="mt-6 text-xs leading-relaxed text-charcoal/60">
               Carries traditional and spiritual significance; not a substitute

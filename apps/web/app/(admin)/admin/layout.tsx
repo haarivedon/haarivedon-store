@@ -21,9 +21,7 @@ async function pendingCounts(): Promise<PendingCounts> {
     adminFetch<{ meta: { total: number } }>(
       "/predictions?status=pending&perPage=1",
     ),
-    adminFetch<{ meta: { total: number } }>(
-      "/course-enquiries?status=pending&perPage=1",
-    ),
+    adminFetch<{ meta: { total: number } }>("/enquiries?status=pending&perPage=1"),
   ]);
 
   return {

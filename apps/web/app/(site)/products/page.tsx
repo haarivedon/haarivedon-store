@@ -110,7 +110,11 @@ export default async function ProductsPage() {
               {group.items.map((product) => (
                 <li key={product.id}>
                   <Link
-                    href={`/products/${product.slug}`}
+                    href={
+                      product.price === null
+                        ? `/products/${product.slug}#enquire`
+                        : `/products/${product.slug}`
+                    }
                     className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
                   >
                     <div className="relative aspect-square bg-sage/30">

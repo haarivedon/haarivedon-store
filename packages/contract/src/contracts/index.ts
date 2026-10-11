@@ -3,6 +3,7 @@ import { errorSchema } from "../schemas/common";
 import { adminContract } from "./admin";
 import { bookingsContract } from "./bookings";
 import { coursesContract } from "./courses";
+import { enquiriesContract } from "./enquiries";
 import { healthContract } from "./health";
 import { kundaliContract } from "./kundali";
 import { predictionsContract } from "./predictions";
@@ -27,6 +28,7 @@ export const contract = c.router(
     products: productsContract,
     kundali: kundaliContract,
     courses: coursesContract,
+    enquiries: enquiriesContract,
     siteContent: siteContentContract,
     admin: adminContract,
   },
@@ -45,6 +47,7 @@ export {
   adminContract,
   bookingsContract,
   coursesContract,
+  enquiriesContract,
   healthContract,
   kundaliContract,
   predictionsContract,

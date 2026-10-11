@@ -23,7 +23,7 @@ export default async function AdminHome() {
       count("/products?published=true"),
       count("/bookings?status=pending"),
       count("/predictions?status=pending"),
-      count("/course-enquiries?status=pending"),
+      count("/enquiries?status=pending"),
     ]);
 
   const tiles = [
@@ -32,7 +32,7 @@ export default async function AdminHome() {
     { label: "Published products", value: products, href: "/admin/content/products" },
     { label: "New bookings", value: bookings, href: "/admin/inbox/bookings" },
     { label: "New prediction requests", value: predictions, href: "/admin/inbox/predictions" },
-    { label: "New course enquiries", value: enquiries, href: "/admin/inbox/enquiries" },
+    { label: "New enquiries", value: enquiries, href: "/admin/inbox/enquiries" },
   ];
 
   return (

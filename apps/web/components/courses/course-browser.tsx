@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Clock, Search, X } from "lucide-react";
 import {
   courseCategories,
@@ -28,9 +29,44 @@ import { cn } from "@/lib/utils";
  * choosing a level switches to results.
  */
 export function CourseBrowser({ courses }: { courses: Course[] }) {
-  const [category, setCategory] = useState<string>("all");
-  const [level, setLevel] = useState<string>("all");
-  const [query, setQuery] = useState("");
+  // Filter state lives in the URL, not in component state: a filtered view
+  // is a thing people link to, bookmark and press Back out of. Reading it
+  // from the query string also means the server render and the client agree.
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+
+  const category = params.get("subject") ?? "all";
+  const level = params.get("level") ?? "all";
+
+  // The text box keeps its own copy so typing filters instantly; the URL is
+  // written on a short debounce, because each write re-renders the route and
+  // doing that per keystroke would be wasteful.
+  const [query, setQueryText] = useState(params.get("q") ?? "");
+  const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /** Writes one filter, dropping it from the URL when it goes back to "all". */
+  const setParam = (key: string, value: string) => {
+    const next = new URLSearchParams(params.toString());
+    if (!value || value === "all") next.delete(key);
+    else next.set(key, value);
+
+    const search = next.toString();
+    // `scroll: false` keeps the page where it is — changing a filter should
+    // not throw you back to the top of the list.
+    router.replace(search ? `${pathname}?${search}` : pathname, {
+      scroll: false,
+    });
+  };
+
+  const setCategory = (value: string) => setParam("subject", value);
+  const setLevel = (value: string) => setParam("level", value);
+
+  const setQuery = (value: string) => {
+    setQueryText(value);
+    if (debounce.current) clearTimeout(debounce.current);
+    debounce.current = setTimeout(() => setParam("q", value), 400);
+  };
 
   const categories = useMemo(
     () =>
@@ -58,9 +94,9 @@ export function CourseBrowser({ courses }: { courses: Course[] }) {
 
   const browsing = category === "all" && level === "all" && !query.trim();
   const clear = () => {
-    setCategory("all");
-    setLevel("all");
-    setQuery("");
+    setQueryText("");
+    if (debounce.current) clearTimeout(debounce.current);
+    router.replace(pathname, { scroll: false });
   };
 
   return (

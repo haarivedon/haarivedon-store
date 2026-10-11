@@ -9,7 +9,7 @@ import {
   courseLevelLabels,
 } from "@repo/contract";
 import { Section } from "@/components/section";
-import { CourseEnquiryForm } from "@/components/courses/enquiry-form";
+import { EnquiryForm } from "@/components/enquiry-form";
 import { Price } from "@/components/price";
 import { getCourse, getCourses } from "@/lib/api/content";
 import { CourseJsonLd } from "@/components/seo/json-ld";
@@ -202,9 +202,11 @@ export default async function CoursePage({
                 join.
               </p>
               <div className="mt-5">
-                <CourseEnquiryForm
-                  courseSlug={course.slug}
-                  courseTitle={course.title}
+                <EnquiryForm
+                  kind="course"
+                  itemSlug={course.slug}
+                  itemTitle={course.title}
+                  submitLabel="Ask about this course"
                 />
               </div>
             </div>
