@@ -45,6 +45,7 @@ export default async function AboutPage() {
           <div>
             <SectionHeader
               eyebrow="About"
+              as="h1"
               title={orFallback(copy.heading, defaults.heading)}
               description={orFallback(copy.intro, defaults.intro)}
             />

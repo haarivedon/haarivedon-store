@@ -1,20 +1,20 @@
 import { initContract } from "@ts-rest/core";
-import { z } from "zod";
 import {
   bookingCreatedSchema,
-  bookingSchema,
-  bookingStatuses,
   createBookingSchema,
-  updateBookingStatusSchema,
 } from "../schemas/booking";
-import {
-  errorSchema,
-  paginated,
-  paginationQuerySchema,
-} from "../schemas/common";
+import { errorSchema } from "../schemas/common";
 
 const c = initContract();
 
+/**
+ * Public intake only.
+ *
+ * Reading and triaging bookings lives under /api/admin, behind a real
+ * session. These used to be duplicated here behind the shared ADMIN_API_KEY,
+ * which meant two doors to the same personal data and one of them guarded by
+ * a static string.
+ */
 export const bookingsContract = c.router({
   create: {
     method: "POST",
@@ -26,38 +26,5 @@ export const bookingsContract = c.router({
       429: errorSchema,
     },
     summary: "Submit a session booking request.",
-  },
-  list: {
-    method: "GET",
-    path: "/bookings",
-    query: paginationQuerySchema.extend({
-      status: z.enum(bookingStatuses).optional(),
-    }),
-    responses: {
-      200: paginated(bookingSchema),
-    },
-    summary: "List booking requests (admin).",
-  },
-  getById: {
-    method: "GET",
-    path: "/bookings/:id",
-    pathParams: z.object({ id: z.string() }),
-    responses: {
-      200: bookingSchema,
-      404: errorSchema,
-    },
-    summary: "Fetch one booking request (admin).",
-  },
-  updateStatus: {
-    method: "PATCH",
-    path: "/bookings/:id/status",
-    pathParams: z.object({ id: z.string() }),
-    body: updateBookingStatusSchema,
-    responses: {
-      200: bookingSchema,
-      404: errorSchema,
-      422: errorSchema,
-    },
-    summary: "Move a booking through its lifecycle (admin).",
   },
 });

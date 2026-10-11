@@ -10,6 +10,8 @@ import { prisma } from "@repo/db";
 import { env, isProduction } from "./env";
 import { getObject } from "./lib/storage";
 import { handleUpload } from "./routes/admin/upload";
+import { readSessionCookie, sessionFromToken } from "./routes/admin/session";
+import { exportRows, toCsv } from "./lib/csv";
 import { logger } from "./lib/logger";
 import { router } from "./router";
 
@@ -87,6 +89,29 @@ export const createApp = () => {
   });
 
   // Non-contract routes must be registered before the contract catch-all.
+  //
+  // CSV export of an inbox. Outside ts-rest because the response is a file,
+  // and session-guarded like everything else under /api/admin.
+  app.get("/api/admin/export/:kind", async (c) => {
+    const user = await sessionFromToken(readSessionCookie(c.req.raw.headers));
+    if (!user) return c.json({ error: "Please sign in again." }, 401);
+
+    const kind = c.req.param("kind");
+    const rows = await exportRows(kind);
+    if (!rows) return c.json({ error: "Not found." }, 404);
+
+    logger.info("inbox exported", { kind, by: user.email, rows: rows.length });
+
+    const today = new Date().toISOString().slice(0, 10);
+    return c.body(toCsv(rows), 200, {
+      "content-type": "text/csv; charset=utf-8",
+      // No personal data in the filename — it ends up in download folders,
+      // chat attachments and screen shares.
+      "content-disposition": `attachment; filename="haarivedon-${kind}-${today}.csv"`,
+      "cache-control": "private, no-store",
+    });
+  });
+
   //
   // Multipart upload: ts-rest handlers take JSON bodies, so the image
   // pipeline sits outside the contract (docs/PLAN.md §3.3).

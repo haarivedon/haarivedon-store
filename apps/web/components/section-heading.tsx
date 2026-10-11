@@ -30,6 +30,12 @@ export function SectionHeading({
   description,
   tone = "dark",
   align = "left",
+  /**
+   * `h2` by default, since most of these head a section. A page whose title
+   * this *is* passes "h1" — several pages had no h1 at all because this
+   * component could only ever render an h2.
+   */
+  as: Heading = "h2",
   className,
 }: {
   eyebrow?: string;
@@ -37,6 +43,7 @@ export function SectionHeading({
   description?: React.ReactNode;
   tone?: "dark" | "light";
   align?: "left" | "center";
+  as?: "h1" | "h2";
   className?: string;
 }) {
   return (
@@ -48,14 +55,14 @@ export function SectionHeading({
       )}
     >
       {eyebrow && <Eyebrow tone={tone}>{eyebrow}</Eyebrow>}
-      <h2
+      <Heading
         className={cn(
           "font-display text-[1.75rem] leading-[1.15] font-semibold tracking-tight sm:text-4xl",
           tone === "light" ? "text-ivory" : "text-forest",
         )}
       >
         {title}
-      </h2>
+      </Heading>
       {description && (
         <p
           className={cn(

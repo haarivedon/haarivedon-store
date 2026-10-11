@@ -43,6 +43,7 @@ export default async function BookPage() {
       <Section background="cream" containerClassName="pb-8 sm:pb-10">
         <SectionHeader
           eyebrow="Book a Session"
+          as="h1"
           title={orFallback(copy.heading, defaults.heading)}
           description={orFallback(copy.intro, defaults.intro)}
           align="center"

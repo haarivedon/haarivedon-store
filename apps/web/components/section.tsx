@@ -51,6 +51,7 @@ export function SectionHeader({
   description,
   tone = "dark",
   align = "left",
+  as,
   actionHref,
   actionLabel,
   className,
@@ -60,6 +61,8 @@ export function SectionHeader({
   description?: React.ReactNode;
   tone?: "dark" | "light";
   align?: "left" | "center";
+  /** "h1" where this heading is the page's title. */
+  as?: "h1" | "h2";
   actionHref?: string;
   actionLabel?: string;
   className?: string;
@@ -71,6 +74,7 @@ export function SectionHeader({
       description={description}
       tone={tone}
       align={align}
+      as={as}
     />
   );
 
