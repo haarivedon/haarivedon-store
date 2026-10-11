@@ -4,11 +4,16 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Check, ImagePlus, Loader2, Trash2, X } from "lucide-react";
 import type { Media } from "@repo/contract";
-import { adminApi, API_BASE, uploadImage } from "@/lib/api/admin-client";
+import { adminApi, uploadImage } from "@/lib/api/admin-client";
 import { FieldShell, TextInput } from "@/components/admin/ui";
 import { cn } from "@/lib/utils";
 
-const absolute = (url: string) => (url.startsWith("/") ? `${API_BASE}${url}` : url);
+/**
+ * Media URLs are stored root-relative and proxied by the rewrite in
+ * next.config.ts, so they resolve on this origin as-is. R2 URLs are already
+ * absolute and pass straight through.
+ */
+const absolute = (url: string) => url;
 
 /**
  * Image picker: upload, pick from recent uploads, and describe the picture.
