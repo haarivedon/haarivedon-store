@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { InboxTable, type InboxKind } from "@/components/admin/inbox-table";
+import { PageHeader } from "@/components/admin/page-header";
 import { adminFetch, requireAdminUser } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
 
@@ -39,9 +40,16 @@ export default async function InboxPage({
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-forest">Inbox</h1>
+      <PageHeader
+        title={tab.label}
+        description={
+          result
+            ? `${result.meta.total} in total. Nothing here is editable — this is what people sent you.`
+            : "Could not load the inbox — is the API running?"
+        }
+      />
 
-      <nav aria-label="Inbox sections" className="mt-4 flex flex-wrap gap-2">
+      <nav aria-label="Inbox sections" className="flex flex-wrap gap-2">
         {tabs.map((candidate) => (
           <Link
             key={candidate.key}
@@ -51,7 +59,7 @@ export default async function InboxPage({
               "rounded-full border px-4 py-2 text-sm font-medium",
               candidate.key === tab.key
                 ? "border-forest bg-forest text-ivory"
-                : "border-border bg-background text-charcoal/80 hover:border-brand-600",
+                : "border-border bg-white text-charcoal/80 hover:border-brand-600",
             )}
           >
             {candidate.label}
@@ -66,20 +74,16 @@ export default async function InboxPage({
             name="q"
             defaultValue={search}
             placeholder="Name, mobile or email"
-            className="h-10 w-64 rounded-xl border border-border bg-background px-3 text-sm shadow-sm"
+            className="h-10 w-64 rounded-xl border border-border bg-white px-3 text-sm shadow-sm"
           />
         </label>
         <button
           type="submit"
-          className="h-10 rounded-xl border border-border bg-background px-4 text-sm font-medium shadow-sm hover:border-brand-600"
+          className="h-10 rounded-xl border border-border bg-white px-4 text-sm font-medium shadow-sm hover:border-brand-600"
         >
           Search
         </button>
       </form>
-
-      <p className="mt-4 text-sm text-muted-foreground">
-        {result ? `${result.meta.total} total` : "Could not load the inbox"}
-      </p>
 
       <InboxTable kind={tab.key} rows={result?.data ?? []} />
 
