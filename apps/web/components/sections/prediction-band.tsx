@@ -37,7 +37,9 @@ export function PredictionBand() {
           href="/predictions"
           className={cn(
             buttonVariants({ size: "lg" }),
-            "mt-8 h-12 px-7 text-sm font-semibold shadow-sm",
+            // On the forest band the default hover (bg-forest) would blend the
+            // button into the section — fill gold instead (the CTA colour).
+            "mt-8 h-12 px-7 text-sm font-semibold shadow-sm hover:bg-gold hover:text-forest",
           )}
         >
           Get Your Prediction

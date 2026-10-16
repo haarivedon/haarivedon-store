@@ -54,6 +54,7 @@ next-env.d.ts
 .turbo
 # build output
 dist/
+temp/
 
 # Locally generated Kundali PDFs (no R2 credentials configured)
 .data/
