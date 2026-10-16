@@ -1,3 +1,4 @@
+import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { OrganizationJsonLd } from "@/components/seo/json-ld";
@@ -21,6 +22,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
         phone={orFallback(contact.phone, site.phone)}
         email={orFallback(contact.email, site.email)}
       />
+      <AnnouncementBar />
       <SiteHeader />
       <main className="flex-1">{children}</main>
       <SiteFooter />

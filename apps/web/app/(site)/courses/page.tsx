@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Section } from "@/components/section";
 import { PageIntro, HowItWorks } from "@/components/page-intro";
 import { CourseBrowser } from "@/components/courses/course-browser";
-import { getCourses } from "@/lib/api/content";
+import { getAllCourses } from "@/lib/api/content";
 
 export const metadata: Metadata = {
   title: "Courses",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CoursesPage() {
-  const courses = await getCourses();
+  const courses = await getAllCourses();
 
   return (
     <>

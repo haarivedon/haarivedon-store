@@ -7,8 +7,8 @@ import { adminApi } from "@/lib/api/admin-client";
 import { copyFields, readPath, writePath } from "@/lib/admin/copy-fields";
 import type { FieldSpec } from "@/lib/admin/collections";
 import { ImagePicker } from "@/components/admin/image-picker";
+import { toast } from "@/components/admin/toast";
 import {
-  Banner,
   FieldShell,
   Repeater,
   StickyActions,
@@ -29,7 +29,6 @@ export function CopyForm({
   const [values, setValues] = useState<Record<string, unknown>>(initial);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const fields = copyFields[contentKey];
 
@@ -43,7 +42,6 @@ export function CopyForm({
     if (saving) return;
 
     setSaving(true);
-    setError(null);
     try {
       const response = await adminApi.putSiteContent({
         params: { key: contentKey },
@@ -52,12 +50,19 @@ export function CopyForm({
 
       if (response.status === 200) {
         setSaved(true);
+        toast.success("Page copy saved.", {
+          description: "The site updates within a minute.",
+        });
         return;
       }
       const body = response.body as { error?: string } | undefined;
-      setError(body?.error ?? "That didn't save. Please try again.");
+      toast.error("That didn't save", {
+        description: body?.error ?? "Please try again.",
+      });
     } catch {
-      setError("We couldn't reach the server. Your changes are still here.");
+      toast.error("We couldn't reach the server", {
+        description: "Your changes are still here. Try saving again.",
+      });
     } finally {
       setSaving(false);
     }
@@ -65,9 +70,6 @@ export function CopyForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
-      {saved && <Banner tone="ok">Saved. The site updates within a minute.</Banner>}
-      {error && <Banner tone="error">{error}</Banner>}
-
       <div className="grid gap-x-5 gap-y-5 sm:grid-cols-2">
         {fields.map((field) => (
           <CopyField

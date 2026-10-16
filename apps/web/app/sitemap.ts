@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getCourses, getProducts } from "@/lib/api/content";
+import { getAllCourses, getAllProducts } from "@/lib/api/content";
 import { features } from "@/lib/flags";
 
 const BASE = "https://haarivedon.com";
@@ -9,7 +9,10 @@ const BASE = "https://haarivedon.com";
  * so a draft can never leak into the sitemap (docs/PLAN.md §13).
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [courses, products] = await Promise.all([getCourses(), getProducts()]);
+  const [courses, products] = await Promise.all([
+    getAllCourses(),
+    getAllProducts(),
+  ]);
 
   const staticRoutes = [
     { path: "/", priority: 1 },

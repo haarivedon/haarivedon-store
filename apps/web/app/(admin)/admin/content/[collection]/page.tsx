@@ -5,6 +5,7 @@ import { collections, type CollectionSpec } from "@/lib/admin/collections";
 import { adminFetch, requireAdminUser } from "@/lib/admin/session";
 import { PageHeader, Panel } from "@/components/admin/page-header";
 import { RowActions } from "@/components/admin/row-actions";
+import { SearchField, SegmentedFilter, Toolbar } from "@/components/admin/ui";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -25,14 +26,14 @@ function StatusChip({ published }: { published: boolean }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
+        "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold",
         published ? "bg-brand-600/15 text-forest" : "bg-charcoal/10 text-charcoal/70",
       )}
     >
       <span
         aria-hidden
         className={cn(
-          "size-1.5 rounded-full",
+          "size-1.5",
           published ? "bg-brand-600" : "bg-charcoal/40",
         )}
       />
@@ -90,6 +91,9 @@ export default async function CollectionListPage({
             ? `${meta.total} in total. Drafts stay hidden from the site until you publish them.`
             : "Could not load the list — is the API running?"
         }
+      />
+
+      <Toolbar
         action={
           <Link
             href={`/admin/content/${spec.key}/new`}
@@ -99,46 +103,23 @@ export default async function CollectionListPage({
             New {spec.singular}
           </Link>
         }
-      />
-
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <form action="" className="flex items-center gap-2">
-          {statusFilter && (
-            <input type="hidden" name="status" value={statusFilter} />
-          )}
-          <input
-            name="q"
-            defaultValue={search}
-            placeholder={`Search ${spec.label.toLowerCase()}`}
-            aria-label={`Search ${spec.label}`}
-            className="h-10 w-56 rounded-xl border border-border bg-white px-3.5 text-sm shadow-sm outline-none focus-visible:border-brand-600 focus-visible:ring-2 focus-visible:ring-brand-600/25"
-          />
-          <button
-            type="submit"
-            className="h-10 rounded-xl border border-border bg-white px-4 text-sm font-medium shadow-sm hover:border-brand-600"
-          >
-            Search
-          </button>
-        </form>
-
-        <div className="flex items-center gap-1.5">
-          {filters.map((filter) => (
-            <Link
-              key={filter.value}
-              href={`?${keep(filter.value ? { status: filter.value } : {})}`}
-              aria-current={statusFilter === filter.value ? "true" : undefined}
-              className={cn(
-                "rounded-full border px-3.5 py-2 text-sm font-medium transition-colors",
-                statusFilter === filter.value
-                  ? "border-forest bg-forest text-ivory"
-                  : "border-border bg-white text-charcoal/75 hover:border-brand-600",
-              )}
-            >
-              {filter.label}
-            </Link>
-          ))}
-        </div>
-      </div>
+      >
+        <SearchField
+          defaultValue={search}
+          placeholder={`Search ${spec.label.toLowerCase()}`}
+          label={`Search ${spec.label}`}
+          hidden={statusFilter ? { status: statusFilter } : undefined}
+        />
+        <SegmentedFilter
+          label="Filter by status"
+          active={statusFilter}
+          options={filters.map((filter) => ({
+            value: filter.value,
+            label: filter.label,
+            href: `?${keep(filter.value ? { status: filter.value } : {})}`,
+          }))}
+        />
+      </Toolbar>
 
       {rows.length === 0 ? (
         <Panel className="p-10 text-center">
@@ -159,7 +140,7 @@ export default async function CollectionListPage({
             {rows.map((row) => (
               <li
                 key={row.id}
-                className="rounded-2xl border border-border/70 bg-white p-4 shadow-[0_1px_2px_rgba(32,38,31,0.04)]"
+                className="border border-border bg-white p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <Link
@@ -276,7 +257,7 @@ export default async function CollectionListPage({
           {current > 1 && (
             <Link
               href={`?${keep({ page: String(current - 1) })}`}
-              className="rounded-lg border border-border bg-white px-3 py-1.5"
+              className="border border-border bg-white px-3 py-1.5 hover:border-brand-600"
             >
               Previous
             </Link>
@@ -287,7 +268,7 @@ export default async function CollectionListPage({
           {current < meta.totalPages && (
             <Link
               href={`?${keep({ page: String(current + 1) })}`}
-              className="rounded-lg border border-border bg-white px-3 py-1.5"
+              className="border border-border bg-white px-3 py-1.5 hover:border-brand-600"
             >
               Next
             </Link>

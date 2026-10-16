@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { productFamilies, productFamilyLabels } from "@repo/contract";
 import { Section } from "@/components/section";
 import { PageIntro } from "@/components/page-intro";
-import { Price } from "@/components/price";
-import { getProducts } from "@/lib/api/content";
+import { ProductCard } from "@/components/products/product-card";
+import { getAllProducts } from "@/lib/api/content";
 
 export const metadata: Metadata = {
   title: "Energy Tools & Products",
@@ -32,7 +31,7 @@ const familyIntros: Record<(typeof productFamilies)[number], string> = {
 };
 
 export default async function ProductsPage() {
-  const products = await getProducts();
+  const products = await getAllProducts();
 
   // Families render in a fixed order; a family with nothing published in it
   // is skipped entirely rather than showing an empty heading (PLAN.md §13).
@@ -109,51 +108,7 @@ export default async function ProductsPage() {
             <ul className="mt-7 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
               {group.items.map((product) => (
                 <li key={product.id}>
-                  <Link
-                    href={
-                      product.price === null
-                        ? `/products/${product.slug}#enquire`
-                        : `/products/${product.slug}`
-                    }
-                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
-                  >
-                    <div className="relative aspect-square bg-sage/30">
-                      {product.images[0] ? (
-                        <Image
-                          src={product.images[0]}
-                          alt={product.name}
-                          fill
-                          sizes="(max-width: 640px) 50vw, 25vw"
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      ) : (
-                        <span className="absolute inset-0 grid place-items-center px-3 text-center text-xs text-muted-foreground">
-                          Photo coming soon
-                        </span>
-                      )}
-                      {!product.inStock && (
-                        <span className="absolute left-2 top-2 rounded-full bg-ivory/95 px-2 py-0.5 text-[0.65rem] font-semibold text-terracotta">
-                          Enquire
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-1 flex-col p-3 sm:p-4">
-                      <h3 className="font-display text-sm font-semibold leading-snug text-forest sm:text-base">
-                        {product.name}
-                      </h3>
-                      {product.summary && (
-                        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                          {product.summary}
-                        </p>
-                      )}
-                      <p className="mt-auto pt-3">
-                        <Price
-                          value={product.price}
-                          currency={product.currency}
-                        />
-                      </p>
-                    </div>
-                  </Link>
+                  <ProductCard product={product} />
                 </li>
               ))}
             </ul>

@@ -53,10 +53,6 @@ export function Panel({
   className?: string;
 }) {
   return (
-    <div
-      className={`rounded-2xl border border-border/70 bg-white shadow-[0_1px_2px_rgba(32,38,31,0.04)] ${className}`}
-    >
-      {children}
-    </div>
+    <div className={`border border-border bg-white ${className}`}>{children}</div>
   );
 }

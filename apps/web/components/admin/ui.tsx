@@ -1,7 +1,8 @@
 "use client";
 
 import { useId } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Plus, Search, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -14,7 +15,7 @@ import { cn } from "@/lib/utils";
  */
 
 export const controlClass =
-  "h-11 w-full rounded-xl border border-border bg-white px-3.5 text-sm text-charcoal shadow-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus-visible:border-brand-600 focus-visible:ring-2 focus-visible:ring-brand-600/20 disabled:opacity-60 aria-[invalid=true]:border-terracotta";
+  "h-11 w-full border border-border bg-white px-3.5 text-sm text-charcoal outline-none transition-colors placeholder:text-muted-foreground/60 focus-visible:border-brand-600 focus-visible:ring-2 focus-visible:ring-brand-600/20 disabled:opacity-60 aria-[invalid=true]:border-terracotta";
 
 /** A titled group of fields. */
 export function FormSection({
@@ -53,7 +54,7 @@ export type Requirement = "required" | "publish";
 
 export function RequirementBadge() {
   return (
-    <span className="shrink-0 rounded-full bg-terracotta/12 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-terracotta">
+    <span className="shrink-0 bg-terracotta/12 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-terracotta">
       Required
     </span>
   );
@@ -205,7 +206,7 @@ export function SlugInput({
   onChange: (next: string) => void;
 }) {
   return (
-    <div className="flex h-11 w-full items-stretch overflow-hidden rounded-xl border border-border bg-white shadow-sm focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/20">
+    <div className="flex h-11 w-full items-stretch overflow-hidden border border-border bg-white focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/20">
       <span className="grid shrink-0 place-items-center whitespace-nowrap border-r border-border/70 bg-[#faf9f3] px-3 text-xs text-muted-foreground">
         {prefix}
       </span>
@@ -241,7 +242,7 @@ export function Toggle({
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={cn(
-          "relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600",
+          "relative mt-0.5 h-6 w-11 shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600",
           checked ? "bg-brand-600" : "bg-charcoal/25",
         )}
       >
@@ -253,7 +254,7 @@ export function Toggle({
         <span
           aria-hidden
           className={cn(
-            "absolute left-0.5 top-0.5 size-5 rounded-full bg-white shadow transition-transform duration-150",
+            "absolute left-0.5 top-0.5 size-5 bg-white shadow transition-transform duration-150",
             checked ? "translate-x-5" : "translate-x-0",
           )}
         />
@@ -297,7 +298,7 @@ export function Repeater({
   return (
     <div className="flex flex-col gap-2">
       {rows.length === 0 && emptyHint && (
-        <p className="rounded-xl border border-dashed border-border bg-[#faf9f3] px-4 py-3 text-xs text-muted-foreground">
+        <p className="border border-dashed border-border bg-[#faf9f3] px-4 py-3 text-xs text-muted-foreground">
           {emptyHint}
         </p>
       )}
@@ -345,7 +346,7 @@ export function Repeater({
       <button
         type="button"
         onClick={() => onChange([...rows, ""])}
-        className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-xl border border-border bg-white px-3.5 text-sm font-medium text-charcoal shadow-sm transition-colors hover:border-brand-600"
+        className="inline-flex min-h-11 w-fit items-center gap-1.5 border border-border bg-white px-3.5 text-sm font-medium text-charcoal transition-colors hover:border-brand-600"
       >
         <Plus className="size-4 text-brand-600" />
         {addLabel}
@@ -374,7 +375,7 @@ function RowButton({
       disabled={disabled}
       aria-label={label}
       className={cn(
-        "grid size-11 place-items-center rounded-lg border border-border bg-white text-charcoal/70 transition-colors disabled:opacity-40 sm:size-9",
+        "grid size-11 place-items-center border border-border bg-white text-charcoal/70 transition-colors disabled:opacity-40 sm:size-9",
         tone === "danger" ? "text-terracotta hover:border-terracotta" : "hover:border-brand-600",
       )}
     >
@@ -417,9 +418,116 @@ export function Banner({
   return (
     <div
       role={tone === "ok" ? "status" : "alert"}
-      className={cn("rounded-xl border px-4 py-3 text-sm", tones[tone])}
+      className={cn("border-l-4 border-y border-r px-4 py-3 text-sm", tones[tone])}
     >
       {children}
+    </div>
+  );
+}
+
+/**
+ * The control band that sits under a page heading on every list screen:
+ * search and filters on the left, the primary action on the right. Framed by
+ * hairline rules top and bottom so the controls land in the same place on
+ * every page.
+ */
+export function Toolbar({
+  children,
+  action,
+}: {
+  children?: React.ReactNode;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2.5 border-y border-border bg-white px-3 py-2.5 sm:px-4">
+      <div className="flex flex-1 flex-wrap items-center gap-2.5">{children}</div>
+      {action && <div className="flex shrink-0 items-center gap-2">{action}</div>}
+    </div>
+  );
+}
+
+/**
+ * Square search box with an inline submit. A plain GET form so the query
+ * lands in the URL and the server renders the filtered list — no client state.
+ * `hidden` carries any other active filters through the submit.
+ */
+export function SearchField({
+  name = "q",
+  defaultValue,
+  placeholder,
+  label,
+  hidden,
+}: {
+  name?: string;
+  defaultValue?: string;
+  placeholder?: string;
+  label: string;
+  hidden?: Record<string, string>;
+}) {
+  return (
+    <form action="" role="search" className="flex items-stretch">
+      {hidden &&
+        Object.entries(hidden).map(([key, value]) => (
+          <input key={key} type="hidden" name={key} value={value} />
+        ))}
+      <div className="flex h-10 items-stretch border border-border bg-white transition-colors focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/20">
+        <span aria-hidden className="grid shrink-0 place-items-center pl-3 text-muted-foreground">
+          <Search className="size-4" />
+        </span>
+        <input
+          name={name}
+          defaultValue={defaultValue}
+          placeholder={placeholder}
+          aria-label={label}
+          className="h-full w-40 bg-transparent px-2.5 text-sm text-charcoal outline-none placeholder:text-muted-foreground/60 sm:w-56"
+        />
+        <button
+          type="submit"
+          className="border-l border-border px-3.5 text-sm font-medium text-charcoal/80 transition-colors hover:bg-sage/40 hover:text-forest"
+        >
+          Search
+        </button>
+      </div>
+    </form>
+  );
+}
+
+/**
+ * Square segmented control rendered as links, so each segment is a real,
+ * shareable URL. Each option carries its own href — this renders inside
+ * Server Components, which cannot be handed a function prop.
+ */
+export function SegmentedFilter({
+  options,
+  active,
+  label,
+}: {
+  options: { value: string; label: string; href: string }[];
+  active: string;
+  label: string;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label={label}
+      className="inline-flex items-stretch border border-border bg-white"
+    >
+      {options.map((option, index) => (
+        <Link
+          key={option.value}
+          href={option.href}
+          aria-current={active === option.value ? "true" : undefined}
+          className={cn(
+            "px-3.5 py-2 text-sm font-medium transition-colors",
+            index > 0 && "border-l border-border",
+            active === option.value
+              ? "bg-forest text-ivory"
+              : "text-charcoal/75 hover:bg-sage/40 hover:text-forest",
+          )}
+        >
+          {option.label}
+        </Link>
+      ))}
     </div>
   );
 }

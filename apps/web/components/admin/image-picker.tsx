@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Check, ImagePlus, Loader2, Trash2, X } from "lucide-react";
 import type { Media } from "@repo/contract";
 import { adminApi, uploadImage } from "@/lib/api/admin-client";
+import { toast } from "@/components/admin/toast";
 import { FieldShell, TextInput } from "@/components/admin/ui";
 import { cn } from "@/lib/utils";
 
@@ -72,11 +73,13 @@ export function ImagePicker({
 
     if (!result.ok) {
       setError(result.error);
+      toast.error("Upload failed", { description: result.error });
       return;
     }
 
     await refresh();
     onChange(multiple ? [...value, result.media.url] : [result.media.url]);
+    toast.success("Image uploaded.");
   }
 
   /** Deletes from the library for good, and detaches it here if in use. */
@@ -87,11 +90,13 @@ export function ImagePicker({
     const response = await adminApi.removeMedia({ params: { id: media.id } });
     if (response.status !== 200) {
       setError("That image could not be deleted.");
+      toast.error("Couldn't delete that image", { description: "Please try again." });
       return;
     }
 
     setLibrary((previous) => previous.filter((item) => item.id !== media.id));
     onChange(value.filter((url) => url !== media.url));
+    toast.success("Image deleted.");
   }
 
   async function saveAlt(id: string, alt: string) {
@@ -104,7 +109,7 @@ export function ImagePicker({
   const selected = value.filter(Boolean);
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-[#faf9f3] p-4">
+    <div className="flex flex-col gap-4 border border-border bg-[#faf9f3] p-4">
       {selected.length > 0 && (
         <ul className="flex flex-col gap-3">
           {selected.map((url) => {
@@ -112,9 +117,9 @@ export function ImagePicker({
             return (
               <li
                 key={url}
-                className="flex flex-col gap-3 rounded-xl border border-border/70 bg-white p-3 sm:flex-row"
+                className="flex flex-col gap-3 border border-border/70 bg-white p-3 sm:flex-row"
               >
-                <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-lg bg-sage/30 sm:aspect-square sm:w-28">
+                <div className="relative aspect-video w-full shrink-0 overflow-hidden border border-border/60 bg-sage/30 sm:aspect-square sm:w-28">
                   <Image
                     src={absolute(url)}
                     alt={media?.alt ?? ""}
@@ -155,7 +160,7 @@ export function ImagePicker({
 
       <label
         className={cn(
-          "inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-medium text-charcoal shadow-sm transition-colors hover:border-brand-600",
+          "inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 border border-border bg-white px-4 text-sm font-medium text-charcoal transition-colors hover:border-brand-600",
           busy && "pointer-events-none opacity-70",
         )}
       >
@@ -173,6 +178,11 @@ export function ImagePicker({
           disabled={busy}
         />
       </label>
+
+      <p className="text-xs text-muted-foreground">
+        Recommended: 1600px or wider on the longest edge, up to 10 MB. JPEG, PNG
+        or WebP.
+      </p>
 
       {error && (
         <p role="alert" className="text-sm font-medium text-terracotta">
@@ -196,7 +206,7 @@ export function ImagePicker({
                       onChange(multiple ? [...value, item.url] : [item.url])
                     }
                     className={cn(
-                      "relative block aspect-square w-full overflow-hidden rounded-lg border",
+                      "relative block aspect-square w-full overflow-hidden border",
                       inUse
                         ? "border-brand-600 ring-2 ring-brand-600/30"
                         : "border-border hover:border-brand-600",
@@ -214,7 +224,7 @@ export function ImagePicker({
                   </button>
 
                   {confirming === item.id ? (
-                    <div className="absolute inset-0 grid place-items-center gap-1 rounded-lg bg-charcoal/80 p-1 text-center">
+                    <div className="absolute inset-0 grid place-items-center gap-1 bg-charcoal/80 p-1 text-center">
                       <p className="text-[0.6rem] font-semibold leading-tight text-white">
                         Delete for good?
                       </p>
@@ -223,7 +233,7 @@ export function ImagePicker({
                           type="button"
                           onClick={() => void deleteMedia(item)}
                           aria-label={`Confirm deleting ${item.alt || "this image"}`}
-                          className="grid size-7 place-items-center rounded-md bg-terracotta text-white"
+                          className="grid size-7 place-items-center bg-terracotta text-white"
                         >
                           <Check className="size-3.5" />
                         </button>
@@ -231,7 +241,7 @@ export function ImagePicker({
                           type="button"
                           onClick={() => setConfirming(null)}
                           aria-label="Cancel"
-                          className="grid size-7 place-items-center rounded-md bg-white text-charcoal"
+                          className="grid size-7 place-items-center bg-white text-charcoal"
                         >
                           <X className="size-3.5" />
                         </button>
@@ -242,7 +252,7 @@ export function ImagePicker({
                       type="button"
                       onClick={() => setConfirming(item.id)}
                       aria-label={`Delete ${item.alt || "this image"} from the library`}
-                      className="absolute right-1 top-1 grid size-7 place-items-center rounded-md bg-white/90 text-terracotta shadow-sm transition-colors hover:bg-white"
+                      className="absolute right-1 top-1 grid size-7 place-items-center bg-white/90 text-terracotta shadow-sm transition-colors hover:bg-white"
                     >
                       <Trash2 className="size-3.5" />
                     </button>

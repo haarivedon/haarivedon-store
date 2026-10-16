@@ -11,11 +11,11 @@ import {
 import { Section } from "@/components/section";
 import { EnquiryForm } from "@/components/enquiry-form";
 import { Price } from "@/components/price";
-import { getCourse, getCourses } from "@/lib/api/content";
+import { getAllCourses, getCourse } from "@/lib/api/content";
 import { CourseJsonLd } from "@/components/seo/json-ld";
 
 export async function generateStaticParams() {
-  const courses = await getCourses();
+  const courses = await getAllCourses();
   return courses.map((course) => ({ slug: course.slug }));
 }
 

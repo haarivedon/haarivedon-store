@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   BookOpen,
@@ -13,7 +14,6 @@ import {
   LogOut,
   Menu,
   MessageSquareQuote,
-  PanelsTopLeft,
   ShoppingBag,
   Sparkles,
   Stars,
@@ -25,6 +25,7 @@ import {
   type AdminUser,
 } from "@repo/contract";
 import { adminApi } from "@/lib/api/admin-client";
+import { Toaster, toast } from "@/components/admin/toast";
 import { cn } from "@/lib/utils";
 
 export type PendingCounts = {
@@ -80,7 +81,12 @@ export function AdminShell({
 
   // Sign-in has no chrome: there is nothing to navigate to yet.
   if (pathname === "/admin/login") {
-    return <div className="min-h-screen bg-[#f6f5ef]">{children}</div>;
+    return (
+      <div className="min-h-screen bg-[#f6f5ef]">
+        {children}
+        <Toaster />
+      </div>
+    );
   }
 
   const groups: { heading: string; items: Item[] }[] = [
@@ -141,6 +147,7 @@ export function AdminShell({
   async function signOut() {
     setSigningOut(true);
     await adminApi.logout({ body: {} });
+    toast.success("Signed out.");
     router.push("/admin/login");
     router.refresh();
   }
@@ -149,7 +156,13 @@ export function AdminShell({
     <div className="flex h-full flex-col bg-forest text-ivory">
       <div className="flex items-center justify-between gap-2 px-5 py-5">
         <Link href="/admin" className="flex items-center gap-2.5">
-          <PanelsTopLeft className="size-5 text-gold" />
+          <Image
+            src="/images/logo.png"
+            alt=""
+            width={36}
+            height={36}
+            className="size-9 shrink-0"
+          />
           <span className="font-display text-lg font-semibold leading-none">
             Haarivedon
             <span className="mt-0.5 block text-[0.65rem] font-normal uppercase tracking-[0.18em] text-gold">
@@ -161,7 +174,7 @@ export function AdminShell({
           type="button"
           onClick={() => setOpen(false)}
           aria-label="Close menu"
-          className="grid size-9 place-items-center rounded-lg text-ivory/70 hover:bg-ivory/10 lg:hidden"
+          className="grid size-9 place-items-center text-ivory/70 hover:bg-ivory/10 lg:hidden"
         >
           <X className="size-5" />
         </button>
@@ -183,10 +196,10 @@ export function AdminShell({
                       onClick={() => setOpen(false)}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
+                        "flex min-h-11 items-center gap-2.5 border-l-2 px-3 py-2 text-sm transition-colors",
                         active
-                          ? "bg-ivory/15 font-semibold text-ivory"
-                          : "text-ivory/75 hover:bg-ivory/10 hover:text-ivory",
+                          ? "border-l-gold bg-ivory/15 font-semibold text-ivory"
+                          : "border-l-transparent text-ivory/75 hover:bg-ivory/10 hover:text-ivory",
                       )}
                     >
                       <item.icon
@@ -197,7 +210,7 @@ export function AdminShell({
                       />
                       <span className="flex-1 truncate">{item.label}</span>
                       {item.badge ? (
-                        <span className="rounded-full bg-gold px-1.5 py-0.5 text-[0.65rem] font-bold text-charcoal">
+                        <span className="bg-gold px-1.5 py-0.5 text-[0.65rem] font-bold tabular-nums text-charcoal">
                           {item.badge > 99 ? "99+" : item.badge}
                         </span>
                       ) : null}
@@ -221,7 +234,7 @@ export function AdminShell({
             href="/"
             target="_blank"
             rel="noreferrer"
-            className="flex-1 rounded-lg border border-ivory/20 px-3 py-2 text-center text-xs font-medium text-ivory/85 hover:bg-ivory/10"
+            className="flex-1 border border-ivory/20 px-3 py-2 text-center text-xs font-medium text-ivory/85 hover:bg-ivory/10"
           >
             View site
           </Link>
@@ -229,7 +242,7 @@ export function AdminShell({
             type="button"
             onClick={signOut}
             disabled={signingOut}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-ivory/20 px-3 py-2 text-xs font-medium text-ivory/85 hover:bg-ivory/10 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 border border-ivory/20 px-3 py-2 text-xs font-medium text-ivory/85 hover:bg-ivory/10 disabled:opacity-60"
           >
             <LogOut className="size-3.5" />
             Sign out
@@ -261,10 +274,17 @@ export function AdminShell({
           onClick={() => setOpen(true)}
           aria-label="Open menu"
           aria-expanded={open}
-          className="grid size-10 place-items-center rounded-lg border border-ivory/25"
+          className="grid size-10 place-items-center border border-ivory/25"
         >
           <Menu className="size-5" />
         </button>
+        <Image
+          src="/images/logo.png"
+          alt=""
+          width={28}
+          height={28}
+          className="size-7 shrink-0"
+        />
         <span className="font-display text-base font-semibold">
           Haarivedon admin
         </span>
@@ -287,6 +307,8 @@ export function AdminShell({
       <main className="min-w-0 px-4 pb-10 pt-20 sm:px-8 lg:py-10">
         <div className="mx-auto max-w-5xl">{children}</div>
       </main>
+
+      <Toaster />
     </div>
   );
 }

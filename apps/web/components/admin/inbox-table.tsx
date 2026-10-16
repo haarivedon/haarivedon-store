@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Download, Loader2, RefreshCw } from "lucide-react";
 import { adminApi, API_BASE } from "@/lib/api/admin-client";
+import { toast } from "@/components/admin/toast";
 import { Select } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
@@ -39,7 +40,7 @@ export function InboxTable({ kind, rows }: { kind: InboxKind; rows: Row[] }) {
 
   if (rows.length === 0) {
     return (
-      <p className="mt-8 rounded-2xl bg-ivory/80 p-8 text-center text-sm text-muted-foreground">
+      <p className="mt-8 border border-border bg-ivory/80 p-8 text-center text-sm text-muted-foreground">
         Nothing here yet.
       </p>
     );
@@ -50,7 +51,7 @@ export function InboxTable({ kind, rows }: { kind: InboxKind; rows: Row[] }) {
       {rows.map((row) => (
         <li
           key={row.id}
-          className="rounded-2xl border border-border/60 bg-card shadow-sm"
+          className="border border-border bg-card"
         >
           <button
             type="button"
@@ -66,7 +67,7 @@ export function InboxTable({ kind, rows }: { kind: InboxKind; rows: Row[] }) {
               <span className="text-sm text-charcoal/70">
                 {String(row.itemTitle ?? row.itemSlug ?? "")}
                 {row.kind ? (
-                  <span className="ml-2 rounded-full bg-sage/60 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-forest">
+                  <span className="ml-2 bg-sage/60 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-forest">
                     {String(row.kind)}
                   </span>
                 ) : null}
@@ -76,7 +77,7 @@ export function InboxTable({ kind, rows }: { kind: InboxKind; rows: Row[] }) {
               {kind === "bookings" && (
                 <KundaliBadge status={String(row.kundaliStatus ?? "")} />
               )}
-              <span className="rounded-full bg-charcoal/10 px-2.5 py-1 text-xs font-semibold text-charcoal/75">
+              <span className="bg-charcoal/10 px-2.5 py-1 text-xs font-semibold text-charcoal/75">
                 {statusLabels[String(row.status)] ?? String(row.status)}
               </span>
               <span className="text-xs text-muted-foreground">
@@ -105,7 +106,7 @@ function KundaliBadge({ status }: { status: string }) {
   return (
     <span
       className={cn(
-        "rounded-full px-2.5 py-1 text-xs font-semibold",
+        "px-2.5 py-1 text-xs font-semibold",
         tones[status] ?? "bg-charcoal/10",
       )}
     >
@@ -164,12 +165,32 @@ function Detail({ kind, row }: { kind: InboxKind; row: Row }) {
           ? await adminApi.updatePrediction({ params: { id: row.id }, body })
           : await adminApi.updateEnquiry({ params: { id: row.id }, body });
     setSaving(false);
-    if (response.status === 200) setSaved(true);
+    if (response.status === 200) {
+      setSaved(true);
+      toast.success(`Updated ${String(row.name)}.`, {
+        description: `Status set to ${statusLabels[status] ?? status}.`,
+      });
+    } else {
+      toast.error("That didn't save", { description: "Please try again." });
+    }
   }
 
   async function regenerate() {
     setKundali("pending");
-    await adminApi.regenerateKundali({ params: { id: row.id }, body: {} });
+    const response = await adminApi.regenerateKundali({
+      params: { id: row.id },
+      body: {},
+    });
+    if (response.status === 200) {
+      toast.info("Generating the Kundali", {
+        description: "This can take a moment — refresh to see it when it's ready.",
+      });
+    } else {
+      setKundali("failed");
+      toast.error("Could not start the Kundali", {
+        description: "Please try again.",
+      });
+    }
   }
 
   return (
@@ -203,7 +224,7 @@ function Detail({ kind, row }: { kind: InboxKind; row: Row }) {
             <button
               type="button"
               onClick={regenerate}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:border-brand-600"
+              className="inline-flex items-center gap-1.5 border border-border px-3 py-2 text-sm font-medium hover:border-brand-600"
             >
               <RefreshCw className="size-4 text-brand-600" />
               Generate Kundali
@@ -228,6 +249,7 @@ function Detail({ kind, row }: { kind: InboxKind; row: Row }) {
               value: option,
               label: statusLabels[option] ?? option,
             }))}
+            className="rounded-none"
           />
         </div>
 
@@ -241,7 +263,7 @@ function Detail({ kind, row }: { kind: InboxKind; row: Row }) {
           <textarea
             value={note}
             onChange={(event) => setNote(event.target.value)}
-            className="min-h-20 rounded-xl border border-border bg-background px-3 py-2 text-sm"
+            className="min-h-20 border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-brand-600 focus-visible:ring-2 focus-visible:ring-brand-600/20"
           />
         </label>
       </div>
@@ -251,7 +273,7 @@ function Detail({ kind, row }: { kind: InboxKind; row: Row }) {
           type="button"
           onClick={save}
           disabled={saving}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-forest px-4 py-2 text-sm font-semibold text-ivory disabled:opacity-70"
+          className="inline-flex items-center gap-1.5 bg-forest px-4 py-2 text-sm font-semibold text-ivory transition-colors hover:bg-forest/90 disabled:opacity-70"
         >
           {saving && <Loader2 className="size-4 animate-spin" />}
           Save

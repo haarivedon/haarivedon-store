@@ -53,6 +53,60 @@ export async function getCourses(query: Partial<CourseQuery> = {}) {
   }
 }
 
+/**
+ * Every published product, across all pages.
+ *
+ * The list endpoint caps `perPage` at 100 (paginationQuerySchema), so a single
+ * request silently drops anything past the first 100. The listing page, the
+ * prerender params and the sitemap all need the whole catalogue, so walk the
+ * pages until `meta.totalPages` is covered. `getProducts` stays for bounded
+ * callers (related items, featured).
+ */
+export async function getAllProducts(query: Partial<ProductQuery> = {}) {
+  try {
+    const first = await api.products.list({
+      query: { page: 1, perPage: 100, ...query },
+      fetchOptions: revalidate,
+    });
+    if (first.status !== 200) return [];
+
+    const all = [...first.body.data];
+    for (let page = 2; page <= first.body.meta.totalPages; page++) {
+      const res = await api.products.list({
+        query: { page, perPage: 100, ...query },
+        fetchOptions: revalidate,
+      });
+      if (res.status === 200) all.push(...res.body.data);
+    }
+    return all;
+  } catch {
+    return [];
+  }
+}
+
+/** Every published course, across all pages. See `getAllProducts`. */
+export async function getAllCourses(query: Partial<CourseQuery> = {}) {
+  try {
+    const first = await api.courses.list({
+      query: { page: 1, perPage: 100, ...query },
+      fetchOptions: revalidate,
+    });
+    if (first.status !== 200) return [];
+
+    const all = [...first.body.data];
+    for (let page = 2; page <= first.body.meta.totalPages; page++) {
+      const res = await api.courses.list({
+        query: { page, perPage: 100, ...query },
+        fetchOptions: revalidate,
+      });
+      if (res.status === 200) all.push(...res.body.data);
+    }
+    return all;
+  } catch {
+    return [];
+  }
+}
+
 export async function getCourse(slug: string) {
   try {
     const res = await api.courses.getBySlug({

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Download } from "lucide-react";
 import { InboxTable, type InboxKind } from "@/components/admin/inbox-table";
 import { PageHeader } from "@/components/admin/page-header";
+import { SearchField, Toolbar } from "@/components/admin/ui";
 import { API_BASE } from "@/lib/api/admin-client";
 import { adminFetch, requireAdminUser } from "@/lib/admin/session";
 import { cn } from "@/lib/utils";
@@ -49,27 +50,16 @@ export default async function InboxPage({
             ? `${result.meta.total} in total. Nothing here is editable — this is what people sent you.`
             : "Could not load the inbox — is the API running?"
         }
-        action={
-          result && result.meta.total > 0 ? (
-            <a
-              href={`${API_BASE}/api/admin/export/${tab.key}`}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-medium text-charcoal shadow-sm transition-colors hover:border-brand-600"
-            >
-              <Download className="size-4 text-brand-600" />
-              Export CSV
-            </a>
-          ) : null
-        }
       />
 
-      <nav aria-label="Inbox sections" className="flex flex-wrap gap-2">
+      <nav aria-label="Inbox sections" className="mb-4 flex flex-wrap gap-2">
         {tabs.map((candidate) => (
           <Link
             key={candidate.key}
             href={`/admin/inbox/${candidate.key}`}
             aria-current={candidate.key === tab.key ? "page" : undefined}
             className={cn(
-              "rounded-full border px-4 py-2 text-sm font-medium",
+              "border px-4 py-2 text-sm font-medium transition-colors",
               candidate.key === tab.key
                 ? "border-forest bg-forest text-ivory"
                 : "border-border bg-white text-charcoal/80 hover:border-brand-600",
@@ -80,23 +70,25 @@ export default async function InboxPage({
         ))}
       </nav>
 
-      <form className="mt-5 flex items-end gap-3" action="">
-        <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-charcoal/90">Search</span>
-          <input
-            name="q"
-            defaultValue={search}
-            placeholder="Name, mobile or email"
-            className="h-10 w-64 rounded-xl border border-border bg-white px-3 text-sm shadow-sm"
-          />
-        </label>
-        <button
-          type="submit"
-          className="h-10 rounded-xl border border-border bg-white px-4 text-sm font-medium shadow-sm hover:border-brand-600"
-        >
-          Search
-        </button>
-      </form>
+      <Toolbar
+        action={
+          result && result.meta.total > 0 ? (
+            <a
+              href={`${API_BASE}/api/admin/export/${tab.key}`}
+              className="inline-flex h-10 items-center gap-2 border border-border bg-white px-4 text-sm font-medium text-charcoal transition-colors hover:border-brand-600"
+            >
+              <Download className="size-4 text-brand-600" />
+              Export CSV
+            </a>
+          ) : null
+        }
+      >
+        <SearchField
+          defaultValue={search}
+          placeholder="Name, mobile or email"
+          label="Search submissions"
+        />
+      </Toolbar>
 
       <InboxTable kind={tab.key} rows={result?.data ?? []} />
 
@@ -105,7 +97,7 @@ export default async function InboxPage({
           {current > 1 && (
             <Link
               href={`?page=${current - 1}${search ? `&q=${search}` : ""}`}
-              className="rounded-lg border border-border px-3 py-1.5"
+              className="border border-border bg-white px-3 py-1.5 hover:border-brand-600"
             >
               Previous
             </Link>
@@ -116,7 +108,7 @@ export default async function InboxPage({
           {current < result.meta.totalPages && (
             <Link
               href={`?page=${current + 1}${search ? `&q=${search}` : ""}`}
-              className="rounded-lg border border-border px-3 py-1.5"
+              className="border border-border bg-white px-3 py-1.5 hover:border-brand-600"
             >
               Next
             </Link>

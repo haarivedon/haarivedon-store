@@ -23,6 +23,7 @@ import {
 } from "@/lib/admin/collections";
 import { issuesToFieldErrors, requiredKeys } from "@/lib/forms";
 import { ImagePicker } from "@/components/admin/image-picker";
+import { toast } from "@/components/admin/toast";
 import {
   Banner,
   FieldShell,
@@ -43,6 +44,9 @@ import { cn } from "@/lib/utils";
 
 type Values = Record<string, unknown>;
 type Missing = { field: string; message: string };
+
+const capitalize = (value: string) =>
+  value.charAt(0).toUpperCase() + value.slice(1);
 
 /**
  * One form for every collection, built from the section config.
@@ -73,7 +77,6 @@ export function RecordForm({
   const router = useRouter();
 
   const [missing, setMissing] = useState<Missing[]>([]);
-  const [formError, setFormError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [conflict, setConflict] = useState(false);
   const slugTouched = useRef(Boolean(recordId));
@@ -132,8 +135,9 @@ export function RecordForm({
 
   const onSubmit = handleSubmit(async (payload) => {
     setMissing([]);
-    setFormError(null);
     setConflict(false);
+
+    const willPublish = Boolean(payload.published);
 
     try {
       const response = recordId
@@ -148,6 +152,16 @@ export function RecordForm({
 
       if (response.status === 200 || response.status === 201) {
         setSaved(true);
+        toast.success(
+          willPublish
+            ? `${capitalize(spec.singular)} published.`
+            : `${capitalize(spec.singular)} saved as a draft.`,
+          {
+            description: willPublish
+              ? "It's live on the site now."
+              : "It stays hidden until you publish it.",
+          },
+        );
         const created = response.body as { id: string };
         if (!recordId) router.push(`/admin/content/${collectionKey}/${created.id}`);
         router.refresh();
@@ -156,6 +170,9 @@ export function RecordForm({
 
       if (response.status === 409) {
         setConflict(true);
+        toast.error("Someone else changed this", {
+          description: "Reload to see the current version, then re-apply your edit.",
+        });
         return;
       }
 
@@ -170,27 +187,34 @@ export function RecordForm({
           setMissing(body.missing);
           // The server rolled the publish back; reflect that here.
           setValue("published", false);
+          toast.info("Saved as a draft", {
+            description: `${body.missing.length} thing${
+              body.missing.length === 1 ? "" : "s"
+            } still needed before it can go live.`,
+          });
           return;
         }
 
         // Anything the client schema let through lands on its own field.
         const fieldErrors = issuesToFieldErrors(body.issues);
         for (const [field, message] of Object.entries(fieldErrors)) {
-          if (field === "_") setFormError(message);
-          else setError(field, { type: "server", message });
+          if (field !== "_") setError(field, { type: "server", message });
         }
-        if (!Object.keys(fieldErrors).length) {
-          setFormError(body.error ?? "That didn't save.");
-        }
+        toast.error("Some fields need attention", {
+          description:
+            fieldErrors._ ?? "Check the fields marked below and save again.",
+        });
         return;
       }
 
       const body = response.body as { error?: string } | undefined;
-      setFormError(body?.error ?? "That didn't save. Please try again.");
+      toast.error("That didn't save", {
+        description: body?.error ?? "Please try again.",
+      });
     } catch {
-      setFormError(
-        "We couldn't reach the server. Your changes are still on screen.",
-      );
+      toast.error("We couldn't reach the server", {
+        description: "Your changes are still on screen. Try saving again.",
+      });
     }
   });
 
@@ -199,7 +223,14 @@ export function RecordForm({
     const response = await adminApi[collectionKey].remove({
       params: { id: recordId },
     });
-    if (response.status === 200) router.push(`/admin/content/${collectionKey}`);
+    if (response.status === 200) {
+      toast.success(`${capitalize(spec.singular)} deleted.`);
+      router.push(`/admin/content/${collectionKey}`);
+    } else {
+      toast.error(`Could not delete this ${spec.singular}.`, {
+        description: "Please try again.",
+      });
+    }
   }
 
   const title = String(values[spec.titleField] ?? "");
@@ -253,8 +284,6 @@ export function RecordForm({
         </Banner>
       )}
 
-      {formError && <Banner tone="error">{formError}</Banner>}
-
       {/*
         Publish state leads the form rather than closing it: it is the thing
         an editor checks first, and the checklist says what stands between a
@@ -262,10 +291,10 @@ export function RecordForm({
       */}
       <section
         className={cn(
-          "rounded-xl border p-4",
+          "border border-l-4 p-4",
           published
-            ? "border-brand-600/40 bg-brand-600/5"
-            : "border-border bg-[#faf9f3]",
+            ? "border-brand-600/40 border-l-brand-600 bg-brand-600/5"
+            : "border-border border-l-charcoal/25 bg-[#faf9f3]",
         )}
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -315,7 +344,7 @@ export function RecordForm({
                   <span
                     aria-hidden
                     className={cn(
-                      "grid size-4 shrink-0 place-items-center rounded-full border",
+                      "grid size-4 shrink-0 place-items-center border",
                       check.done
                         ? "border-brand-600 bg-brand-600 text-white"
                         : "border-charcoal/30",
@@ -382,7 +411,7 @@ export function RecordForm({
       >
         <Link
           href={`/admin/content/${collectionKey}`}
-          className="rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-medium text-charcoal hover:border-brand-600"
+          className="border border-border bg-white px-4 py-2.5 text-sm font-medium text-charcoal hover:border-brand-600"
         >
           Cancel
         </Link>
@@ -406,7 +435,7 @@ export function RecordForm({
       </StickyActions>
 
       {recordId && (
-        <details className="rounded-xl border border-terracotta/30 bg-terracotta/5 p-4">
+        <details className="border border-terracotta/30 bg-terracotta/5 p-4">
           <summary className="cursor-pointer text-sm font-medium text-terracotta">
             Delete this {spec.singular}
           </summary>
@@ -417,7 +446,7 @@ export function RecordForm({
           <button
             type="button"
             onClick={onDelete}
-            className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-terracotta px-4 text-sm font-semibold text-white"
+            className="mt-3 inline-flex min-h-11 items-center gap-1.5 bg-terracotta px-4 text-sm font-semibold text-white hover:bg-terracotta/90"
           >
             Delete permanently
           </button>
@@ -506,6 +535,7 @@ function FormField({
                 value={String(controlled.value ?? "")}
                 onValueChange={controlled.onChange}
                 invalid={Boolean(error)}
+                className="rounded-none"
               />,
             )
           }

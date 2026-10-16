@@ -1,18 +1,26 @@
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
 import { Section, SectionHeader } from "@/components/section";
 import { MediaCard } from "@/components/cards";
-import { cn } from "@/lib/utils";
-import { products } from "@/lib/content/site";
+import { Price } from "@/components/price";
+import { getProducts } from "@/lib/api/content";
 
-const inr = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
+/**
+ * Home-page product strip.
+ *
+ * Reads featured published products from the API (store CR) rather than a
+ * hardcoded array, so the client controls what appears here from the admin.
+ * Falls back to the newest published products if nothing is flagged featured,
+ * and renders nothing when the catalogue is empty — an absent section beats an
+ * empty one (docs/PLAN.md §13).
+ */
+export async function Products() {
+  const featured = await getProducts({ featured: "true", perPage: 4 });
+  const items = featured.length
+    ? featured.slice(0, 4)
+    : (await getProducts({ perPage: 4 })).slice(0, 4);
 
-export function Products() {
+  if (items.length === 0) return null;
+
   return (
     <Section id="products" background="ivory">
       <SectionHeader
@@ -23,28 +31,31 @@ export function Products() {
       />
 
       <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-5 lg:grid-cols-4">
-        {products.map((product) => (
+        {items.map((product) => (
           <MediaCard
-            key={product.name}
-            image={product.image}
-            alt={product.alt}
+            key={product.id}
+            image={product.images[0] ?? ""}
+            alt={product.name}
+            aspect="square"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 300px"
           >
             <h3 className="font-display text-sm font-semibold text-forest sm:text-lg">
-              {product.name}
+              <Link
+                href={`/products/${product.slug}`}
+                className="transition-colors hover:text-brand-700"
+              >
+                {product.name}
+              </Link>
             </h3>
-            <p className="mt-1 flex-1 text-sm font-semibold text-brand-700 sm:text-base">
-              {inr.format(product.price)}
+            <p className="mt-1 flex-1">
+              <Price value={product.price} currency={product.currency} />
             </p>
+
             <Link
-              href="/products"
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "mt-3 h-10 w-full gap-1.5 px-2 text-xs font-semibold sm:mt-4 sm:h-11 sm:text-sm",
-              )}
+              href={`/products/${product.slug}`}
+              className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-none border border-forest/30 px-2 text-xs font-semibold text-forest transition-colors hover:bg-forest hover:text-ivory sm:mt-4 sm:h-11 sm:text-sm"
             >
-              <ShoppingBag className="size-3.5 sm:size-4" />
-              Add to Cart
+              View details
             </Link>
           </MediaCard>
         ))}
