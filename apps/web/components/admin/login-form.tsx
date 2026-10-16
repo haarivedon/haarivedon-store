@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { loginSchema } from "@repo/contract";
 import { adminApi } from "@/lib/api/admin-client";
+import { toast } from "@/components/admin/toast";
 import { toFieldErrors, type FieldErrors } from "@/lib/forms";
-import { Field, inputClass } from "@/components/forms/field";
+import { Field } from "@/components/forms/field";
+import { controlClass } from "@/components/admin/ui";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +36,7 @@ export function LoginForm({ next }: { next: string }) {
     try {
       const response = await adminApi.login({ body: parsed.data });
       if (response.status === 200) {
+        toast.success("Signed in.");
         router.push(next);
         router.refresh();
         return;
@@ -57,7 +60,7 @@ export function LoginForm({ next }: { next: string }) {
           autoComplete="username"
           autoFocus
           aria-invalid={Boolean(errors.email)}
-          className={inputClass}
+          className={controlClass}
         />
       </Field>
       <Field label="Password" htmlFor="password" error={errors.password}>
@@ -67,12 +70,12 @@ export function LoginForm({ next }: { next: string }) {
           type="password"
           autoComplete="current-password"
           aria-invalid={Boolean(errors.password)}
-          className={inputClass}
+          className={controlClass}
         />
       </Field>
 
       {errors._ && (
-        <p role="alert" className="rounded-xl bg-terracotta/10 px-4 py-3 text-sm text-terracotta">
+        <p role="alert" className="border-l-4 border-terracotta bg-terracotta/10 px-4 py-3 text-sm text-terracotta">
           {errors._}
         </p>
       )}

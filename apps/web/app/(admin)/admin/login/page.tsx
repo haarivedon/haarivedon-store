@@ -22,7 +22,7 @@ export default async function LoginPage({
       <p className="mt-1.5 text-sm text-muted-foreground">
         The Haarivedon content admin.
       </p>
-      <div className="mt-6 rounded-2xl border border-border/70 bg-white p-6 shadow-[0_1px_2px_rgba(32,38,31,0.04)]">
+      <div className="mt-6 border border-l-4 border-border border-l-gold bg-white p-6">
         <LoginForm next={target} />
       </div>
     </div>

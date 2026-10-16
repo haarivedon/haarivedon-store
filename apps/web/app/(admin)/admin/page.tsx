@@ -47,7 +47,7 @@ export default async function AdminHome() {
           <li key={tile.label}>
             <Link
               href={tile.href}
-              className="flex h-full flex-col rounded-2xl border border-border/70 bg-white p-5 shadow-[0_1px_2px_rgba(32,38,31,0.04)] transition-colors hover:border-brand-600"
+              className="flex h-full flex-col border border-l-2 border-border border-l-gold bg-white p-5 transition-colors hover:border-brand-600 hover:border-l-gold"
             >
               <span className="font-display text-3xl font-semibold text-forest">
                 {tile.value ?? "—"}

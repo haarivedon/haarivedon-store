@@ -19,6 +19,7 @@
     "clean": "rm -rf node_modules .turbo",
     "db:seed": "dotenv -e ../../.env -- tsx prisma/seed.ts",
     "db:seed:admin": "dotenv -e ../../.env -- tsx prisma/seed-admin.ts",
+    "db:seed:featured": "dotenv -e ../../.env -- tsx prisma/seed-featured.ts",
     "db:seed:places": "dotenv -e ../../.env -- tsx prisma/seed-places.ts"
   },
   "dependencies": {

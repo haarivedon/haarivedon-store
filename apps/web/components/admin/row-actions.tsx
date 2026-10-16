@@ -13,8 +13,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { adminApi } from "@/lib/api/admin-client";
+import { toast } from "@/components/admin/toast";
 import type { CollectionSpec } from "@/lib/admin/collections";
-import { cn } from "@/lib/utils";
 
 type Missing = { field: string; message: string };
 
@@ -46,7 +46,6 @@ export function RowActions({
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [missing, setMissing] = useState<Missing[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const wrapper = useRef<HTMLDivElement>(null);
 
   // Close on an outside click or Escape, like any menu.
@@ -71,7 +70,6 @@ export function RowActions({
   async function togglePublished() {
     setBusy(true);
     setMissing(null);
-    setError(null);
 
     try {
       const response = await adminApi[spec].update({
@@ -84,6 +82,11 @@ export function RowActions({
 
       if (response.status === 200) {
         setOpen(false);
+        toast.success(published ? `“${title}” unpublished.` : `“${title}” published.`, {
+          description: published
+            ? "It's hidden from the site now."
+            : "It's live on the site now.",
+        });
         router.refresh();
         return;
       }
@@ -91,19 +94,28 @@ export function RowActions({
       if (response.status === 422) {
         const body = response.body as { missing?: Missing[]; error?: string };
         if (body.missing?.length) setMissing(body.missing);
-        else setError(body.error ?? "That didn't work.");
+        else
+          toast.error("That didn't work", {
+            description: body.error ?? "Please try again.",
+          });
         return;
       }
 
       if (response.status === 409) {
-        setError("This changed somewhere else. Reload and try again.");
+        toast.error("This changed somewhere else", {
+          description: "Reload the page and try again.",
+        });
         return;
       }
 
       const body = response.body as { error?: string } | undefined;
-      setError(body?.error ?? "That didn't work. Please try again.");
+      toast.error("That didn't work", {
+        description: body?.error ?? "Please try again.",
+      });
     } catch {
-      setError("We couldn't reach the server.");
+      toast.error("We couldn't reach the server", {
+        description: "Please try again.",
+      });
     } finally {
       setBusy(false);
     }
@@ -116,9 +128,10 @@ export function RowActions({
     setBusy(false);
     if (response.status === 200) {
       setOpen(false);
+      toast.success(`“${title}” deleted.`);
       router.refresh();
     } else {
-      setError("Could not delete that.");
+      toast.error("Could not delete that", { description: "Please try again." });
     }
   }
 
@@ -137,7 +150,7 @@ export function RowActions({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Actions for ${title}`}
-        className="grid size-9 place-items-center rounded-lg text-charcoal/60 transition-colors hover:bg-sage/40 hover:text-forest"
+        className="grid size-9 place-items-center text-charcoal/60 transition-colors hover:bg-sage/40 hover:text-forest"
       >
         {busy ? (
           <Loader2 className="size-4 animate-spin" />
@@ -149,7 +162,7 @@ export function RowActions({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-10 z-30 w-56 overflow-hidden rounded-xl border border-border bg-white py-1 shadow-lg"
+          className="absolute right-0 top-10 z-30 w-56 overflow-hidden border border-border bg-white py-1 shadow-lg"
         >
           <button
             type="button"
@@ -206,41 +219,31 @@ export function RowActions({
         </div>
       )}
 
-      {/* Validation feedback stays on screen until dismissed. */}
-      {(missing || error) && (
+      {/*
+        The publish checklist stays anchored to the row — it is a list the
+        editor needs to act on, with a link into the record, so a transient
+        toast would be the wrong home for it. Plain failures do toast.
+      */}
+      {missing && (
         <div
           role="alert"
-          className={cn(
-            "absolute right-0 top-10 z-40 w-72 rounded-xl border p-3 text-left text-xs shadow-lg",
-            missing
-              ? "border-gold/70 bg-[#fffbe8] text-charcoal"
-              : "border-terracotta/40 bg-terracotta/10 text-terracotta",
-          )}
+          className="absolute right-0 top-10 z-40 w-72 border border-l-4 border-gold/70 border-l-gold bg-[#fffbe8] p-3 text-left text-xs text-charcoal shadow-lg"
         >
-          {missing ? (
-            <>
-              <strong className="block text-sm">Not ready to publish</strong>
-              <ul className="mt-1.5 list-disc space-y-1 pl-4">
-                {missing.map((item) => (
-                  <li key={item.field}>{item.message}</li>
-                ))}
-              </ul>
-              <Link
-                href={`/admin/content/${spec}/${id}`}
-                className="mt-2 inline-block font-semibold underline"
-              >
-                Open and finish it
-              </Link>
-            </>
-          ) : (
-            error
-          )}
+          <strong className="block text-sm">Not ready to publish</strong>
+          <ul className="mt-1.5 list-disc space-y-1 pl-4">
+            {missing.map((item) => (
+              <li key={item.field}>{item.message}</li>
+            ))}
+          </ul>
+          <Link
+            href={`/admin/content/${spec}/${id}`}
+            className="mt-2 inline-block font-semibold underline"
+          >
+            Open and finish it
+          </Link>
           <button
             type="button"
-            onClick={() => {
-              setMissing(null);
-              setError(null);
-            }}
+            onClick={() => setMissing(null)}
             className="mt-2 block text-[0.7rem] font-medium underline"
           >
             Dismiss

@@ -32,6 +32,13 @@ export const marqueeWords = [
   "A Better Tomorrow",
 ] as const;
 
+/** Thin promotional bar shown above the header. */
+export const announcement = {
+  message: "Online sessions worldwide — personal guidance wherever you are.",
+  ctaLabel: "Book a session",
+  ctaHref: "/book",
+} as const;
+
 export const heroHighlights = [
   { icon: "Sprout", label: "Personal Guidance" },
   { icon: "Users", label: "One-on-One Sessions" },
@@ -68,33 +75,85 @@ export const aboutPillars = [
 
 export const services = [
   {
-    icon: "MessageCircleHeart",
-    title: "Personal Consultation",
-    description:
-      "Bring your questions and explore clear, personalized guidance for the decisions ahead.",
-    href: "/services#consultation",
+    icon: "Compass",
+    title: "Life Coaching",
+    description: "Clarity and direction for the choices in front of you.",
+    href: "/book",
   },
   {
-    icon: "Sparkles",
-    title: "Prediction & Reading",
-    description:
-      "A dedicated reading based on your details, offering insight into what lies ahead.",
+    icon: "HeartHandshake",
+    title: "Relationship Coaching",
+    description: "Understand and heal the patterns in your closest bonds.",
+    href: "/book",
+  },
+  {
+    icon: "BrainCircuit",
+    title: "NLP Therapy",
+    description: "Rewire limiting thoughts and respond from a calmer place.",
+    href: "/book",
+  },
+  {
+    icon: "Orbit",
+    title: "Hypnotherapy",
+    description: "Gentle guided trance to release what holds you back.",
+    href: "/book",
+  },
+  {
+    icon: "Layers",
+    title: "Tarot Reading",
+    description: "Insightful card readings for the question you bring.",
     href: "/predictions",
   },
   {
-    icon: "Compass",
-    title: "Guidance Sessions",
-    description:
-      "Focused support for specific areas of life — relationships, career, and beyond.",
-    href: "/services#guidance",
+    icon: "Eye",
+    title: "Prediction & Analysis",
+    description: "A considered look at what lies ahead for you.",
+    href: "/predictions",
   },
   {
-    icon: "Flower2",
-    title: "Spiritual Products",
-    description:
-      "Curated sacred objects chosen to support and steady your everyday practice.",
-    href: "/products",
+    icon: "MoonStar",
+    title: "Astrology & Nadi",
+    description: "Vedic and Nadi reading of your birth chart.",
+    href: "/book",
   },
+  {
+    icon: "Hash",
+    title: "Numerology",
+    description: "What your numbers reveal about path and timing.",
+    href: "/book",
+  },
+  {
+    icon: "HandHeart",
+    title: "Reiki Grandmaster",
+    description: "Hands-on energy healing to restore balance.",
+    href: "/book",
+  },
+  {
+    icon: "Flame",
+    title: "Lama Fera Grandmaster",
+    description: "A powerful Buddhist energy-healing technique.",
+    href: "/book",
+  },
+  {
+    icon: "Feather",
+    title: "Angel Therapy & Grandmaster",
+    description: "Connect with angelic guidance and support.",
+    href: "/book",
+  },
+  {
+    icon: "Hourglass",
+    title: "Past Life Regression",
+    description: "Revisit past lives to understand this one.",
+    href: "/book",
+  },
+] as const;
+
+/** Standalone credentials shown under the services grid (from the brand asset). */
+export const serviceCredentials = [
+  "Energy Healer",
+  "Quantum Healer",
+  "Healer",
+  "Counsellor",
 ] as const;
 
 export const products = [
