@@ -9,6 +9,7 @@ import { cors } from "hono/cors";
 import { prisma } from "@repo/db";
 import { env, isProduction } from "./env";
 import { getObject } from "./lib/storage";
+import { verifyWebhookSignature } from "./lib/razorpay";
 import { handleUpload } from "./routes/admin/upload";
 import { readSessionCookie, sessionFromToken } from "./routes/admin/session";
 import { exportRows, toCsv } from "./lib/csv";
@@ -165,6 +166,57 @@ export const createApp = () => {
       "content-disposition": `attachment; filename="${filename}"`,
       "cache-control": "private, no-store",
     });
+  });
+
+  //
+  // Razorpay webhook: the authoritative "order paid" signal. Outside ts-rest
+  // because the HMAC must run over the exact raw body Razorpay sent — ts-rest
+  // would parse and re-shape it first, breaking the check (store CR).
+  app.post("/api/razorpay/webhook", async (c) => {
+    const raw = await c.req.text();
+    if (!verifyWebhookSignature(raw, c.req.header("x-razorpay-signature") ?? null)) {
+      return c.json({ error: "Invalid signature." }, 400);
+    }
+
+    let event: {
+      event?: string;
+      payload?: {
+        payment?: { entity?: { id?: string; order_id?: string } };
+        order?: { entity?: { id?: string } };
+      };
+    };
+    try {
+      event = JSON.parse(raw);
+    } catch {
+      return c.json({ error: "Bad payload." }, 400);
+    }
+
+    const payment = event.payload?.payment?.entity;
+    const razorpayOrderId = payment?.order_id ?? event.payload?.order?.entity?.id;
+
+    if (
+      (event.event === "payment.captured" || event.event === "order.paid") &&
+      razorpayOrderId
+    ) {
+      const order = await prisma.order.findUnique({ where: { razorpayOrderId } });
+      // Idempotent: promote only a still-pending order, so a replayed webhook
+      // or a race with the client-side verify changes nothing.
+      if (order && order.paymentStatus === "pending") {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: {
+            paymentStatus: "paid",
+            razorpayPaymentId: payment?.id ?? order.razorpayPaymentId,
+          },
+        });
+        logger.info("order paid (webhook)", {
+          orderNumber: order.orderNumber,
+          event: event.event,
+        });
+      }
+    }
+
+    return c.json({ ok: true });
   });
 
   // Everything declared in @repo/contract.

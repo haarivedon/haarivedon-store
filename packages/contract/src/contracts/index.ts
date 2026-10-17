@@ -2,6 +2,7 @@ import { initContract } from "@ts-rest/core";
 import { errorSchema } from "../schemas/common";
 import { adminContract } from "./admin";
 import { bookingsContract } from "./bookings";
+import { checkoutContract } from "./checkout";
 import { coursesContract } from "./courses";
 import { enquiriesContract } from "./enquiries";
 import { healthContract } from "./health";
@@ -31,6 +32,7 @@ export const contract = c.router(
     kundali: kundaliContract,
     courses: coursesContract,
     enquiries: enquiriesContract,
+    checkout: checkoutContract,
     siteContent: siteContentContract,
     admin: adminContract,
   },
@@ -48,6 +50,7 @@ export type Contract = typeof contract;
 export {
   adminContract,
   bookingsContract,
+  checkoutContract,
   coursesContract,
   enquiriesContract,
   healthContract,

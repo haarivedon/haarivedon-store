@@ -26,6 +26,9 @@
     "ADMIN_PASSWORD",
     "REVALIDATE_SECRET",
     "WEB_URL",
+    "RAZORPAY_KEY_ID",
+    "RAZORPAY_KEY_SECRET",
+    "RAZORPAY_WEBHOOK_SECRET",
     "NEXT_PUBLIC_*"
   ],
   "tasks": {

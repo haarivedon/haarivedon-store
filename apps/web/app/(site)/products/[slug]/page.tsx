@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { MessageCircle, Package, ShieldCheck, Sparkles } from "lucide-react";
 import { productFamilyLabels } from "@repo/contract";
 import { Section } from "@/components/section";
+import { AddToCart } from "@/components/cart/add-to-cart";
 import { EnquiryForm } from "@/components/enquiry-form";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { ProductCard } from "@/components/products/product-card";
@@ -179,16 +180,27 @@ export default async function ProductPage({
               <StockPill inStock={product.inStock} priced={product.price !== null} />
             </div>
 
-            <a
-              href="#enquire"
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "mt-6 h-12 w-full rounded-full px-6 text-sm font-semibold sm:w-auto",
-              )}
-            >
-              <MessageCircle className="size-4" />
-              Ask about this {itemNoun}
-            </a>
+            {buyable ? (
+              <div className="mt-6">
+                <AddToCart
+                  slug={product.slug}
+                  name={product.name}
+                  price={product.price!}
+                  image={product.images[0] ?? ""}
+                />
+              </div>
+            ) : (
+              <a
+                href="#enquire"
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "mt-6 h-12 w-full rounded-full px-6 text-sm font-semibold sm:w-auto",
+                )}
+              >
+                <MessageCircle className="size-4" />
+                Ask about this {itemNoun}
+              </a>
+            )}
 
             <ul className="mt-7 grid gap-x-4 gap-y-4 border-t border-border/60 pt-6 sm:grid-cols-2 lg:grid-cols-3">
               {assurances.map((item) => (

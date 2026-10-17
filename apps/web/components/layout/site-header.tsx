@@ -7,6 +7,7 @@ import { ArrowRight, Mail, Menu, Phone, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
+import { CartButton } from "@/components/cart/cart-button";
 import { navLinks, site } from "@/lib/content/site";
 
 export function SiteHeader() {
@@ -51,6 +52,7 @@ export function SiteHeader() {
 
           {/* Mobile menu toggle */}
           <div className="flex items-center gap-1 lg:hidden">
+            <CartButton tone="light" />
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
@@ -95,6 +97,7 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <CartButton tone="dark" />
             <Link
               href="/book"
               className={cn(
