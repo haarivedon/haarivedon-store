@@ -8,6 +8,7 @@ const backgrounds = {
   cream: "bg-cream",
   sage: "bg-sage/40",
   forest: "bg-forest text-ivory",
+  indigo: "bg-indigo text-ivory",
 } as const;
 
 /** Shared section shell — consistent container width and vertical rhythm. */

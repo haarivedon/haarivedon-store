@@ -138,7 +138,7 @@ export default function CheckoutPage() {
           email: session.email,
           contact: session.phone,
         },
-        theme: { color: "#214A2E" },
+        theme: { color: "#16235F" },
         modal: {
           // Buyer closed the modal without paying — let them try again.
           ondismiss: () => {
