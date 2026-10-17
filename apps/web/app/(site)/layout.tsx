@@ -2,6 +2,7 @@ import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { OrganizationJsonLd } from "@/components/seo/json-ld";
+import { CartProvider } from "@/lib/cart/cart-context";
 import { getSiteContent, orFallback } from "@/lib/api/content";
 import { site } from "@/lib/content/site";
 
@@ -17,7 +18,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
   const contact = await getSiteContent("site.contact");
 
   return (
-    <>
+    <CartProvider>
       <OrganizationJsonLd
         phone={orFallback(contact.phone, site.phone)}
         email={orFallback(contact.email, site.email)}
@@ -26,6 +27,6 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       <SiteHeader />
       <main className="flex-1">{children}</main>
       <SiteFooter />
-    </>
+    </CartProvider>
   );
 }

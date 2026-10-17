@@ -72,6 +72,16 @@ const envSchema = z.object({
   REVALIDATE_SECRET: z.string().optional(),
   /** The web app's base URL, for revalidation callbacks. */
   WEB_URL: z.string().default("http://localhost:3000"),
+
+  // ── Store / Razorpay (store CR) ─────────────────────────────────────────
+  /**
+   * Razorpay API credentials. With no key pair the store is disabled: Buy Now
+   * is hidden and checkout refuses, so the catalogue still works without them.
+   * `KEY_ID` is publishable; `KEY_SECRET` and `WEBHOOK_SECRET` stay server-side.
+   */
+  RAZORPAY_KEY_ID: z.string().optional(),
+  RAZORPAY_KEY_SECRET: z.string().optional(),
+  RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
