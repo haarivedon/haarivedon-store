@@ -55,19 +55,45 @@ function toUtc(date: Date, time: string, tz: string): Date {
   return new Date(local.getTime() + (local.getTime() - asZoned));
 }
 
-export async function generateKundali(bookingId: string): Promise<boolean> {
-  const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
-  if (!booking) return false;
+/** The birth fields a chart needs, however the source record names them. */
+type KundaliRecord = {
+  name: string;
+  dateOfBirth: Date;
+  timeOfBirth: string;
+  birthPlace: string;
+  birthLat: number;
+  birthLng: number;
+  birthTz: string;
+};
+type KundaliResult = {
+  kundaliStatus: string;
+  kundaliKey?: string;
+  kundaliError: string;
+};
+
+/**
+ * Generates a Kundali for any record that carries birth details. The source
+ * (a Booking or a PredictionRequest) is abstracted behind `load`/`save`, so the
+ * provider, retry and storage logic is written once.
+ */
+async function generate(
+  entity: string,
+  id: string,
+  load: () => Promise<KundaliRecord | null>,
+  save: (data: KundaliResult) => Promise<void>,
+): Promise<boolean> {
+  const record = await load();
+  if (!record) return false;
 
   const input: BirthInput = {
-    name: booking.name,
-    bornAt: toUtc(booking.dateOfBirth, booking.timeOfBirth, booking.birthTz),
-    localDate: booking.dateOfBirth.toISOString().slice(0, 10),
-    localTime: booking.timeOfBirth,
-    place: booking.birthPlace,
-    lat: booking.birthLat,
-    lng: booking.birthLng,
-    tz: booking.birthTz,
+    name: record.name,
+    bornAt: toUtc(record.dateOfBirth, record.timeOfBirth, record.birthTz),
+    localDate: record.dateOfBirth.toISOString().slice(0, 10),
+    localTime: record.timeOfBirth,
+    place: record.birthPlace,
+    lat: record.birthLat,
+    lng: record.birthLng,
+    tz: record.birthTz,
   };
 
   for (let attempt = 0; attempt < ATTEMPTS; attempt += 1) {
@@ -78,16 +104,14 @@ export async function generateKundali(bookingId: string): Promise<boolean> {
     try {
       const chart = await chartProvider().getChart(input);
       const pdf = await renderKundaliPdf(input, chart);
-      const key = `kundali/${booking.id}/${randomBytes(6).toString("hex")}.pdf`;
+      const key = `kundali/${entity}/${id}/${randomBytes(6).toString("hex")}.pdf`;
       await putObject(key, pdf, "application/pdf");
 
-      await prisma.booking.update({
-        where: { id: booking.id },
-        data: { kundaliKey: key, kundaliStatus: "ready", kundaliError: "" },
-      });
+      await save({ kundaliKey: key, kundaliStatus: "ready", kundaliError: "" });
 
       logger.info("kundali generated", {
-        bookingId: booking.id,
+        entity,
+        id,
         bytes: pdf.byteLength,
         sample: chart.sample,
       });
@@ -95,16 +119,14 @@ export async function generateKundali(bookingId: string): Promise<boolean> {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logger.warn("kundali generation failed", {
-        bookingId: booking.id,
+        entity,
+        id,
         attempt: attempt + 1,
         message,
       });
 
       if (attempt === ATTEMPTS - 1) {
-        await prisma.booking.update({
-          where: { id: booking.id },
-          data: { kundaliStatus: "failed", kundaliError: message.slice(0, 300) },
-        });
+        await save({ kundaliStatus: "failed", kundaliError: message.slice(0, 300) });
       }
     }
   }
@@ -112,9 +134,41 @@ export async function generateKundali(bookingId: string): Promise<boolean> {
   return false;
 }
 
+export function generateKundali(bookingId: string): Promise<boolean> {
+  return generate(
+    "booking",
+    bookingId,
+    () => prisma.booking.findUnique({ where: { id: bookingId } }),
+    async (data) => {
+      await prisma.booking.update({ where: { id: bookingId }, data });
+    },
+  );
+}
+
+export function generatePredictionKundali(id: string): Promise<boolean> {
+  return generate(
+    "prediction",
+    id,
+    async () => {
+      const p = await prisma.predictionRequest.findUnique({ where: { id } });
+      // PredictionRequest names the place column `placeOfBirth`; map it across.
+      return p ? { ...p, birthPlace: p.placeOfBirth } : null;
+    },
+    async (data) => {
+      await prisma.predictionRequest.update({ where: { id }, data });
+    },
+  );
+}
+
 /** Fire-and-forget wrapper: never let a generation error reject a request. */
 export function queueKundali(bookingId: string): void {
   void generateKundali(bookingId).catch((error) => {
-    logger.error("kundali queue crashed", { bookingId, error });
+    logger.error("kundali queue crashed", { entity: "booking", id: bookingId, error });
+  });
+}
+
+export function queuePredictionKundali(id: string): void {
+  void generatePredictionKundali(id).catch((error) => {
+    logger.error("kundali queue crashed", { entity: "prediction", id, error });
   });
 }

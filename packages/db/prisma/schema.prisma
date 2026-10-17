@@ -58,11 +58,22 @@ model PredictionRequest {
   dateOfBirth  DateTime
   timeOfBirth  String   @default("")
   placeOfBirth String
+  /// Coordinates + zone for the Kundali, from the city picker (like Booking).
+  birthLat     Float    @default(0)
+  birthLng     Float    @default(0)
+  birthTz      String   @default("Asia/Kolkata")
   // career | relationships | health | finance | general
   focusArea    String   @default("general")
   question     String   @default("")
   // pending | in-progress | delivered
   status       String   @default("pending")
+  // pending | ready | failed — the chart is generated after the request is saved.
+  kundaliStatus String  @default("pending")
+  /// Private-bucket object key; never served directly.
+  kundaliKey   String   @default("")
+  /// One-time token handed to the submitter so only they can download the PDF.
+  kundaliToken String   @default("")
+  kundaliError String   @default("")
   /// Admin-only, never exposed publicly.
   internalNote String   @default("")
   createdAt    DateTime @default(now())

@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Download, Loader2 } from "lucide-react";
 import { createPredictionSchema, focusAreas } from "@repo/contract";
 import { api } from "@/lib/api/client";
 import { issuesToFieldErrors, toFieldErrors, type FieldErrors } from "@/lib/forms";
 import { Field, inputClass, textareaClass } from "@/components/forms/field";
 import { Select } from "@/components/ui/select";
+import {
+  CitySelect,
+  emptyBirthPlace,
+  type BirthPlace,
+} from "@/components/forms/city-select";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -19,31 +24,44 @@ const focusLabels: Record<(typeof focusAreas)[number], string> = {
   general: "General guidance",
 };
 
+type Submitted = { id: string; message: string; kundaliToken: string };
+
 export function PredictionForm() {
+  const [place, setPlace] = useState<BirthPlace>(emptyBirthPlace);
   const [focusArea, setFocusArea] =
     useState<(typeof focusAreas)[number]>("general");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState<Submitted | null>(null);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting) return;
 
     const form = new FormData(event.currentTarget);
-    const parsed = createPredictionSchema.safeParse({
+    const raw = {
       name: String(form.get("name") ?? ""),
       email: String(form.get("email") ?? ""),
       phone: String(form.get("phone") ?? ""),
       dateOfBirth: String(form.get("dateOfBirth") ?? ""),
       timeOfBirth: String(form.get("timeOfBirth") ?? ""),
-      placeOfBirth: String(form.get("placeOfBirth") ?? ""),
+      placeOfBirth: place.place,
+      birthLat: place.lat,
+      birthLng: place.lng,
+      birthTz: place.tz,
       focusArea,
       question: String(form.get("question") ?? ""),
-    });
+    };
 
+    // Same schema the API uses, so the shapes cannot drift (PLAN.md §2).
+    const parsed = createPredictionSchema.safeParse(raw);
     if (!parsed.success) {
-      setErrors(toFieldErrors(parsed.error));
+      const fieldErrors = toFieldErrors(parsed.error);
+      if (place.lat === null || place.lng === null) {
+        fieldErrors.placeOfBirth ??=
+          "Pick your city from the list, or enter coordinates manually.";
+      }
+      setErrors(fieldErrors);
       return;
     }
 
@@ -53,7 +71,7 @@ export function PredictionForm() {
       const response = await api.predictions.create({ body: parsed.data });
 
       if (response.status === 201) {
-        setDone(response.body.message);
+        setSubmitted(response.body);
         return;
       }
       if (response.status === 422) {
@@ -75,25 +93,7 @@ export function PredictionForm() {
     }
   }
 
-  if (done) {
-    return (
-      <div className="rounded-3xl border border-brand-600/30 bg-ivory p-6 sm:p-8">
-        <CheckCircle2 className="size-9 text-brand-600" />
-        <h2 className="mt-4 font-display text-2xl font-semibold text-forest">
-          Your request is with us
-        </h2>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          {done}
-        </p>
-        <Link
-          href="/"
-          className="mt-6 inline-flex text-sm font-medium text-brand-700 underline underline-offset-2"
-        >
-          Back to home
-        </Link>
-      </div>
-    );
-  }
+  if (submitted) return <Confirmation submitted={submitted} />;
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
@@ -107,11 +107,7 @@ export function PredictionForm() {
             className={inputClass}
           />
         </Field>
-        <Field
-          label="Mobile number"
-          htmlFor="p-phone"
-          error={errors.phone}
-        >
+        <Field label="Mobile number" htmlFor="p-phone" error={errors.phone}>
           <input
             id="p-phone"
             name="phone"
@@ -127,7 +123,6 @@ export function PredictionForm() {
       <Field
         label="Email"
         htmlFor="p-email"
-       
         error={errors.email}
         hint="Your reading is sent here"
       >
@@ -141,12 +136,8 @@ export function PredictionForm() {
         />
       </Field>
 
-      <div className="grid gap-5 sm:grid-cols-3">
-        <Field
-          label="Date of birth"
-          htmlFor="p-dob"
-          error={errors.dateOfBirth}
-        >
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field label="Date of birth" htmlFor="p-dob" error={errors.dateOfBirth}>
           <input
             id="p-dob"
             name="dateOfBirth"
@@ -160,26 +151,20 @@ export function PredictionForm() {
         <Field
           label="Time of birth"
           htmlFor="p-tob"
-          optional
           error={errors.timeOfBirth}
-          hint="If you know it"
-        >
-          <input id="p-tob" name="timeOfBirth" type="time" className={inputClass} />
-        </Field>
-        <Field
-          label="Place of birth"
-          htmlFor="p-pob"
-          error={errors.placeOfBirth}
+          hint="As exact as you can — the chart depends on it"
         >
           <input
-            id="p-pob"
-            name="placeOfBirth"
-            aria-invalid={Boolean(errors.placeOfBirth)}
+            id="p-tob"
+            name="timeOfBirth"
+            type="time"
+            aria-invalid={Boolean(errors.timeOfBirth)}
             className={inputClass}
-            placeholder="City"
           />
         </Field>
       </div>
+
+      <CitySelect value={place} onChange={setPlace} errors={errors} />
 
       <Field label="What is this about?" htmlFor="p-focus">
         <Select
@@ -229,6 +214,100 @@ export function PredictionForm() {
           </>
         )}
       </button>
+
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        Your birth details are used to prepare your chart and are never shared.
+      </p>
     </form>
+  );
+}
+
+/**
+ * Confirmation state. Keyed by the returned request id, so a refresh shows the
+ * same state rather than resubmitting. The chart is generated after the request
+ * is saved, so this polls for it.
+ */
+function Confirmation({ submitted }: { submitted: Submitted }) {
+  const [status, setStatus] = useState<"pending" | "ready" | "failed">("pending");
+  const [downloadPath, setDownloadPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    let attempts = 0;
+
+    const poll = async () => {
+      attempts += 1;
+      try {
+        const response = await api.predictions.status({
+          params: { id: submitted.id },
+          query: { token: submitted.kundaliToken },
+        });
+        if (!active) return;
+
+        if (response.status === 200) {
+          setStatus(response.body.status);
+          setDownloadPath(response.body.downloadPath);
+          if (response.body.status !== "pending") return;
+        }
+      } catch {
+        // Keep polling; a transient network blip is not a failure.
+      }
+
+      // Poll for ~3.5 min: the free VedAstro tier is throttled and a chart can
+      // take a couple of minutes. The practice follows up either way.
+      if (active && attempts < 70) setTimeout(poll, 3000);
+    };
+
+    void poll();
+    return () => {
+      active = false;
+    };
+  }, [submitted.id, submitted.kundaliToken]);
+
+  const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+  return (
+    <div className="rounded-3xl border border-brand-600/30 bg-ivory p-6 sm:p-8">
+      <CheckCircle2 className="size-9 text-brand-600" />
+      <h2 className="mt-4 font-display text-2xl font-semibold text-forest">
+        Your request is with us
+      </h2>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        {submitted.message}
+      </p>
+
+      <div className="mt-6 rounded-2xl bg-cream/70 p-4">
+        {status === "pending" && (
+          <p className="flex items-center gap-2 text-sm text-charcoal/80">
+            <Loader2 className="size-4 animate-spin text-brand-600" />
+            Preparing your chart…
+          </p>
+        )}
+
+        {status === "ready" && downloadPath && (
+          <a
+            href={`${base}${downloadPath}`}
+            className={cn(buttonVariants({ size: "sm" }), "h-10")}
+          >
+            <Download className="size-4" />
+            Download your chart (PDF)
+          </a>
+        )}
+
+        {status === "failed" && (
+          <p className="text-sm text-charcoal/80">
+            Your request is saved. Your chart needs a quick manual check — we
+            will send it across shortly.
+          </p>
+        )}
+      </div>
+
+      <Link
+        href="/"
+        className="mt-6 inline-flex text-sm font-medium text-brand-700 underline underline-offset-2"
+      >
+        Back to home
+      </Link>
+    </div>
   );
 }

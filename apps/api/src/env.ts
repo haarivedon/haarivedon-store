@@ -43,6 +43,17 @@ const envSchema = z.object({
   KUNDALI_API_KEY: z.string().optional(),
   /** North Indian (diamond) or South Indian (square) chart layout. */
   KUNDALI_CHART_STYLE: z.enum(["north", "south"]).default("north"),
+  /**
+   * Which chart engine to use. `vedastro` calls the VedAstro HTTP API (real
+   * Swiss-Ephemeris astronomy; defaults to the free hosted host + FreeAPIUser
+   * key when URL/key are unset). `http` uses the generic single-POST provider.
+   * Unset falls back to the built-in watermarked sample.
+   */
+  KUNDALI_PROVIDER: z.enum(["sample", "http", "vedastro"]).optional(),
+  /** Ayanamsa for VedAstro calculations. */
+  KUNDALI_AYANAMSA: z
+    .enum(["LAHIRI", "RAMAN", "KRISHNAMURTI", "YUKTESHWAR"])
+    .default("LAHIRI"),
 
   // ── Object storage ──────────────────────────────────────────────────────
   /**

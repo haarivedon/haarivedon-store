@@ -168,6 +168,31 @@ export const createApp = () => {
     });
   });
 
+  // Same token-gated download for a prediction request's chart (see above).
+  app.get("/api/predictions/:id/download", async (c) => {
+    const token = c.req.query("token");
+    if (!token) return c.json({ error: "Not found." }, 404);
+
+    const record = await prisma.predictionRequest.findUnique({
+      where: { id: c.req.param("id") },
+      select: { name: true, kundaliKey: true, kundaliToken: true },
+    });
+
+    if (!record?.kundaliKey || record.kundaliToken !== token) {
+      return c.json({ error: "Not found." }, 404);
+    }
+
+    const file = await getObject(record.kundaliKey);
+    if (!file) return c.json({ error: "Not found." }, 404);
+
+    const filename = `Kundali-${record.name.replace(/[^\w]+/g, "-")}.pdf`;
+    return c.body(new Uint8Array(file), 200, {
+      "content-type": "application/pdf",
+      "content-disposition": `attachment; filename="${filename}"`,
+      "cache-control": "private, no-store",
+    });
+  });
+
   //
   // Razorpay webhook: the authoritative "order paid" signal. Outside ts-rest
   // because the HMAC must run over the exact raw body Razorpay sent — ts-rest
