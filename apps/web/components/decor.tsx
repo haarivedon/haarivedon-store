@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils";
-
 /* Natural leaf greens for the botanical sprig (light → deep). */
 const TONES = [
   { fill: "#93c056", vein: "#4f7222" },
@@ -77,30 +75,6 @@ export function LeafSprig({ className }: { className?: string }) {
           <BotanicalLeaf fill={TONES[tone].fill} vein={TONES[tone].vein} />
         </g>
       ))}
-    </svg>
-  );
-}
-
-/** Small single-leaf glyph (themeable via currentColor) for eyebrows/marks. */
-export function LeafMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={cn("text-brand", className)}
-      aria-hidden="true"
-    >
-      <path
-        d="M12 22 C5 16 6 5 12 2 C18 5 19 16 12 22 Z"
-        fill="currentColor"
-        fillOpacity="0.92"
-      />
-      <path
-        d="M12 20 L12 4 M12 9 L8.5 6.5 M12 9 L15.5 6.5 M12 13 L8.5 11 M12 13 L15.5 11"
-        stroke="var(--color-forest)"
-        strokeOpacity="0.28"
-        strokeWidth="0.7"
-        strokeLinecap="round"
-      />
     </svg>
   );
 }
@@ -187,14 +161,15 @@ export function Mandala({ className }: { className?: string }) {
         </g>
       ))}
 
-      {/* Centre bloom */}
+      {/* Centre bloom — a vermilion dot, echoing the red centre of the logo's
+          ring. Fixed colour (not currentColor) so the accent reads on any band. */}
       <circle
         cx="100"
         cy="100"
         r="5"
-        fill="currentColor"
+        fill="var(--color-terracotta)"
         stroke="none"
-        fillOpacity="0.6"
+        fillOpacity="0.9"
       />
     </svg>
   );

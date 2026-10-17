@@ -11,28 +11,40 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Haarivedon brand tokens — client palette + typography.
+   Haarivedon brand tokens — typography + palette drawn from the logo.
+   The logo is navy (#00017D), sacred gold (#FDC403), herbal green (#009337)
+   and a vermilion dot (#FF3A3A) on white. Royal rebrand: the logo's indigo is
+   now the dominant dark anchor (hero, footer, dark bands, headings, dark
+   buttons); sacred gold stays the CTA; herbal green and vermilion are accents.
    These generate Tailwind utilities: bg-brand, text-forest, border-sage, etc.
+
+   NOTE: the `forest` token now carries the royal INDIGO, not green. The name is
+   kept only to avoid rewriting ~165 `*-forest` call-sites; its green days are
+   over. `brand` is the herbal-green accent. A later pass can rename forest→ink.
 --------------------------------------------------------------------------- */
 @theme {
   --color-ivory: #fffdf4;
   --color-cream: #f5f1d8;
-  --color-brand: #7fae3b;
+  --color-brand: #7fae3b; /* Herbal Green accent — from the logo outline */
   --color-brand-600: #6d992f;
   --color-brand-700: #4d6f22; /* accessible for small text on light bands */
-  --color-forest: #214a2e;
-  --color-forest-700: #1a3c25;
+  --color-forest: #16235f; /* royal INDIGO — the dominant dark anchor (see note) */
+  --color-forest-700: #0e1740; /* deeper indigo for gradient ends / hover */
   --color-sage: #dde8b8;
-  --color-gold: #f3d85b;
-  --color-gold-600: #e6c53c;
+  /* Indigo — the logo's navy. Same hues as `forest`; use either name. */
+  --color-indigo: #16235f;
+  --color-indigo-700: #0e1740; /* deeper, for gradients / hover on dark */
+  --color-indigo-600: #2a3c93; /* lighter indigo, accessible for text/icons on light */
+  --color-gold: #f7bf1e; /* Sacred Gold (CTA) — brightened to the logo's */
+  --color-gold-600: #e0a400; /* darker gold for hover / accessible edges */
   --color-soft-yellow: #fff4bf;
-  --color-terracotta: #b8654a;
-  --color-terracotta-700: #7a3620; /* deep terracotta — accessible for button text/border */
+  --color-terracotta: #da352f; /* Vermilion — the logo's red dot, warm accent (AA on ivory) */
+  --color-terracotta-700: #a3281f; /* deep red — accessible for button text/border */
   --color-charcoal: #20261f;
 
-  --font-display: var(--font-fraunces);
-  --font-sans: var(--font-mulish);
-  --font-script: var(--font-tangerine);
+  --font-display: var(--font-schibsted); /* Schibsted Grotesk — headings (FH Total stand-in) */
+  --font-sans: var(--font-be-vietnam); /* Be Vietnam Pro — body (matches astroarunpandit.org) */
+  --font-script: var(--font-tangerine); /* Tangerine — signature accent */
 }
 
 @theme inline {
@@ -87,38 +99,38 @@
   --popover: #ffffff;
   --popover-foreground: #20261f;
 
-  /* Primary CTA = Sacred Gold with charcoal text (matches design's buttons) */
-  --primary: #f3d85b;
+  /* Primary CTA = Sacred Gold with charcoal text (matches the logo's house) */
+  --primary: #f7bf1e;
   --primary-foreground: #20261f;
 
-  /* Secondary = Deep Forest Green with ivory text (dark buttons/sections) */
-  --secondary: #214a2e;
+  /* Secondary = Royal Indigo with ivory text (dark buttons/sections) */
+  --secondary: #16235f;
   --secondary-foreground: #fffdf4;
 
   --muted: #f5f1d8; /* Botanical Cream */
   --muted-foreground: #5b664e; /* muted green-charcoal, AA on ivory/cream */
 
   --accent: #dde8b8; /* Sage */
-  --accent-foreground: #214a2e;
+  --accent-foreground: #16235f; /* indigo ink on sage */
 
-  --destructive: #b8654a; /* Muted Terracotta doubles as warm alert */
+  --destructive: #da352f; /* Vermilion (logo red) doubles as a true alert */
 
   --border: #e8e4c9;
   --input: #e8e4c9;
   --ring: #7fae3b; /* Herbal Green focus ring */
 
   --chart-1: #7fae3b;
-  --chart-2: #214a2e;
-  --chart-3: #f3d85b;
-  --chart-4: #b8654a;
+  --chart-2: #16235f;
+  --chart-3: #f7bf1e;
+  --chart-4: #da352f;
   --chart-5: #dde8b8;
 
   --sidebar: #fffdf4;
   --sidebar-foreground: #20261f;
-  --sidebar-primary: #214a2e;
+  --sidebar-primary: #16235f;
   --sidebar-primary-foreground: #fffdf4;
   --sidebar-accent: #dde8b8;
-  --sidebar-accent-foreground: #214a2e;
+  --sidebar-accent-foreground: #16235f;
   --sidebar-border: #e8e4c9;
   --sidebar-ring: #7fae3b;
 }
@@ -130,15 +142,15 @@
   --card-foreground: #f4f2e4;
   --popover: #1d2318;
   --popover-foreground: #f4f2e4;
-  --primary: #f3d85b;
+  --primary: #f7bf1e;
   --primary-foreground: #20261f;
-  --secondary: #2b4a34;
+  --secondary: #243170;
   --secondary-foreground: #f4f2e4;
   --muted: #26301d;
   --muted-foreground: #b7c19d;
-  --accent: #2b4a34;
+  --accent: #243170;
   --accent-foreground: #f4f2e4;
-  --destructive: #c9765a;
+  --destructive: #e8544e;
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
   --ring: #7fae3b;

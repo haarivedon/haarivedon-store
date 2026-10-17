@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 
 export function PredictionBand() {
   return (
-    <section className="relative overflow-hidden bg-forest text-ivory">
+    <section className="relative overflow-hidden bg-gradient-to-br from-indigo via-indigo to-indigo-700 text-ivory">
       {/* Zodiac wheel — the client's celestial motif; transparent PNG so only
-          the gold linework shows on the forest band. */}
+          the gold linework shows on the indigo night-sky band. */}
       <Image
         src="/images/zodiac-wheel.webp"
         alt=""
@@ -21,7 +21,7 @@ export function PredictionBand() {
       />
       <Mandala
         aria-hidden="true"
-        className="pointer-events-none absolute -left-16 top-1/2 size-72 -translate-y-1/2 text-brand/25"
+        className="pointer-events-none absolute -left-16 top-1/2 size-72 -translate-y-1/2 text-gold/25"
       />
 
       <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 py-14 text-center sm:px-6 sm:py-20 lg:py-24">

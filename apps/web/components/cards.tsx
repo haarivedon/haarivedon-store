@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
  * primitive with its default rounding / ring / padding reset.
  */
 const cardShell =
-  "group h-full gap-0 rounded-none border border-border py-0 shadow-none ring-0 transition-all hover:-translate-y-1 hover:shadow-[0_24px_45px_-28px_rgba(33,74,46,0.5)]";
+  "group h-full gap-0 rounded-none border border-border py-0 shadow-none ring-0 transition-all hover:-translate-y-1 hover:shadow-[0_24px_45px_-28px_rgba(22,35,95,0.5)]";
 
 const aspects = {
   video: "aspect-video",

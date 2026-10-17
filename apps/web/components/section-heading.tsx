@@ -1,4 +1,3 @@
-import { LeafMark } from "@/components/decor";
 import { cn } from "@/lib/utils";
 
 export function Eyebrow({
@@ -13,12 +12,11 @@ export function Eyebrow({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 text-xs font-semibold tracking-[0.2em] uppercase",
+        "inline-flex items-center text-xs font-semibold tracking-[0.2em] uppercase",
         tone === "light" ? "text-gold" : "text-brand-700",
         className,
       )}
     >
-      <LeafMark className="size-3.5" />
       {children}
     </span>
   );

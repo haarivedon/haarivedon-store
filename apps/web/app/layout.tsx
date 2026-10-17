@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
-import { Fraunces, Mulish, Tangerine } from "next/font/google";
+import { Schibsted_Grotesk, Be_Vietnam_Pro, Tangerine } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const fraunces = Fraunces({
+// Matches the reference site (astroarunpandit.org): Be Vietnam Pro for body.
+// Their headings use the commercial FH Total (trial files) which we can't
+// license/bundle, so Schibsted Grotesk — the closest free modern grotesque —
+// stands in for the display face. Swap to next/font/local if FH Total is bought.
+const schibsted = Schibsted_Grotesk({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  variable: "--font-schibsted",
   display: "swap",
-  axes: ["opsz", "SOFT"],
 });
 
-const mulish = Mulish({
+const beVietnam = Be_Vietnam_Pro({
   subsets: ["latin"],
-  variable: "--font-mulish",
+  variable: "--font-be-vietnam",
   display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const tangerine = Tangerine({
@@ -53,8 +57,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={cn(
         "h-full antialiased",
-        fraunces.variable,
-        mulish.variable,
+        schibsted.variable,
+        beVietnam.variable,
         tangerine.variable,
       )}
     >
