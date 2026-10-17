@@ -53,6 +53,15 @@ export type ChartData = {
   };
   /** Flags the client's reading starts from — never presented as outcomes. */
   flags: { label: string; present: boolean; note: string }[];
+  /**
+   * Rendered chart SVGs, when the provider supplies them (VedAstro does). The
+   * PDF embeds these as images; absent, it falls back to drawing the grid
+   * itself. `rasi` is the D1, `navamsa` the D9.
+   */
+  charts?: {
+    rasi?: string;
+    navamsa?: string;
+  };
 };
 
 export interface ChartProvider {
