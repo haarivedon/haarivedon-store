@@ -13,9 +13,10 @@
 /* ---------------------------------------------------------------------------
    Haarivedon brand tokens — typography + palette drawn from the logo.
    The logo is navy (#00017D), sacred gold (#FDC403), herbal green (#009337)
-   and a vermilion dot (#FF3A3A) on white. Royal rebrand: the logo's indigo is
-   now the dominant dark anchor (hero, footer, dark bands, headings, dark
-   buttons); sacred gold stays the CTA; herbal green and vermilion are accents.
+   and a vermilion dot (#FF3A3A) on white. The logo's navy, deepened to a
+   midnight #000142, is the dominant dark anchor (hero, footer, dark bands,
+   headings, dark buttons); sacred gold (refined to #F7BF1E) stays the CTA;
+   herbal green and vermilion are the refined accents.
    These generate Tailwind utilities: bg-brand, text-forest, border-sage, etc.
 
    NOTE: the `forest` token now carries the royal INDIGO, not green. The name is
@@ -28,13 +29,13 @@
   --color-brand: #7fae3b; /* Herbal Green accent — from the logo outline */
   --color-brand-600: #6d992f;
   --color-brand-700: #4d6f22; /* accessible for small text on light bands */
-  --color-forest: #16235f; /* royal INDIGO — the dominant dark anchor (see note) */
-  --color-forest-700: #0e1740; /* deeper indigo for gradient ends / hover */
+  --color-forest: #000142; /* midnight NAVY — the dominant dark anchor (deepened from logo #00017d) */
+  --color-forest-700: #00012e; /* deeper navy for gradient ends / hover */
   --color-sage: #dde8b8;
-  /* Indigo — the logo's navy. Same hues as `forest`; use either name. */
-  --color-indigo: #16235f;
-  --color-indigo-700: #0e1740; /* deeper, for gradients / hover on dark */
-  --color-indigo-600: #2a3c93; /* lighter indigo, accessible for text/icons on light */
+  /* Indigo — the logo's navy, deepened to midnight. Same hues as `forest`; use either name. */
+  --color-indigo: #000142;
+  --color-indigo-700: #00012e; /* deeper, for gradients / hover on dark */
+  --color-indigo-600: #1a1c7a; /* brighter navy, accessible (≈13:1 on ivory) for text/icons on light */
   --color-gold: #f7bf1e; /* Sacred Gold (CTA) — brightened to the logo's */
   --color-gold-600: #e0a400; /* darker gold for hover / accessible edges */
   --color-soft-yellow: #fff4bf;
@@ -103,15 +104,15 @@
   --primary: #f7bf1e;
   --primary-foreground: #20261f;
 
-  /* Secondary = Royal Indigo with ivory text (dark buttons/sections) */
-  --secondary: #16235f;
+  /* Secondary = midnight Navy with ivory text (dark buttons/sections) */
+  --secondary: #000142;
   --secondary-foreground: #fffdf4;
 
   --muted: #f5f1d8; /* Botanical Cream */
   --muted-foreground: #5b664e; /* muted green-charcoal, AA on ivory/cream */
 
   --accent: #dde8b8; /* Sage */
-  --accent-foreground: #16235f; /* indigo ink on sage */
+  --accent-foreground: #000142; /* navy ink on sage */
 
   --destructive: #da352f; /* Vermilion (logo red) doubles as a true alert */
 
@@ -120,17 +121,17 @@
   --ring: #7fae3b; /* Herbal Green focus ring */
 
   --chart-1: #7fae3b;
-  --chart-2: #16235f;
+  --chart-2: #000142;
   --chart-3: #f7bf1e;
   --chart-4: #da352f;
   --chart-5: #dde8b8;
 
   --sidebar: #fffdf4;
   --sidebar-foreground: #20261f;
-  --sidebar-primary: #16235f;
+  --sidebar-primary: #000142;
   --sidebar-primary-foreground: #fffdf4;
   --sidebar-accent: #dde8b8;
-  --sidebar-accent-foreground: #16235f;
+  --sidebar-accent-foreground: #000142;
   --sidebar-border: #e8e4c9;
   --sidebar-ring: #7fae3b;
 }
@@ -144,11 +145,11 @@
   --popover-foreground: #f4f2e4;
   --primary: #f7bf1e;
   --primary-foreground: #20261f;
-  --secondary: #243170;
+  --secondary: #2d2eb0;
   --secondary-foreground: #f4f2e4;
   --muted: #26301d;
   --muted-foreground: #b7c19d;
-  --accent: #243170;
+  --accent: #2d2eb0;
   --accent-foreground: #f4f2e4;
   --destructive: #e8544e;
   --border: oklch(1 0 0 / 12%);

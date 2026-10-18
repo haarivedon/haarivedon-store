@@ -94,12 +94,6 @@ export function LoginForm({ next }: { next: string }) {
           "Sign in"
         )}
       </button>
-
-      <p className="text-xs leading-relaxed text-muted-foreground">
-        Forgotten the password? It can be reset on the server with
-        <code className="mx-1 rounded bg-cream px-1 py-0.5">pnpm db:seed:admin</code>
-        — see docs/BUILD.md.
-      </p>
     </form>
   );
 }

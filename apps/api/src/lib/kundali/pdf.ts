@@ -18,10 +18,10 @@ import type { BirthInput, ChartData, PlanetPosition } from "./types";
  * if a provider gives no SVG, pdfkit draws the grid itself as a fallback.
  */
 
-// ── Palette (current theme — indigo rebrand, see globals.css) ───────────────
-const INDIGO = "#16235f";
-const INDIGO_700 = "#0e1740";
-const INDIGO_600 = "#2a3c93";
+// ── Palette (current theme — logo navy, see globals.css) ───────────────────
+const INDIGO = "#000142";
+const INDIGO_700 = "#00012e";
+const INDIGO_600 = "#1a1c7a";
 const GOLD = "#f7bf1e";
 const GOLD_600 = "#e0a400";
 const SAGE = "#dde8b8";
