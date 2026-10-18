@@ -23,7 +23,7 @@ export async function Hero() {
   const heading = orFallback(copy.heading, defaults.heading);
 
   return (
-    <section className="relative overflow-hidden bg-[radial-gradient(120%_120%_at_65%_25%,#2a3c93_0%,#16235f_42%,#0b1233_100%)] text-ivory">
+    <section className="relative overflow-hidden bg-[radial-gradient(120%_120%_at_65%_25%,#26278a_0%,#000142_42%,#00011a_100%)] text-ivory">
       {/* Corner foliage, kept faint on the dark ground */}
       <LeafSprig
         aria-hidden="true"

@@ -13,7 +13,7 @@ export function About() {
       <div className="mx-auto grid max-w-screen-2xl items-center gap-8 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14 lg:py-24">
         {/* Portrait */}
         <div className="relative mx-auto w-full max-w-sm">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-t-full rounded-b-3xl border border-sage shadow-[0_28px_55px_-30px_rgba(22,35,95,0.4)]">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-t-full rounded-b-3xl border border-sage shadow-[0_28px_55px_-30px_rgba(0,1,66,0.4)]">
             <Image
               src="/images/founder-about.jpg"
               alt="Neelam Niranjan tending to plants in her garden"
