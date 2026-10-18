@@ -39,6 +39,14 @@ model Booking {
   message      String   @default("")
   // pending | confirmed | completed | cancelled
   status       String   @default("pending")
+  /// Human-readable booking reference (e.g. HV-7F3K9Q) once a fee is paid.
+  reference    String   @default("")
+  /// Session fee paid in whole rupees (0 if booking is free / unpaid).
+  amount       Int      @default(0)
+  // none | pending | paid | failed — the session fee via Razorpay.
+  paymentStatus String  @default("none")
+  razorpayOrderId   String @default("")
+  razorpayPaymentId String @default("")
   // pending | ready | failed — the PDF is generated after the booking is saved.
   kundaliStatus String  @default("pending")
   /// Private-bucket object key; never served directly.
@@ -51,6 +59,7 @@ model Booking {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  @@index([razorpayOrderId])
   @@map("bookings")
 }
 
@@ -216,100 +225,46 @@ model Course {
 ///
 /// One model rather than one per kind: the fields are identical, the inbox
 /// wants them in one list, and "ask about this" is the same act whichever
-/// page it starts from. Products and courses are catalogue items with no
-/// checkout (docs/PLAN.md §3.1, SRS §3.5) — this is how someone asks.
+/// page it starts from. Products and courses are catalogue items — there is no
+/// store with carts or order tracking. An enquiry is either a free "ask about
+/// this" or a Razorpay-paid "reserve this", which the admin then fulfils by
+/// hand. The payment fields stay empty (`paymentStatus = "none"`) for a free
+/// ask; a paid reserve carries the Razorpay ids and amount so the inbox shows
+/// what was paid.
 model Enquiry {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
   // course | product
-  kind         String
-  name         String
-  email        String
-  phone        String
-  /// Slug of the course or product being asked about.
-  itemSlug     String
-  /// Denormalised so the inbox reads correctly even if the item is renamed.
-  itemTitle    String   @default("")
-  message      String   @default("")
-  // pending | contacted | enrolled | closed
-  status       String   @default("pending")
-  /// Admin-only, never exposed publicly.
-  internalNote String   @default("")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@index([kind, status])
-  @@map("enquiries")
-}
-
-/// A single line in an order: a snapshot of the product at purchase time.
-///
-/// Price and name are copied, not referenced — a later admin edit to the
-/// product (or its deletion) must never rewrite what someone already bought.
-type OrderItem {
-  productId String
-  slug      String
-  name      String
-  image     String @default("")
-  /// Unit price in whole rupees at the time of purchase.
-  unitPrice Int
-  quantity  Int
-  /// unitPrice * quantity, denormalised so totals never drift.
-  lineTotal Int
-}
-
-/// Where a paid order ships to. Collected at checkout; shipping is charged at
-/// ₹0 for now (docs/PLAN.md — store CR), so there is no rate logic here yet.
-type ShippingAddress {
-  line1   String
-  line2   String @default("")
-  city    String
-  state   String
-  pincode String
-  country String @default("India")
-}
-
-/// A store order (store CR).
-///
-/// Self-serve checkout: the buyer fills a cart, pays through Razorpay, and the
-/// order is created server-side from re-priced cart items — the client never
-/// sends an amount. `paymentStatus` is driven by Razorpay (signature + webhook);
-/// `fulfillmentStatus` is driven by the admin as the parcel moves. The buyer
-/// tracks it through `accessToken`, with no account, mirroring the Kundali
-/// one-time-token pattern (CR-2).
-model Order {
-  id                String          @id @default(auto()) @map("_id") @db.ObjectId
-  /// Human-readable, e.g. HV-7F3K9Q. What the buyer and admin quote.
-  orderNumber       String          @unique
-  items             OrderItem[]
-  /// Contact details, captured at checkout (no customer accounts).
+  kind              String
   name              String
   email             String
   phone             String
-  shippingAddress   ShippingAddress
-  /// Sum of line totals, in whole rupees.
-  subtotal          Int
-  /// Flat shipping fee in rupees; 0 until rates are decided.
-  shippingFee       Int             @default(0)
-  /// subtotal + shippingFee — the amount charged.
-  total             Int
-  currency          String          @default("INR")
-  // pending | paid | failed | refunded
-  paymentStatus     String          @default("pending")
-  // pending | packed | shipped | delivered | cancelled
-  fulfillmentStatus String          @default("pending")
-  razorpayOrderId   String          @unique
-  razorpayPaymentId String          @default("")
-  courier           String          @default("")
-  trackingNumber    String          @default("")
-  /// Unguessable token the buyer uses to view the order; no account needed.
-  accessToken       String          @unique
+  /// Slug of the course or product being asked about.
+  itemSlug          String
+  /// Denormalised so the inbox reads correctly even if the item is renamed.
+  itemTitle         String   @default("")
+  message           String   @default("")
+  // pending | contacted | enrolled | closed
+  status            String   @default("pending")
+  /// Human-readable reservation number (e.g. HV-7F3K9Q) for a paid reserve;
+  /// empty for a free ask. What the buyer and admin quote to each other.
+  reference         String   @default("")
+  /// How many units a paid reserve was for (1 for a free ask).
+  quantity          Int      @default(1)
+  /// Total paid in whole rupees (0 for a free ask).
+  amount            Int      @default(0)
+  // none (free ask) | pending | paid | failed
+  paymentStatus     String   @default("none")
+  /// Razorpay ids for a paid reserve; empty for a free ask.
+  razorpayOrderId   String   @default("")
+  razorpayPaymentId String   @default("")
   /// Admin-only, never exposed publicly.
-  internalNote      String          @default("")
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  internalNote      String   @default("")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  @@index([paymentStatus, fulfillmentStatus])
-  @@map("orders")
+  @@index([kind, status])
+  @@index([razorpayOrderId])
+  @@map("enquiries")
 }
 
 /// Admin accounts for the CMS (CR-3, docs/PLAN.md §3.3).

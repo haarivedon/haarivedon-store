@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { MessageCircle, Package, ShieldCheck, Sparkles } from "lucide-react";
 import { productFamilyLabels } from "@repo/contract";
 import { Section } from "@/components/section";
-import { AddToCart } from "@/components/cart/add-to-cart";
+import { BuyNow } from "@/components/products/buy-now";
 import { EnquiryForm } from "@/components/enquiry-form";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { ProductCard } from "@/components/products/product-card";
@@ -182,11 +182,12 @@ export default async function ProductPage({
 
             {buyable ? (
               <div className="mt-6">
-                <AddToCart
-                  slug={product.slug}
-                  name={product.name}
+                <BuyNow
+                  kind="product"
+                  itemSlug={product.slug}
+                  itemTitle={product.name}
                   price={product.price!}
-                  image={product.images[0] ?? ""}
+                  currency={product.currency}
                 />
               </div>
             ) : (

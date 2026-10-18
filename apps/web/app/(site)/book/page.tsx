@@ -76,7 +76,7 @@ export default async function BookPage() {
               {copy.kundaliNote}
             </p>
           )}
-          <BookingForm />
+          <BookingForm fee={copy.fee} />
         </div>
       </Section>
     </>

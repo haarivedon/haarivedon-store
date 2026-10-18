@@ -2,11 +2,40 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Download, Loader2 } from "lucide-react";
+import { CheckCircle2, Download, Loader2, Lock } from "lucide-react";
 import { createBookingSchema, sessionTypes } from "@repo/contract";
 import { api } from "@/lib/api/client";
 import { issuesToFieldErrors, toFieldErrors, type FieldErrors } from "@/lib/forms";
 import { Field, inputClass, textareaClass } from "@/components/forms/field";
+
+const inr = (value: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(value);
+
+/** Razorpay Checkout, loaded on demand so it never ships on other pages. */
+type RazorpayResponse = {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+};
+type RazorpayInstance = { open: () => void };
+type RazorpayConstructor = new (options: Record<string, unknown>) => RazorpayInstance;
+
+function loadRazorpay(): Promise<RazorpayConstructor | null> {
+  return new Promise((resolve) => {
+    const existing = (window as { Razorpay?: RazorpayConstructor }).Razorpay;
+    if (existing) return resolve(existing);
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () =>
+      resolve((window as { Razorpay?: RazorpayConstructor }).Razorpay ?? null);
+    script.onerror = () => resolve(null);
+    document.body.appendChild(script);
+  });
+}
 import { Select } from "@/components/ui/select";
 import {
   CitySelect,
@@ -25,7 +54,7 @@ const sessionLabels: Record<(typeof sessionTypes)[number], string> = {
 
 type Submitted = { id: string; message: string; kundaliToken: string };
 
-export function BookingForm() {
+export function BookingForm({ fee }: { fee: number }) {
   const [place, setPlace] = useState<BirthPlace>(emptyBirthPlace);
   const [sessionType, setSessionType] =
     useState<(typeof sessionTypes)[number]>("personal-consultation");
@@ -68,27 +97,73 @@ export function BookingForm() {
     setErrors({});
     setSubmitting(true);
     try {
-      const response = await api.bookings.create({ body: parsed.data });
+      // Open a Razorpay order for the session fee and hold the booking.
+      const reserved = await api.bookings.reserve({ body: parsed.data });
 
-      if (response.status === 201) {
-        setSubmitted(response.body);
+      if (reserved.status === 422) {
+        setErrors(issuesToFieldErrors(reserved.body.issues));
+        setSubmitting(false);
         return;
       }
-      if (response.status === 422) {
-        setErrors(issuesToFieldErrors(response.body.issues));
+      if (reserved.status !== 200) {
+        const body = reserved.body as { error?: string } | undefined;
+        setErrors({ _: body?.error ?? "Something went wrong. Please try again." });
+        setSubmitting(false);
         return;
       }
-      // Any other status (429, 500, or an unknown one) surfaces as one
-      // form-level message rather than a silent no-op.
-      const body = response.body as { error?: string } | undefined;
-      setErrors({
-        _: body?.error ?? "Something went wrong. Please try again.",
+
+      const session = reserved.body;
+      const Razorpay = await loadRazorpay();
+      if (!Razorpay) {
+        setErrors({ _: "Could not reach the payment gateway. Check your connection and retry." });
+        setSubmitting(false);
+        return;
+      }
+
+      const instance = new Razorpay({
+        key: session.keyId,
+        amount: session.amount,
+        currency: session.currency,
+        order_id: session.razorpayOrderId,
+        name: "Haarivedon",
+        description: `Session fee · ${session.reference}`,
+        prefill: {
+          name: session.name,
+          email: session.email,
+          contact: session.phone,
+        },
+        theme: { color: "#000142" },
+        modal: {
+          ondismiss: () => {
+            setErrors({ _: "Payment was not completed. You can try again." });
+            setSubmitting(false);
+          },
+        },
+        handler: async (response: RazorpayResponse) => {
+          const verified = await api.bookings.verifyReserve({
+            body: {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            },
+          });
+
+          if (verified.status === 200) {
+            setSubmitted(verified.body);
+            return;
+          }
+          setErrors({
+            _: `Payment went through but we could not confirm it automatically. Please contact us quoting ${session.reference}.`,
+          });
+          setSubmitting(false);
+        },
       });
+
+      instance.open();
     } catch {
       setErrors({
         _: "We couldn't reach the server. Please check your connection and try again.",
       });
-    } finally {
       setSubmitting(false);
     }
   }
@@ -222,12 +297,12 @@ export function BookingForm() {
         {submitting ? (
           <>
             <Loader2 className="size-4 animate-spin" />
-            Sending…
+            Processing…
           </>
         ) : (
           <>
-            Request my session
-            <ArrowRight className="size-4" />
+            <Lock className="size-4" />
+            Pay {inr(fee)} &amp; book
           </>
         )}
       </button>

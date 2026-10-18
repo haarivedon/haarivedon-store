@@ -72,6 +72,12 @@ export const copyFields: Record<SiteContentKey, FieldSpec[]> = {
       hint: "Shown after the form is sent",
       wide: true,
     },
+    {
+      name: "fee",
+      label: "Session fee (₹)",
+      kind: "number",
+      hint: "Charged via Razorpay before a booking is confirmed",
+    },
   ],
   "site.contact": [
     { name: "phone", label: "Phone", kind: "text" },
