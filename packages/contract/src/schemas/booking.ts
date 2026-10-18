@@ -133,6 +133,9 @@ export const bookingSchema = z.object({
   kundaliStatus: z.enum(kundaliStatuses),
   /** True once a PDF exists; the file itself is fetched via a signed URL. */
   hasKundali: z.boolean(),
+  reference: z.string(),
+  amount: z.number().int(),
+  paymentStatus: z.enum(["none", "pending", "paid", "failed"]),
   internalNote: z.string(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
@@ -148,6 +151,23 @@ export const bookingCreatedSchema = z.object({
   message: z.string(),
   kundaliToken: z.string(),
 });
+
+/**
+ * What the server hands back so the browser can open Razorpay Checkout for the
+ * session fee. `amount` is in paise; `keyId` is the publishable key.
+ */
+export const bookingReserveSessionSchema = z.object({
+  bookingId: z.string(),
+  reference: z.string(),
+  razorpayOrderId: z.string(),
+  amount: z.number().int(),
+  currency: z.string(),
+  keyId: z.string(),
+  name: z.string(),
+  email: z.string(),
+  phone: z.string(),
+});
+export type BookingReserveSession = z.infer<typeof bookingReserveSessionSchema>;
 
 export const updateBookingStatusSchema = z.object({
   status: z.enum(bookingStatuses),

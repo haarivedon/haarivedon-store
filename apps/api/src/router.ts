@@ -2,7 +2,6 @@ import { contract } from "@repo/contract";
 import { tsr } from "@ts-rest/serverless/fetch";
 import { adminRouter } from "./routes/admin";
 import { bookingsRouter } from "./routes/bookings";
-import { checkoutRouter } from "./routes/checkout";
 import { coursesRouter } from "./routes/courses";
 import { enquiriesRouter } from "./routes/enquiries";
 import { healthRouter } from "./routes/health";
@@ -24,7 +23,6 @@ export const router = tsr.router(contract, {
   kundali: kundaliRouter,
   courses: coursesRouter,
   enquiries: enquiriesRouter,
-  checkout: checkoutRouter,
   siteContent: siteContentRouter,
   admin: adminRouter,
 });

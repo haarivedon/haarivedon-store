@@ -166,6 +166,22 @@ function CopyField({
     );
   }
 
+  if (field.kind === "number" || field.kind === "price") {
+    const num = typeof value === "number" ? String(value) : text;
+    return shell(
+      <TextInput
+        id={id}
+        value={num}
+        inputMode="numeric"
+        placeholder={field.placeholder}
+        onChange={(event) => {
+          const digits = event.target.value.replace(/[^\d]/g, "");
+          onChange(digits === "" ? 0 : Number(digits));
+        }}
+      />,
+    );
+  }
+
   return shell(
     <TextInput
       id={id}

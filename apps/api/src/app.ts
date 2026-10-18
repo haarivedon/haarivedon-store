@@ -10,6 +10,7 @@ import { prisma } from "@repo/db";
 import { env, isProduction } from "./env";
 import { getObject } from "./lib/storage";
 import { verifyWebhookSignature } from "./lib/razorpay";
+import { queueKundali } from "./lib/kundali/queue";
 import { handleUpload } from "./routes/admin/upload";
 import { readSessionCookie, sessionFromToken } from "./routes/admin/session";
 import { exportRows, toCsv } from "./lib/csv";
@@ -223,21 +224,42 @@ export const createApp = () => {
       (event.event === "payment.captured" || event.event === "order.paid") &&
       razorpayOrderId
     ) {
-      const order = await prisma.order.findUnique({ where: { razorpayOrderId } });
-      // Idempotent: promote only a still-pending order, so a replayed webhook
-      // or a race with the client-side verify changes nothing.
-      if (order && order.paymentStatus === "pending") {
-        await prisma.order.update({
-          where: { id: order.id },
+      // A Razorpay order maps to either a product/course reserve (enquiry) or a
+      // paid session booking. Idempotent: promote only a still-pending record,
+      // so a replayed webhook or a race with the client verify changes nothing.
+      const reserve = await prisma.enquiry.findFirst({
+        where: { razorpayOrderId },
+      });
+      if (reserve && reserve.paymentStatus === "pending") {
+        await prisma.enquiry.update({
+          where: { id: reserve.id },
           data: {
             paymentStatus: "paid",
-            razorpayPaymentId: payment?.id ?? order.razorpayPaymentId,
+            razorpayPaymentId: payment?.id ?? reserve.razorpayPaymentId,
           },
         });
-        logger.info("order paid (webhook)", {
-          orderNumber: order.orderNumber,
+        logger.info("reserve paid (webhook)", {
+          reference: reserve.reference,
           event: event.event,
         });
+      } else {
+        const booking = await prisma.booking.findFirst({
+          where: { razorpayOrderId },
+        });
+        if (booking && booking.paymentStatus === "pending") {
+          await prisma.booking.update({
+            where: { id: booking.id },
+            data: {
+              paymentStatus: "paid",
+              razorpayPaymentId: payment?.id ?? booking.razorpayPaymentId,
+            },
+          });
+          void queueKundali(booking.id);
+          logger.info("booking paid (webhook)", {
+            reference: booking.reference,
+            event: event.event,
+          });
+        }
       }
     }
 
