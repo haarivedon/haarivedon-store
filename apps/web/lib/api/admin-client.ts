@@ -9,15 +9,23 @@ import { initClient } from "@ts-rest/core";
  * a different host from the API, so every admin request has to opt in to
  * sending it (docs/PLAN.md §3.3).
  */
+const ABSOLUTE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+/**
+ * In the browser, admin calls go to the web app's OWN origin (empty base =>
+ * relative `/api/admin/...`), which a Next rewrite proxies to the API. That
+ * makes the session cookie first-party to the web app, so it survives the
+ * redirect to the dashboard. On the server we call the API directly (absolute),
+ * forwarding the now first-party cookie. See next.config.ts rewrites.
+ */
+export const API_BASE = typeof window === "undefined" ? ABSOLUTE : "";
+
 export const adminApi = initClient(contract.admin, {
-  baseUrl: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000",
+  baseUrl: API_BASE,
   baseHeaders: {},
   throwOnUnknownStatus: false,
   credentials: "include",
 });
-
-export const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 /** Uploads are multipart, so they bypass the contract client. */
 export async function uploadImage(file: File, alt: string) {

@@ -65,6 +65,16 @@ const nextConfig: NextConfig = {
         source: "/api/media/:file",
         destination: `${API_URL}/api/media/:file`,
       },
+      {
+        // Proxy admin API calls through the web's own origin so the session
+        // cookie the API sets is first-party to the web app. Without this, the
+        // cookie lives on the API host (e.g. *.onrender.com) and the Vercel
+        // server never sees it — login "works" then bounces back to the login
+        // screen. A shared custom domain (api.site.com + site.com) removes the
+        // need for this, but this keeps admin auth working on the default URLs.
+        source: "/api/admin/:path*",
+        destination: `${API_URL}/api/admin/:path*`,
+      },
     ];
   },
 };
