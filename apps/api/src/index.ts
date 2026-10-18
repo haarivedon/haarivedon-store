@@ -6,8 +6,13 @@ import { logger } from "./lib/logger";
 
 const app = createApp();
 
+// Render (and most managed hosts) inject the port to bind on as `PORT`.
+// Locally we keep `API_PORT` — `next dev` also reads `PORT` and the two apps
+// share the root .env, so the convention only bends for the isolated prod host.
+const port = Number(process.env.PORT) || env.API_PORT;
+
 const server = serve(
-  { fetch: app.fetch, port: env.API_PORT, hostname: env.HOST },
+  { fetch: app.fetch, port, hostname: env.HOST },
   (info) => {
     logger.info(`API ready on http://${env.HOST}:${info.port}/api`);
   },

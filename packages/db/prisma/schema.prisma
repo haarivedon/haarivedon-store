@@ -3,10 +3,11 @@
 
 generator client {
   provider = "prisma-client-js"
-  // `native` for local dev; `rhel-openssl-3.0.x` is the Vercel Functions
-  // (Amazon Linux 2023 / Node 20) runtime, so the query engine ships with the
-  // serverless bundle. Keep in sync if the deploy target's OpenSSL changes.
-  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  // `native` for local dev. `debian-openssl-3.0.x` is the Render runtime
+  // (Ubuntu 22.04 / OpenSSL 3), where the API now lives. `rhel-openssl-3.0.x`
+  // is kept for the legacy Vercel Functions bundle. Keep in sync if a deploy
+  // target's OpenSSL changes.
+  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x"]
 }
 
 datasource db {

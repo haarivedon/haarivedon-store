@@ -1,0 +1,67 @@
+# Render Blueprint — the Haarivedon API (apps/api, Hono on Node).
+# The web app (apps/web) deploys to Vercel; MongoDB lives on Atlas.
+# Secrets are declared with `sync: false` so Render prompts for them in the
+# dashboard instead of storing them in git.
+services:
+  - type: web
+    name: haarivedon-api
+    runtime: node
+    region: singapore # closest Render region to India
+    plan: free # spins down after ~15min idle (≈50s cold start). Bump to `starter` to stay warm.
+    # Build the API plus its workspace deps (@repo/db runs `prisma generate`).
+    buildCommand: pnpm install --frozen-lockfile && pnpm build --filter=api...
+    startCommand: pnpm --filter=api start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      # ── Core ──────────────────────────────────────────────────────────────
+      - key: DATABASE_URL # MongoDB Atlas SRV string
+        sync: false
+      - key: CORS_ORIGIN # the web app's Vercel origin, e.g. https://haarivedon.com
+        sync: false
+      - key: WEB_URL # web base URL, for revalidation callbacks
+        sync: false
+      - key: ADMIN_API_KEY
+        sync: false
+      # ── Admin auth (better-auth) ────────────────────────────────────────────
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: BETTER_AUTH_URL # this service's own public URL, e.g. https://api.haarivedon.com
+        sync: false
+      - key: AUTH_COOKIE_DOMAIN # e.g. .haarivedon.com — needed for admin login across web+api
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: REVALIDATE_SECRET
+        sync: false
+      # ── Kundali (VedAstro) ──────────────────────────────────────────────────
+      - key: KUNDALI_PROVIDER
+        value: vedastro
+      - key: KUNDALI_AYANAMSA
+        value: LAHIRI
+      # ── Object storage (R2) — PDFs/media; Render's disk is ephemeral ─────────
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_PRIVATE_BUCKET
+        sync: false
+      - key: R2_MEDIA_BUCKET
+        sync: false
+      - key: R2_PUBLIC_URL
+        sync: false
+      # ── Payments (Razorpay) ──────────────────────────────────────────────────
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
