@@ -16,7 +16,7 @@ export function About() {
           <div className="relative aspect-[4/5] overflow-hidden rounded-t-full rounded-b-3xl border border-sage shadow-[0_28px_55px_-30px_rgba(0,1,66,0.4)]">
             <Image
               src="/images/founder-about.jpg"
-              alt="Neelam Niranjan tending to plants in her garden"
+              alt="Neelam A. Singh tending to plants in her garden"
               fill
               sizes="(max-width: 1024px) 80vw, 360px"
               className="object-cover object-top"
@@ -32,8 +32,8 @@ export function About() {
         <div>
           <SectionHeading
             eyebrow="About Haarivedon"
-            title="Meet Neelam Niranjan"
-            description="With a deep-rooted connection to ancient wisdom and a compassionate approach, Neelam Niranjan helps you find clarity, balance, and direction in life. Through personalized guidance and intuitive understanding, she empowers you to make confident decisions and embrace your true path."
+            title="Meet Neelam A. Singh"
+            description="With a deep-rooted connection to ancient wisdom and a compassionate approach, Neelam A. Singh helps you find clarity, balance, and direction in life. Through personalized guidance and intuitive understanding, she empowers you to make confident decisions and embrace your true path."
           />
 
           <Link

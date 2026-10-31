@@ -110,7 +110,7 @@ export function BookingBand() {
           />
           <Image
             src="/images/founder-reading.png"
-            alt="Neelam Niranjan reading, offering personalized guidance"
+            alt="Neelam A. Singh reading, offering personalized guidance"
             width={1236}
             height={1500}
             sizes="(max-width: 768px) 60vw, 460px"

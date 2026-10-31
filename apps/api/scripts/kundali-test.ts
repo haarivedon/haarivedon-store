@@ -15,7 +15,7 @@ import type { BirthInput, ChartData } from "../src/lib/kundali/types";
 const CACHE = "/tmp/kundali-chart.json";
 
 const input: BirthInput = {
-  name: "Neelam Niranjan",
+  name: "Neelam A. Singh",
   bornAt: new Date("1992-10-25T09:00:00Z"), // 14:30 Asia/Kolkata
   localDate: "1992-10-25",
   localTime: "14:30",

@@ -35,7 +35,7 @@ export function OrganizationJsonLd({
         url: BASE,
         description:
           "Ancient wisdom and personalized guidance — consultations, readings, courses and sacred tools.",
-        founder: { "@type": "Person", name: "Neelam Niranjan" },
+        founder: { "@type": "Person", name: "Neelam A. Singh" },
         contactPoint: {
           "@type": "ContactPoint",
           contactType: "customer service",

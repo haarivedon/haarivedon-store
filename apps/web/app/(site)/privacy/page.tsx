@@ -77,7 +77,7 @@ export default async function PrivacyPage() {
             </h2>
             <p className="mt-2">
               Your details are stored in our database and are visible to
-              Neelam Niranjan and anyone she has given access to the admin.
+              Neelam A. Singh and anyone she has given access to the admin.
               Beyond that:
             </p>
             <ul className="mt-2 list-disc space-y-1 pl-5">
