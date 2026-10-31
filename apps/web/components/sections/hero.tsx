@@ -24,14 +24,14 @@ export async function Hero() {
 
   return (
     <section className="relative overflow-hidden bg-[radial-gradient(120%_120%_at_65%_25%,#26278a_0%,#000142_42%,#00011a_100%)] text-ivory">
-      {/* Corner foliage, kept faint on the dark ground */}
+      {/* Corner foliage — hidden on mobile where it crowds the content */}
       <LeafSprig
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 left-0 w-44 -scale-x-100 opacity-90 drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)] sm:w-56"
+        className="pointer-events-none absolute top-0 left-0 hidden w-44 -scale-x-100 opacity-90 drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)] sm:block sm:w-56"
       />
       <LeafSprig
         aria-hidden="true"
-        className="pointer-events-none absolute right-0 bottom-0 w-44 opacity-80 drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)] sm:w-56"
+        className="pointer-events-none absolute right-0 bottom-0 hidden w-44 opacity-80 drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)] sm:block sm:w-56"
       />
 
       {/* Glowing diya with rising smoke — bottom-left accent on the dark ground */}
@@ -42,7 +42,7 @@ export async function Hero() {
         <Diya priority />
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-screen-2xl items-center gap-x-8 px-4 pt-14 pb-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pt-16 lg:pb-0">
+      <div className="relative z-10 mx-auto grid max-w-screen-2xl items-center gap-x-8 px-4 pt-9 pb-8 sm:px-6 sm:pt-14 sm:pb-10 lg:grid-cols-[1.05fr_0.95fr] lg:pt-16 lg:pb-0">
         {/* Copy column — on mobile its children flow straight into the grid
             (display:contents) so the portrait can sit between the heading and
             the CTAs; on lg it collapses back into a normal left column. */}

@@ -62,7 +62,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         tangerine.variable,
       )}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col overflow-x-hidden bg-background text-foreground">
         {children}
       </body>
     </html>
