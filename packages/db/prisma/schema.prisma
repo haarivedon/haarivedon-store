@@ -49,6 +49,11 @@ model Booking {
   paymentStatus String  @default("none")
   razorpayOrderId   String @default("")
   razorpayPaymentId String @default("")
+  /// Calendly booking captured in the "schedule" step (empty until scheduled).
+  /// The event URI is enough to confirm a slot was picked; the exact time comes
+  /// from Calendly's own confirmation email (no Calendly API token needed).
+  calendlyEventUri   String @default("")
+  calendlyInviteeUri String @default("")
   // pending | ready | failed — the PDF is generated after the booking is saved.
   kundaliStatus String  @default("pending")
   /// Private-bucket object key; never served directly.

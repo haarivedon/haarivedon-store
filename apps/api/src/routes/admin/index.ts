@@ -173,6 +173,7 @@ const booking = (r: BookingRecord): Booking => ({
   reference: r.reference,
   amount: r.amount,
   paymentStatus: r.paymentStatus as Booking["paymentStatus"],
+  scheduled: r.calendlyEventUri !== "",
   internalNote: r.internalNote,
   createdAt: r.createdAt.toISOString(),
   updatedAt: r.updatedAt.toISOString(),

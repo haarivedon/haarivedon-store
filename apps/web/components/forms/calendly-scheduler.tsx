@@ -22,12 +22,32 @@ export function CalendlyScheduler({
   url,
   name,
   email,
+  onScheduled,
 }: {
   url: string;
   name?: string;
   email?: string;
+  /** Fires once the visitor books a slot in the embedded widget. */
+  onScheduled?: (ev: { eventUri: string; inviteeUri: string }) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!onScheduled) return;
+    const onMessage = (e: MessageEvent) => {
+      const data = e.data as
+        | { event?: string; payload?: { event?: { uri?: string }; invitee?: { uri?: string } } }
+        | undefined;
+      if (data?.event === "calendly.event_scheduled") {
+        onScheduled({
+          eventUri: data.payload?.event?.uri ?? "",
+          inviteeUri: data.payload?.invitee?.uri ?? "",
+        });
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [onScheduled]);
 
   useEffect(() => {
     let cancelled = false;

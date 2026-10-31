@@ -138,6 +138,8 @@ export const bookingSchema = z.object({
   reference: z.string(),
   amount: z.number().int(),
   paymentStatus: z.enum(["none", "pending", "paid", "failed"]),
+  /** True once the booker picked a Calendly slot. */
+  scheduled: z.boolean(),
   internalNote: z.string(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
@@ -181,12 +183,34 @@ export const publicBookingSchema = z.object({
   name: z.string(),
   service: z.string(),
   sessionType: z.enum(sessionTypes),
+  amount: z.number().int(),
   paymentStatus: z.enum(["none", "pending", "paid", "failed"]),
+  /** True once the booker has picked a Calendly slot. */
+  scheduled: z.boolean(),
   kundaliStatus: z.enum(kundaliStatuses),
   hasKundali: z.boolean(),
   createdAt: z.iso.datetime(),
 });
 export type PublicBooking = z.infer<typeof publicBookingSchema>;
+
+/** Draft acknowledgement — the id + token the wizard carries into step 4+. */
+export const bookingDraftSchema = z.object({
+  id: z.string(),
+  token: z.string(),
+});
+
+/** Saving the Calendly slot picked in the schedule step. */
+export const scheduleBookingSchema = z.object({
+  token: z.string().trim().min(1),
+  calendlyEventUri: z.string().trim().min(1).max(500),
+  calendlyInviteeUri: z.string().trim().max(500).optional().default(""),
+});
+export type ScheduleBookingInput = z.infer<typeof scheduleBookingSchema>;
+
+/** Opening the fee payment for a draft booking. */
+export const payBookingSchema = z.object({
+  token: z.string().trim().min(1),
+});
 
 export const updateBookingStatusSchema = z.object({
   status: z.enum(bookingStatuses),

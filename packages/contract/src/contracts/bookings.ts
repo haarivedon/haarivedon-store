@@ -2,9 +2,12 @@ import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import {
   bookingCreatedSchema,
+  bookingDraftSchema,
   bookingReserveSessionSchema,
   createBookingSchema,
+  payBookingSchema,
   publicBookingSchema,
+  scheduleBookingSchema,
 } from "../schemas/booking";
 import { verifyPaymentSchema } from "../schemas/enquiry";
 import { errorSchema } from "../schemas/common";
@@ -12,14 +15,13 @@ import { errorSchema } from "../schemas/common";
 const c = initContract();
 
 /**
- * Public intake only.
+ * Public intake only. Reading/triaging bookings lives under /api/admin.
  *
- * Reading and triaging bookings lives under /api/admin, behind a real session.
- *
- * A session is paid-for: `reserve` re-reads the admin-set fee, opens a Razorpay
- * order and records a pending booking; `verifyReserve` confirms the signature,
- * marks it paid and kicks off the Kundali. `create` remains for a free booking
- * (admin / fallback), but the public page uses the paid flow.
+ * The flow is a wizard: `draft` saves the details and returns a token-gated id;
+ * `schedule` records the Calendly slot the booker picks; `pay` opens a Razorpay
+ * order for the session fee; `verifyReserve` confirms payment, marks the
+ * booking paid and starts the Kundali. `get` is the token-gated view used by
+ * every step after the draft. `create` remains for a free booking (admin).
  */
 export const bookingsContract = c.router({
   create: {
@@ -33,17 +35,40 @@ export const bookingsContract = c.router({
     },
     summary: "Submit a session booking request (no payment).",
   },
-  reserve: {
+  draft: {
     method: "POST",
-    path: "/bookings/reserve",
+    path: "/bookings/draft",
     body: createBookingSchema,
     responses: {
-      200: bookingReserveSessionSchema,
-      409: errorSchema, // online payment unavailable
+      200: bookingDraftSchema,
       422: errorSchema,
       429: errorSchema,
     },
-    summary: "Open a Razorpay order for the session fee and hold the booking.",
+    summary: "Save booking details and start a draft (step 1-3 of the wizard).",
+  },
+  schedule: {
+    method: "POST",
+    path: "/bookings/:id/schedule",
+    pathParams: z.object({ id: z.string() }),
+    body: scheduleBookingSchema,
+    responses: {
+      200: z.object({ ok: z.boolean() }),
+      404: errorSchema,
+      422: errorSchema,
+    },
+    summary: "Record the Calendly slot the booker picked.",
+  },
+  pay: {
+    method: "POST",
+    path: "/bookings/:id/pay",
+    pathParams: z.object({ id: z.string() }),
+    body: payBookingSchema,
+    responses: {
+      200: bookingReserveSessionSchema,
+      404: errorSchema,
+      409: errorSchema, // payment unavailable / already paid
+    },
+    summary: "Open a Razorpay order for the session fee of a draft booking.",
   },
   verifyReserve: {
     method: "POST",
@@ -65,6 +90,6 @@ export const bookingsContract = c.router({
       200: publicBookingSchema,
       404: errorSchema,
     },
-    summary: "The booker's confirmation view, gated by the one-time token.",
+    summary: "The booker's view of one booking, gated by the one-time token.",
   },
 });
