@@ -140,7 +140,11 @@ export const siteContentSchemas = {
     /** Session fee charged via Razorpay before a booking is submitted. */
     fee: z.coerce.number().int().min(0).max(1_000_000).default(501),
     /** Calendly scheduling link shown after payment, e.g. https://calendly.com/you/consult */
-    calendlyUrl: z.string().trim().max(300).default(""),
+    calendlyUrl: z
+      .string()
+      .trim()
+      .max(300)
+      .default("https://calendly.com/harivedon/30min"),
   }),
 
   "site.contact": z.object({
