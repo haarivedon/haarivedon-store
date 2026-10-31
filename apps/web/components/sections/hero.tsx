@@ -112,10 +112,10 @@ export async function Hero() {
           {/* Signature */}
           <div className="absolute top-2 right-0 z-20 hidden rotate-3 flex-col items-end sm:flex">
             <span className="font-script text-4xl leading-none text-gold">
-              Neelam Niranjan
+              Neelam A. Singh
             </span>
             <span className="mt-1 text-[0.65rem] font-medium tracking-[0.18em] text-ivory/60 uppercase">
-              Founder &amp; Guide
+              Vastu &amp; Astrology Expert
             </span>
           </div>
         </div>

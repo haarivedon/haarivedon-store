@@ -10,7 +10,7 @@ import { aboutPillars, site } from "@/lib/content/site";
 import { getSiteContent, orFallback } from "@/lib/api/content";
 
 export const metadata: Metadata = {
-  title: "About Neelam Niranjan",
+  title: "About Neelam A. Singh",
   description:
     "The story, mission and areas of expertise behind Haarivedon — ancient wisdom offered with compassion, for the questions you carry today.",
 };
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 /** Used until the client fills the About page in through the admin. */
 const defaults = {
   heading: "Guidance rooted in tradition, offered with care",
-  intro: `${site.name} is the practice of Neelam Niranjan — a space for people who are carrying a question and want a considered answer, not a quick one.`,
+  intro: `${site.name} is the practice of Neelam A. Singh — a space for people who are carrying a question and want a considered answer, not a quick one.`,
   story:
     "Every consultation begins by listening. The traditional sciences — astrology, numerology, vastu, energy work — are tools, and which one serves you depends entirely on what you bring to the conversation.\n\nThe intent is never to hand you a verdict. It is to show you the pattern you are standing in, and the choices that are genuinely yours to make.",
   expertise: [
@@ -66,7 +66,7 @@ export default async function AboutPage() {
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-border/60 shadow-sm">
             <Image
               src={portrait}
-              alt="Neelam Niranjan, founder of Haarivedon"
+              alt="Neelam A. Singh, founder of Haarivedon"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"

@@ -48,7 +48,7 @@ export const siteContentSchemas = {
       .trim()
       .max(600)
       .default(
-        "Haarivedon is the practice of Neelam Niranjan — a space for people who are carrying a question and want a considered answer, not a quick one.",
+        "Haarivedon is the practice of Neelam A. Singh — a space for people who are carrying a question and want a considered answer, not a quick one.",
       ),
     story: z
       .string()

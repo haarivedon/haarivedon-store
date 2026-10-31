@@ -34,13 +34,13 @@ export const metadata: Metadata = {
     template: "%s · Haarivedon",
   },
   description:
-    "Ancient wisdom and personalized guidance for life's important decisions. Find clarity, balance, and direction with Neelam Niranjan.",
+    "Ancient wisdom and personalized guidance for life's important decisions. Find clarity, balance, and direction with Neelam A. Singh.",
   keywords: [
     "spiritual guidance",
     "vedic wisdom",
     "predictions",
     "consultation",
-    "Neelam Niranjan",
+    "Neelam A. Singh",
     "Haarivedon",
   ],
   openGraph: {
