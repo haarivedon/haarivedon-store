@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import { Section, SectionHeader } from "@/components/section";
 import { Icon, type IconName } from "@/components/icon";
 import { buttonVariants } from "@/components/ui/button";
@@ -148,6 +148,36 @@ export default async function AboutPage() {
           ))}
         </ul>
       </Section>
+
+      {copy.faqs.filter((faq) => faq.question.trim()).length > 0 && (
+        <Section background="ivory">
+          <SectionHeader
+            eyebrow="FAQ"
+            title="Questions people often ask"
+            align="center"
+          />
+          <div className="mx-auto mt-8 max-w-2xl divide-y divide-border/60 border-y border-border/60">
+            {copy.faqs
+              .filter((faq) => faq.question.trim())
+              .map((faq) => (
+                <details key={faq.question} className="group py-4">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-base font-semibold text-forest">
+                    {faq.question}
+                    <Plus
+                      aria-hidden
+                      className="size-4 shrink-0 text-brand-700 transition-transform group-open:rotate-45"
+                    />
+                  </summary>
+                  {faq.answer && (
+                    <p className="mt-3 text-sm leading-relaxed text-charcoal/80">
+                      {faq.answer}
+                    </p>
+                  )}
+                </details>
+              ))}
+          </div>
+        </Section>
+      )}
     </>
   );
 }

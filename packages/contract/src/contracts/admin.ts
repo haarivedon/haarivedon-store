@@ -1,11 +1,13 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import {
+  adminBlogPostSchema,
   adminCourseSchema,
   adminProductSchema,
   adminServiceSchema,
   adminTestimonialSchema,
   adminUserSchema,
+  blogPostWriteSchema,
   changePasswordSchema,
   conflictSchema,
   courseWriteSchema,
@@ -161,6 +163,7 @@ export const adminContract = c.router({
     adminTestimonialSchema,
     testimonialWriteSchema,
   ),
+  blog: collection("blog", adminBlogPostSchema, blogPostWriteSchema),
 
   // ── Page copy ───────────────────────────────────────────────────────────
   getSiteContent: {

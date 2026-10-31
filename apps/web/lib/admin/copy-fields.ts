@@ -42,6 +42,13 @@ export const copyFields: Record<SiteContentKey, FieldSpec[]> = {
     { name: "philosophy", label: "Philosophy", kind: "textarea", wide: true },
     { name: "expertise", label: "Areas of expertise", kind: "list", wide: true },
     { name: "portrait", label: "Portrait image", kind: "image", wide: true },
+    {
+      name: "faqs",
+      label: "FAQs",
+      kind: "faq",
+      hint: "Questions and answers shown at the bottom of the About page",
+      wide: true,
+    },
   ],
   "predictions.page": [
     { name: "heading", label: "Heading", kind: "text", wide: true },

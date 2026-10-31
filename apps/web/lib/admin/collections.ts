@@ -1,4 +1,5 @@
 import {
+  blogPostWriteSchema,
   courseWriteSchema,
   productWriteSchema,
   serviceWriteSchema,
@@ -30,6 +31,7 @@ export type FieldKind =
   | "select"
   | "list"
   | "image"
+  | "faq"
   | "slug";
 
 export type FieldSpec = {
@@ -65,7 +67,7 @@ const filled = (value: unknown) =>
   typeof value === "string" ? value.trim().length > 0 : Boolean(value);
 
 export type CollectionSpec = {
-  key: "courses" | "products" | "services" | "testimonials";
+  key: "courses" | "products" | "services" | "testimonials" | "blog";
   label: string;
   singular: string;
   /** Field holding the display name. */
@@ -499,6 +501,84 @@ export const collections: Record<CollectionSpec["key"], CollectionSpec> = {
       published: false,
     },
   },
+
+  blog: {
+    key: "blog",
+    label: "Blog",
+    singular: "post",
+    titleField: "title",
+    slugPrefix: "/blog/",
+    sections: [
+      {
+        title: "Basics",
+        fields: [
+          { name: "title", label: "Title", kind: "text", max: 160 },
+          { name: "slug", label: "Web address", kind: "slug" },
+          {
+            name: "excerpt",
+            label: "Excerpt",
+            kind: "textarea",
+            max: 400,
+            placeholder: "One or two lines, shown in the blog list.",
+            wide: true,
+          },
+          {
+            name: "tags",
+            label: "Tags",
+            kind: "list",
+            placeholder: "e.g. astrology",
+            emptyHint: "No tags yet. Add one per row.",
+            wide: true,
+          },
+          {
+            name: "order",
+            label: "Display order",
+            kind: "number",
+            hint: "Lower numbers come first within the same date",
+          },
+        ],
+      },
+      {
+        title: "Cover image",
+        description: "Shown in the list and at the top of the article.",
+        fields: [
+          { name: "coverImage", label: "Cover image", kind: "image", wide: true },
+        ],
+      },
+      {
+        title: "Content",
+        fields: [
+          {
+            name: "content",
+            label: "Body",
+            kind: "richtext",
+            max: 50000,
+            placeholder: "Leave a blank line between paragraphs.",
+            wide: true,
+          },
+        ],
+      },
+    ],
+    publishChecks: [
+      { field: "excerpt", label: "An excerpt", done: (r) => filled(r.excerpt) },
+      { field: "content", label: "The post body", done: (r) => filled(r.content) },
+      {
+        field: "coverImage",
+        label: "A cover image",
+        done: (r) => filled(r.coverImage),
+      },
+    ],
+    blank: {
+      title: "",
+      slug: "",
+      excerpt: "",
+      content: "",
+      coverImage: "",
+      tags: [],
+      order: 0,
+      published: false,
+    },
+  },
 };
 
 export const collectionKeys = Object.keys(collections) as CollectionSpec["key"][];
@@ -513,6 +593,7 @@ export const writeSchemas = {
   products: productWriteSchema,
   services: serviceWriteSchema,
   testimonials: testimonialWriteSchema,
+  blog: blogPostWriteSchema,
 } as const;
 
 /** Title-to-slug, matching the server's slug rules (docs/PLAN.md §13). */

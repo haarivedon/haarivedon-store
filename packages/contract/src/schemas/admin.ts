@@ -103,6 +103,20 @@ export const adminTestimonialSchema = z.object({
 });
 export type AdminTestimonial = z.infer<typeof adminTestimonialSchema>;
 
+export const adminBlogPostSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  slug: z.string(),
+  excerpt: z.string(),
+  content: z.string(),
+  coverImage: z.string(),
+  tags: z.array(z.string()),
+  publishedAt: z.iso.datetime(),
+  order: z.number().int(),
+  ...adminFields,
+});
+export type AdminBlogPost = z.infer<typeof adminBlogPostSchema>;
+
 /** Slug rules (docs/PLAN.md §13): lowercase, hyphenated, never reserved. */
 export const RESERVED_SLUGS = [
   "admin",
@@ -215,6 +229,21 @@ export const testimonialWriteSchema = z.object({
     .max(1000),
   rating: z.number().int().min(1).max(5).optional(),
   location: z.string().trim().max(100).optional(),
+  order: z.number().int().min(0).optional(),
+  published: z.boolean().optional(),
+});
+
+export const blogPostWriteSchema = z.object({
+  title: z
+    .string({ error: "Give the post a title." })
+    .trim()
+    .min(2, "Give the post a title.")
+    .max(160),
+  slug: slugSchema,
+  excerpt: z.string().trim().max(400).optional(),
+  content: z.string().trim().max(50_000).optional(),
+  coverImage: z.string().trim().max(500).optional(),
+  tags: z.array(z.string().trim().min(1).max(40)).max(12).optional(),
   order: z.number().int().min(0).optional(),
   published: z.boolean().optional(),
 });
