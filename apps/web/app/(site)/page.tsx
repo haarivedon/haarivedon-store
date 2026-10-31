@@ -9,6 +9,7 @@ import { Products } from "@/components/sections/products";
 import { EnergyTools } from "@/components/sections/energy-tools";
 import { WhyUs } from "@/components/sections/why-us";
 import { Testimonials } from "@/components/sections/testimonials";
+import { Faq } from "@/components/sections/faq";
 import { Blog } from "@/components/sections/blog";
 import { features } from "@/lib/flags";
 
@@ -28,6 +29,7 @@ export default function Home() {
       <EnergyTools />
       <WhyUs />
       <Testimonials />
+      <Faq />
       {features.blog && <Blog />}
     </>
   );

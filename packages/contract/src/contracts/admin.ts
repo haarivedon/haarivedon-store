@@ -2,6 +2,7 @@ import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import {
   adminBlogPostSchema,
+  adminStatsSchema,
   adminCourseSchema,
   adminProductSchema,
   adminServiceSchema,
@@ -113,6 +114,17 @@ const collection = <
   });
 
 export const adminContract = c.router({
+  // ── Dashboard ───────────────────────────────────────────────────────────
+  stats: {
+    method: "GET",
+    path: "/admin/stats",
+    responses: {
+      200: adminStatsSchema,
+      401: errorSchema,
+    },
+    summary: "Dashboard metrics: totals, revenue, activity and breakdowns.",
+  },
+
   // ── Session ─────────────────────────────────────────────────────────────
   login: {
     method: "POST",

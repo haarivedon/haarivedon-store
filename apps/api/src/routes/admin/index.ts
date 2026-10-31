@@ -230,6 +230,135 @@ const searchFilter = (search: string | undefined, fields: string[]) =>
 // ── Routes ────────────────────────────────────────────────────────────────
 
 export const adminRouter = tsr.router(contract.admin, {
+  stats: async (_input, { request }) => {
+    await requireAdmin(request.headers);
+
+    const [bookings, enquiries, products, courses, services, blog] =
+      await Promise.all([
+        prisma.booking.count(),
+        prisma.enquiry.count(),
+        prisma.product.count({ where: { published: true } }),
+        prisma.course.count({ where: { published: true } }),
+        prisma.service.count({ where: { published: true } }),
+        prisma.blogPost.count({ where: { published: true } }),
+      ]);
+
+    const [pendBookings, pendEnquiries, pendPredictions] = await Promise.all([
+      prisma.booking.count({ where: { status: "pending" } }),
+      prisma.enquiry.count({ where: { status: "pending" } }),
+      prisma.predictionRequest.count({ where: { status: "pending" } }),
+    ]);
+
+    const [bRev, eRev] = await Promise.all([
+      prisma.booking.aggregate({
+        _sum: { amount: true },
+        _count: true,
+        where: { paymentStatus: "paid" },
+      }),
+      prisma.enquiry.aggregate({
+        _sum: { amount: true },
+        _count: true,
+        where: { paymentStatus: "paid" },
+      }),
+    ]);
+
+    // 14-day activity: fetch createdAt and bucket by day in JS.
+    const since = new Date();
+    since.setHours(0, 0, 0, 0);
+    since.setDate(since.getDate() - 13);
+    const [bDates, eDates] = await Promise.all([
+      prisma.booking.findMany({
+        where: { createdAt: { gte: since } },
+        select: { createdAt: true },
+      }),
+      prisma.enquiry.findMany({
+        where: { createdAt: { gte: since } },
+        select: { createdAt: true },
+      }),
+    ]);
+    const buckets = new Map<
+      string,
+      { date: string; bookings: number; enquiries: number }
+    >();
+    const order: string[] = [];
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(since);
+      d.setDate(since.getDate() + i);
+      const key = d.toISOString().slice(0, 10);
+      buckets.set(key, { date: key, bookings: 0, enquiries: 0 });
+      order.push(key);
+    }
+    for (const b of bDates) {
+      const row = buckets.get(b.createdAt.toISOString().slice(0, 10));
+      if (row) row.bookings += 1;
+    }
+    for (const e of eDates) {
+      const row = buckets.get(e.createdAt.toISOString().slice(0, 10));
+      if (row) row.enquiries += 1;
+    }
+
+    const bookingPayments = await Promise.all(
+      (["paid", "pending", "none", "failed"] as const).map(async (s) => ({
+        label: s === "none" ? "draft" : s,
+        value: await prisma.booking.count({ where: { paymentStatus: s } }),
+      })),
+    );
+    const enquiryStatuses = await Promise.all(
+      (["pending", "contacted", "enrolled", "closed"] as const).map(
+        async (s) => ({
+          label: s,
+          value: await prisma.enquiry.count({ where: { status: s } }),
+        }),
+      ),
+    );
+
+    const recent = await prisma.booking.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        reference: true,
+        name: true,
+        service: true,
+        amount: true,
+        paymentStatus: true,
+        createdAt: true,
+      },
+    });
+
+    return {
+      status: 200 as const,
+      body: {
+        totals: { bookings, enquiries, products, courses, services, blog },
+        pending: {
+          bookings: pendBookings,
+          enquiries: pendEnquiries,
+          predictions: pendPredictions,
+        },
+        revenue: {
+          total: (bRev._sum.amount ?? 0) + (eRev._sum.amount ?? 0),
+          paidCount: bRev._count + eRev._count,
+        },
+        activity: order.map((k) => buckets.get(k)!),
+        enquiryStatuses: enquiryStatuses.filter((s) => s.value > 0),
+        bookingPayments: bookingPayments.filter((s) => s.value > 0),
+        recentBookings: recent.map((b) => ({
+          id: b.id,
+          reference: b.reference,
+          name: b.name,
+          service: b.service,
+          amount: b.amount,
+          paymentStatus: b.paymentStatus as
+            | "none"
+            | "pending"
+            | "paid"
+            | "failed",
+          createdAt: b.createdAt.toISOString(),
+        })),
+      },
+    };
+  },
+
   login: async ({ body }, { request, responseHeaders }) => {
     const result = await login(body.email, body.password, {
       userAgent: request.headers.get("user-agent") ?? "",

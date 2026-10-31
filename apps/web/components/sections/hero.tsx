@@ -74,7 +74,7 @@ export async function Hero() {
                 href="/book"
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "h-12 w-full justify-center px-6 text-sm font-semibold shadow-sm sm:w-auto",
+                  "h-12 w-full justify-center px-6 text-sm font-semibold shadow-sm hover:bg-gold hover:text-forest sm:w-auto",
                 )}
               >
                 Book a Session
@@ -109,12 +109,13 @@ export async function Hero() {
         <div className="relative order-2 mt-8 self-end lg:order-none lg:mt-0">
           <HeroPortrait />
 
-          {/* Signature */}
-          <div className="absolute top-2 right-0 z-20 hidden rotate-3 flex-col items-end sm:flex">
+          {/* Signature — nudged into the corner and shadowed so it stays legible
+              above the zodiac wheel behind it. */}
+          <div className="absolute -top-1 right-0 z-20 hidden rotate-3 flex-col items-end drop-shadow-[0_2px_10px_#000142] sm:flex">
             <span className="font-script text-4xl leading-none text-gold">
               Neelam A. Singh
             </span>
-            <span className="mt-1 text-[0.65rem] font-medium tracking-[0.18em] text-ivory/60 uppercase">
+            <span className="mt-1 text-[0.65rem] font-medium tracking-[0.18em] text-ivory/80 uppercase">
               Vastu &amp; Astrology Expert
             </span>
           </div>

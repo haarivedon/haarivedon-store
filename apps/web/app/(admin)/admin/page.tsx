@@ -1,56 +1,74 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import type { AdminStats } from "@repo/contract";
 import { adminFetch, requireAdminUser } from "@/lib/admin/session";
 import { PageHeader, Panel } from "@/components/admin/page-header";
+import { ActivityChart, BreakdownBars } from "@/components/admin/stat-charts";
 
 export const metadata: Metadata = { title: "Overview" };
 
-type Paged = { meta: { total: number } };
+const inr = (value: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(value);
 
-/** Counts for the overview tiles; a failed call shows a dash, not an error. */
-async function count(path: string): Promise<number | null> {
-  const result = await adminFetch<Paged>(`${path}?perPage=1`);
-  return result?.meta.total ?? null;
-}
+const shortDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+
+const paymentStyle: Record<string, string> = {
+  paid: "bg-brand-600/15 text-brand-700",
+  pending: "bg-gold/20 text-charcoal",
+  none: "bg-border/60 text-muted-foreground",
+  failed: "bg-terracotta/15 text-terracotta",
+};
 
 export default async function AdminHome() {
   const user = await requireAdminUser("/admin");
+  const stats = await adminFetch<AdminStats>("/stats");
 
-  const [courses, drafts, products, bookings, predictions, enquiries] =
-    await Promise.all([
-      count("/courses?published=true"),
-      count("/courses?published=false"),
-      count("/products?published=true"),
-      count("/bookings?status=pending"),
-      count("/predictions?status=pending"),
-      count("/enquiries?status=pending"),
-    ]);
+  if (!stats) {
+    return (
+      <div>
+        <PageHeader title={`Welcome back${user.name ? `, ${user.name}` : ""}`} />
+        <Panel className="p-5">
+          <p className="text-sm text-muted-foreground">
+            We couldn&rsquo;t load the dashboard metrics just now. Refresh the
+            page, and if it keeps happening the API may be waking up.
+          </p>
+        </Panel>
+      </div>
+    );
+  }
 
   const tiles = [
-    { label: "Published courses", value: courses, href: "/admin/content/courses" },
-    { label: "Course drafts", value: drafts, href: "/admin/content/courses" },
-    { label: "Published products", value: products, href: "/admin/content/products" },
-    { label: "New bookings", value: bookings, href: "/admin/inbox/bookings" },
-    { label: "New prediction requests", value: predictions, href: "/admin/inbox/predictions" },
-    { label: "New enquiries", value: enquiries, href: "/admin/inbox/enquiries" },
+    { label: "Revenue (paid)", value: inr(stats.revenue.total), href: "/admin/inbox/bookings" },
+    { label: "Paid bookings & orders", value: stats.revenue.paidCount, href: "/admin/inbox/bookings" },
+    { label: "New bookings", value: stats.pending.bookings, href: "/admin/inbox/bookings" },
+    { label: "New enquiries", value: stats.pending.enquiries, href: "/admin/inbox/enquiries" },
+    { label: "New predictions", value: stats.pending.predictions, href: "/admin/inbox/predictions" },
+    { label: "Published products", value: stats.totals.products, href: "/admin/content/products" },
+    { label: "Published courses", value: stats.totals.courses, href: "/admin/content/courses" },
+    { label: "Blog posts", value: stats.totals.blog, href: "/admin/content/blog" },
   ];
 
   return (
     <div>
       <PageHeader
         title={`Welcome back${user.name ? `, ${user.name}` : ""}`}
-        description="Anything you have not published yet stays invisible on the site, so you can fill things in over time."
+        description="A snapshot of the practice — revenue, what's new in the inbox, and activity over the last two weeks."
       />
 
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {tiles.map((tile) => (
           <li key={tile.label}>
             <Link
               href={tile.href}
               className="flex h-full flex-col border border-l-2 border-border border-l-gold bg-white p-5 transition-colors hover:border-brand-600 hover:border-l-gold"
             >
-              <span className="font-display text-3xl font-semibold text-forest">
-                {tile.value ?? "—"}
+              <span className="font-display text-2xl font-semibold text-forest">
+                {tile.value}
               </span>
               <span className="mt-1 text-sm text-muted-foreground">
                 {tile.label}
@@ -60,22 +78,89 @@ export default async function AdminHome() {
         ))}
       </ul>
 
-      <Panel className="mt-10 p-5">
-        <h2 className="font-display text-lg font-semibold text-forest">
-          Publishing a course
-        </h2>
-        <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-charcoal/80">
-          <li>Open <strong>Courses</strong> and pick one from the list.</li>
-          <li>Write the summary and description, and set the duration.</li>
-          <li>Upload an image and give it alt text — a sentence describing it.</li>
-          <li>Set a price, or leave it empty to show &ldquo;Enquire for price&rdquo;.</li>
-          <li>Switch <strong>Published</strong> on and save.</li>
-        </ol>
-        <p className="mt-3 text-sm text-muted-foreground">
-          If something is missing, saving will tell you exactly which field it
-          is rather than publishing a half-finished page.
-        </p>
+      <Panel className="mt-6 p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-lg font-semibold text-forest">
+            Recent bookings
+          </h2>
+          <Link
+            href="/admin/inbox/bookings"
+            className="text-sm font-medium text-brand-700 hover:text-forest"
+          >
+            View all
+          </Link>
+        </div>
+        {stats.recentBookings.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">No bookings yet.</p>
+        ) : (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border/70 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <th className="pb-2 pr-3 font-medium">Name</th>
+                  <th className="pb-2 pr-3 font-medium">Service</th>
+                  <th className="pb-2 pr-3 font-medium">Amount</th>
+                  <th className="pb-2 pr-3 font-medium">Payment</th>
+                  <th className="pb-2 font-medium">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.recentBookings.map((b) => (
+                  <tr key={b.id} className="border-b border-border/40 last:border-0">
+                    <td className="py-2.5 pr-3 font-medium text-charcoal">
+                      {b.name}
+                    </td>
+                    <td className="py-2.5 pr-3 text-charcoal/75">
+                      {b.service || "—"}
+                    </td>
+                    <td className="py-2.5 pr-3 text-charcoal/75">
+                      {b.amount ? inr(b.amount) : "—"}
+                    </td>
+                    <td className="py-2.5 pr-3">
+                      <span
+                        className={`inline-block px-2 py-0.5 text-xs font-medium capitalize ${paymentStyle[b.paymentStatus] ?? ""}`}
+                      >
+                        {b.paymentStatus === "none" ? "draft" : b.paymentStatus}
+                      </span>
+                    </td>
+                    <td className="py-2.5 text-muted-foreground">
+                      {shortDate(b.createdAt)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Panel>
+
+      <Panel className="mt-6 p-5">
+        <h2 className="font-display text-lg font-semibold text-forest">
+          Activity — last 14 days
+        </h2>
+        <div className="mt-4">
+          <ActivityChart data={stats.activity} />
+        </div>
+      </Panel>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <Panel className="p-5">
+          <h2 className="font-display text-lg font-semibold text-forest">
+            Enquiries by status
+          </h2>
+          <div className="mt-4">
+            <BreakdownBars items={stats.enquiryStatuses} />
+          </div>
+        </Panel>
+        <Panel className="p-5">
+          <h2 className="font-display text-lg font-semibold text-forest">
+            Bookings by payment
+          </h2>
+          <div className="mt-4">
+            <BreakdownBars items={stats.bookingPayments} />
+          </div>
+        </Panel>
+      </div>
     </div>
   );
 }
