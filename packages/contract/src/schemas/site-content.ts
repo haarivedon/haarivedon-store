@@ -114,12 +114,14 @@ export const siteContentSchemas = {
     confirmation: z.string().trim().max(600).default(""),
     /** Session fee charged via Razorpay before a booking is submitted. */
     fee: z.coerce.number().int().min(0).max(1_000_000).default(501),
+    /** Calendly scheduling link shown after payment, e.g. https://calendly.com/you/consult */
+    calendlyUrl: z.string().trim().max(300).default(""),
   }),
 
   "site.contact": z.object({
-    phone: z.string().trim().max(40).default("+91 98765 43210"),
-    whatsapp: z.string().trim().max(40).default(""),
-    email: z.string().trim().max(120).default("hello@haarivedon.com"),
+    phone: z.string().trim().max(40).default("+91 92509 43774"),
+    whatsapp: z.string().trim().max(40).default("+91 92509 43774"),
+    email: z.string().trim().max(120).default("harivedon@gmail.com"),
     address: z.string().trim().max(300).default(""),
     hours: z.string().trim().max(200).default(""),
     instagram: z.string().trim().max(200).default(""),

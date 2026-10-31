@@ -1,8 +1,10 @@
 import { initContract } from "@ts-rest/core";
+import { z } from "zod";
 import {
   bookingCreatedSchema,
   bookingReserveSessionSchema,
   createBookingSchema,
+  publicBookingSchema,
 } from "../schemas/booking";
 import { verifyPaymentSchema } from "../schemas/enquiry";
 import { errorSchema } from "../schemas/common";
@@ -53,5 +55,16 @@ export const bookingsContract = c.router({
       422: errorSchema,
     },
     summary: "Verify the fee payment, confirm the booking and start the Kundali.",
+  },
+  get: {
+    method: "GET",
+    path: "/bookings/:id",
+    pathParams: z.object({ id: z.string() }),
+    query: z.object({ token: z.string() }),
+    responses: {
+      200: publicBookingSchema,
+      404: errorSchema,
+    },
+    summary: "The booker's confirmation view, gated by the one-time token.",
   },
 });

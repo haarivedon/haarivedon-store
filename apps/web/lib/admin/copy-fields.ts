@@ -78,6 +78,13 @@ export const copyFields: Record<SiteContentKey, FieldSpec[]> = {
       kind: "number",
       hint: "Charged via Razorpay before a booking is confirmed",
     },
+    {
+      name: "calendlyUrl",
+      label: "Calendly scheduling link",
+      kind: "text",
+      hint: "e.g. https://calendly.com/you/consult — shown after payment to pick a slot",
+      wide: true,
+    },
   ],
   "site.contact": [
     { name: "phone", label: "Phone", kind: "text" },

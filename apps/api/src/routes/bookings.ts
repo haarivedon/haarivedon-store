@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { contract, parseSiteContent } from "@repo/contract";
+import { contract, parseSiteContent, type PublicBooking } from "@repo/contract";
 import { prisma } from "@repo/db";
 import { tsr } from "@ts-rest/serverless/fetch";
 import { queueKundali } from "../lib/kundali/queue";
@@ -160,6 +160,28 @@ export const bookingsRouter = tsr.router(contract.bookings, {
         kundaliToken: booking.kundaliToken,
         message:
           "Payment received and your session is booked. We'll reach out shortly to confirm, and your Kundali will follow once it is ready.",
+      },
+    };
+  },
+
+  /** The booker's confirmation view. A wrong token reads like a missing booking. */
+  get: async ({ params, query }) => {
+    const booking = await prisma.booking.findUnique({ where: { id: params.id } });
+    if (!booking || booking.kundaliToken !== query.token) {
+      return { status: 404 as const, body: { error: "Booking not found." } };
+    }
+    return {
+      status: 200 as const,
+      body: {
+        id: booking.id,
+        reference: booking.reference,
+        name: booking.name,
+        service: booking.service,
+        sessionType: booking.sessionType as PublicBooking["sessionType"],
+        paymentStatus: booking.paymentStatus as PublicBooking["paymentStatus"],
+        kundaliStatus: booking.kundaliStatus as PublicBooking["kundaliStatus"],
+        hasKundali: booking.kundaliKey !== "",
+        createdAt: booking.createdAt.toISOString(),
       },
     };
   },
