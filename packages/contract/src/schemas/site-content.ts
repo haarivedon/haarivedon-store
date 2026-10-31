@@ -37,6 +37,34 @@ export const siteContentSchemas = {
     productSlugs: z.array(z.string().trim()).max(8).default([]),
   }),
 
+  "home.faq": z.object({
+    faqs: z
+      .array(
+        z.object({
+          question: z.string().trim().max(300).default(""),
+          answer: z.string().trim().max(2000).default(""),
+        }),
+      )
+      .max(30)
+      .default([
+        {
+          question: "What kind of guidance do you offer?",
+          answer:
+            "Astrology, vastu, numerology, energy healing and coaching — all one-to-one and shaped around the question you bring.",
+        },
+        {
+          question: "How does a session work?",
+          answer:
+            "You share your birth details and book a slot; we prepare your chart beforehand, then meet over a call so the time is spent on you, not on basics.",
+        },
+        {
+          question: "Do you consult online?",
+          answer:
+            "Yes — sessions are held over a call, so you can join from anywhere in the world.",
+        },
+      ]),
+  }),
+
   "about.page": z.object({
     heading: z
       .string()
@@ -176,6 +204,7 @@ export const siteContentKeySchema = z.enum(
 export const siteContentLabels: Record<SiteContentKey, string> = {
   "home.hero": "Home — hero",
   "home.featured": "Home — featured picks",
+  "home.faq": "Home — FAQ",
   "about.page": "About page",
   "predictions.page": "Predictions page",
   "book.page": "Book a Session page",

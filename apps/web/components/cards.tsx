@@ -137,7 +137,7 @@ export function IconCard({
           align === "center" && "items-center text-center",
         )}
       >
-        <div className="grid size-10 place-items-center rounded-lg bg-forest text-gold transition-colors group-hover:bg-brand group-hover:text-forest sm:size-12">
+        <div className="grid size-10 place-items-center rounded-lg bg-gold text-forest transition-colors group-hover:bg-forest group-hover:text-gold sm:size-12">
           {icon}
         </div>
         <h3 className="mt-4 font-display text-base font-semibold text-forest sm:mt-5 sm:text-lg">

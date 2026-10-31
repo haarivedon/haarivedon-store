@@ -37,16 +37,17 @@ export function HeroPortrait() {
       {/* Gold aura */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-1/2 size-[26rem] -translate-x-1/2 -translate-y-[58%] rounded-full bg-gold/25 blur-3xl sm:size-[32rem]"
+        className="pointer-events-none absolute top-1/2 left-1/2 size-[24rem] -translate-x-1/2 -translate-y-[52%] rounded-full bg-gold/25 blur-3xl sm:size-[30rem]"
       />
-      {/* Zodiac wheel — fixed behind the slides; screen blend keeps only the gold */}
+      {/* Zodiac wheel — centred on the figure so it sits inside the ring, and
+          pulled in a touch so the right-hand signs clear the signature. */}
       <Image
         src="/images/zodiac-wheel.webp"
         alt=""
         aria-hidden="true"
         width={800}
         height={799}
-        className="pointer-events-none absolute top-1/2 left-1/2 size-[24rem] -translate-x-1/2 -translate-y-[60%] opacity-80 motion-safe:animate-[spin_80s_linear_infinite] sm:size-[30rem]"
+        className="pointer-events-none absolute top-1/2 left-1/2 size-[22rem] -translate-x-1/2 -translate-y-[52%] opacity-80 motion-safe:animate-[spin_80s_linear_infinite] sm:size-[28rem]"
       />
 
       {/* Slides — cross-fade, all anchored to a common baseline */}

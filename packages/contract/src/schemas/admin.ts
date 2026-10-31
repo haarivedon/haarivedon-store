@@ -281,3 +281,52 @@ export const mediaSchema = z.object({
   createdAt: z.iso.datetime(),
 });
 export type Media = z.infer<typeof mediaSchema>;
+
+/** Dashboard metrics: totals, revenue, a 14-day activity series and breakdowns. */
+export const adminStatsSchema = z.object({
+  totals: z.object({
+    bookings: z.number().int(),
+    enquiries: z.number().int(),
+    products: z.number().int(),
+    courses: z.number().int(),
+    services: z.number().int(),
+    blog: z.number().int(),
+  }),
+  pending: z.object({
+    bookings: z.number().int(),
+    enquiries: z.number().int(),
+    predictions: z.number().int(),
+  }),
+  revenue: z.object({
+    /** Total paid, in whole rupees (paid bookings + paid product reserves). */
+    total: z.number().int(),
+    paidCount: z.number().int(),
+  }),
+  /** One entry per day for the last 14 days, oldest first. */
+  activity: z.array(
+    z.object({
+      date: z.string(),
+      bookings: z.number().int(),
+      enquiries: z.number().int(),
+    }),
+  ),
+  enquiryStatuses: z.array(
+    z.object({ label: z.string(), value: z.number().int() }),
+  ),
+  bookingPayments: z.array(
+    z.object({ label: z.string(), value: z.number().int() }),
+  ),
+  /** The five most recent bookings, newest first. */
+  recentBookings: z.array(
+    z.object({
+      id: z.string(),
+      reference: z.string(),
+      name: z.string(),
+      service: z.string(),
+      amount: z.number().int(),
+      paymentStatus: z.enum(["none", "pending", "paid", "failed"]),
+      createdAt: z.iso.datetime(),
+    }),
+  ),
+});
+export type AdminStats = z.infer<typeof adminStatsSchema>;

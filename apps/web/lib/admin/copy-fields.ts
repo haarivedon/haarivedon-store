@@ -34,6 +34,15 @@ export const copyFields: Record<SiteContentKey, FieldSpec[]> = {
       wide: true,
     },
   ],
+  "home.faq": [
+    {
+      name: "faqs",
+      label: "FAQs",
+      kind: "faq",
+      hint: "Questions and answers shown in the FAQ section on the home page",
+      wide: true,
+    },
+  ],
   "about.page": [
     { name: "heading", label: "Heading", kind: "text", wide: true },
     { name: "intro", label: "Intro", kind: "textarea", wide: true },
