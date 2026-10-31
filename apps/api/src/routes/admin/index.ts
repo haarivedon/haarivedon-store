@@ -142,6 +142,7 @@ const booking = (r: BookingRecord): Booking => ({
   phone: r.phone,
   email: r.email,
   sessionType: r.sessionType as Booking["sessionType"],
+  service: r.service,
   dateOfBirth: r.dateOfBirth.toISOString(),
   timeOfBirth: r.timeOfBirth,
   birthPlace: r.birthPlace,

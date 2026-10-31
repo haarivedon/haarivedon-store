@@ -101,7 +101,7 @@ export default async function ServicesPage() {
                       />
                     </p>
                     <Link
-                      href="/book"
+                      href={`/book?service=${encodeURIComponent(service.slug)}`}
                       className={cn(
                         buttonVariants({ size: "sm" }),
                         "h-11 px-5",

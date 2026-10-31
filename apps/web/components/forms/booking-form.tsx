@@ -54,7 +54,13 @@ const sessionLabels: Record<(typeof sessionTypes)[number], string> = {
 
 type Submitted = { id: string; message: string; kundaliToken: string };
 
-export function BookingForm({ fee }: { fee: number }) {
+export function BookingForm({
+  fee,
+  selectedService = "",
+}: {
+  fee: number;
+  selectedService?: string;
+}) {
   const [place, setPlace] = useState<BirthPlace>(emptyBirthPlace);
   const [sessionType, setSessionType] =
     useState<(typeof sessionTypes)[number]>("personal-consultation");
@@ -72,6 +78,7 @@ export function BookingForm({ fee }: { fee: number }) {
       phone: String(form.get("phone") ?? ""),
       email: String(form.get("email") ?? "") || undefined,
       sessionType,
+      service: selectedService,
       dateOfBirth: String(form.get("dateOfBirth") ?? ""),
       timeOfBirth: String(form.get("timeOfBirth") ?? ""),
       birthPlace: place.place,
@@ -172,6 +179,12 @@ export function BookingForm({ fee }: { fee: number }) {
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
+      {selectedService && (
+        <p className="rounded-2xl border border-brand-600/30 bg-brand-600/5 px-4 py-3 text-sm text-charcoal/80">
+          You&rsquo;re booking{" "}
+          <span className="font-semibold text-forest">{selectedService}</span>.
+        </p>
+      )}
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Full name" htmlFor="name" error={errors.name}>
           <input
