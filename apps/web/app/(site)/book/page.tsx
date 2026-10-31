@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CalendarCheck, FileText, MessageCircle } from "lucide-react";
 import { Section, SectionHeader } from "@/components/section";
 import { BookingForm } from "@/components/forms/booking-form";
-import { getSiteContent, orFallback } from "@/lib/api/content";
+import { getServices, getSiteContent, orFallback } from "@/lib/api/content";
 
 export const metadata: Metadata = {
   title: "Book a Session",
@@ -35,8 +35,17 @@ const steps = [
   },
 ];
 
-export default async function BookPage() {
-  const copy = await getSiteContent("book.page");
+export default async function BookPage({ searchParams }: PageProps<"/book">) {
+  const [copy, services, params] = await Promise.all([
+    getSiteContent("book.page"),
+    getServices(),
+    searchParams,
+  ]);
+
+  // A booking can start from the Services page — carry the chosen service in.
+  const serviceSlug = typeof params.service === "string" ? params.service : "";
+  const selectedService =
+    services.find((s) => s.slug === serviceSlug)?.title ?? "";
 
   return (
     <>
@@ -76,7 +85,7 @@ export default async function BookPage() {
               {copy.kundaliNote}
             </p>
           )}
-          <BookingForm fee={copy.fee} />
+          <BookingForm fee={copy.fee} selectedService={selectedService} />
         </div>
       </Section>
     </>

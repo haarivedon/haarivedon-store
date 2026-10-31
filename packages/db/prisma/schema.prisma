@@ -30,6 +30,8 @@ model Booking {
   email        String?
   // personal-consultation | prediction-reading | guidance-session | other
   sessionType  String   @default("personal-consultation")
+  /// The service chosen on the Services page, if the booking started there.
+  service      String   @default("")
   dateOfBirth  DateTime
   timeOfBirth  String
   birthPlace   String
