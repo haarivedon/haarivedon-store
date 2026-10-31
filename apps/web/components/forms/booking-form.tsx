@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { CheckCircle2, Download, Loader2, Lock } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2, Lock } from "lucide-react";
 import { createBookingSchema, sessionTypes } from "@repo/contract";
 import { api } from "@/lib/api/client";
 import { issuesToFieldErrors, toFieldErrors, type FieldErrors } from "@/lib/forms";
@@ -52,8 +52,6 @@ const sessionLabels: Record<(typeof sessionTypes)[number], string> = {
   other: "Something else",
 };
 
-type Submitted = { id: string; message: string; kundaliToken: string };
-
 export function BookingForm({
   fee,
   selectedService = "",
@@ -61,12 +59,12 @@ export function BookingForm({
   fee: number;
   selectedService?: string;
 }) {
+  const router = useRouter();
   const [place, setPlace] = useState<BirthPlace>(emptyBirthPlace);
   const [sessionType, setSessionType] =
     useState<(typeof sessionTypes)[number]>("personal-consultation");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState<Submitted | null>(null);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -156,7 +154,10 @@ export function BookingForm({
           });
 
           if (verified.status === 200) {
-            setSubmitted(verified.body);
+            // Go to the shareable, bookmarkable confirmation page.
+            router.push(
+              `/book/${verified.body.id}?token=${verified.body.kundaliToken}`,
+            );
             return;
           }
           setErrors({
@@ -174,8 +175,6 @@ export function BookingForm({
       setSubmitting(false);
     }
   }
-
-  if (submitted) return <Confirmation submitted={submitted} />;
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
@@ -327,94 +326,5 @@ export function BookingForm({
         advice.
       </p>
     </form>
-  );
-}
-
-/**
- * Confirmation state. Keyed by the returned booking id, so a refresh shows
- * the same state rather than resubmitting (PLAN.md §13). The Kundali is
- * generated after the booking is saved, so this polls for it.
- */
-function Confirmation({ submitted }: { submitted: Submitted }) {
-  const [status, setStatus] = useState<"pending" | "ready" | "failed">("pending");
-  const [downloadPath, setDownloadPath] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    let attempts = 0;
-
-    const poll = async () => {
-      attempts += 1;
-      try {
-        const response = await api.kundali.status({
-          params: { id: submitted.id },
-          query: { token: submitted.kundaliToken },
-        });
-        if (!active) return;
-
-        if (response.status === 200) {
-          setStatus(response.body.status);
-          setDownloadPath(response.body.downloadPath);
-          if (response.body.status !== "pending") return;
-        }
-      } catch {
-        // Keep polling; a transient network blip is not a failure.
-      }
-
-      // Give up quietly after ~1 minute: the practice follows up either way.
-      if (active && attempts < 20) setTimeout(poll, 3000);
-    };
-
-    void poll();
-    return () => {
-      active = false;
-    };
-  }, [submitted.id, submitted.kundaliToken]);
-
-  const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
-  return (
-    <div className="rounded-3xl border border-brand-600/30 bg-ivory p-6 sm:p-8">
-      <CheckCircle2 className="size-9 text-brand-600" />
-      <h2 className="mt-4 font-display text-2xl font-semibold text-forest">
-        Thank you — we have your details
-      </h2>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-        {submitted.message}
-      </p>
-
-      <div className="mt-6 rounded-2xl bg-cream/70 p-4">
-        {status === "pending" && (
-          <p className="flex items-center gap-2 text-sm text-charcoal/80">
-            <Loader2 className="size-4 animate-spin text-brand-600" />
-            Preparing your Kundali…
-          </p>
-        )}
-
-        {status === "ready" && downloadPath && (
-          <a
-            href={`${base}${downloadPath}`}
-            className={cn(buttonVariants({ size: "sm" }), "h-10")}
-          >
-            <Download className="size-4" />
-            Download your Kundali (PDF)
-          </a>
-        )}
-
-        {status === "failed" && (
-          <p className="text-sm text-charcoal/80">
-            Your request is saved. Your Kundali needs a quick manual check — we
-            will send it across shortly.
-          </p>
-        )}
-      </div>
-
-      <Link
-        href="/"
-        className="mt-6 inline-flex text-sm font-medium text-brand-700 underline underline-offset-2"
-      >
-        Back to home
-      </Link>
-    </div>
   );
 }

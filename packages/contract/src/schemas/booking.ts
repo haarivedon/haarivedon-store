@@ -171,6 +171,23 @@ export const bookingReserveSessionSchema = z.object({
 });
 export type BookingReserveSession = z.infer<typeof bookingReserveSessionSchema>;
 
+/**
+ * The booker's view of their own booking, gated by the one-time token. Only
+ * what the confirmation page needs — no birth details, phone or email.
+ */
+export const publicBookingSchema = z.object({
+  id: z.string(),
+  reference: z.string(),
+  name: z.string(),
+  service: z.string(),
+  sessionType: z.enum(sessionTypes),
+  paymentStatus: z.enum(["none", "pending", "paid", "failed"]),
+  kundaliStatus: z.enum(kundaliStatuses),
+  hasKundali: z.boolean(),
+  createdAt: z.iso.datetime(),
+});
+export type PublicBooking = z.infer<typeof publicBookingSchema>;
+
 export const updateBookingStatusSchema = z.object({
   status: z.enum(bookingStatuses),
 });
