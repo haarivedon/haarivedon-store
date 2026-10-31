@@ -48,7 +48,7 @@ export function Services() {
               {pillar.items.map((service) => (
                 <li key={service.title}>
                   <Link
-                    href={service.href}
+                    href={`/book?service=${service.slug}`}
                     className="group flex items-start gap-3.5 py-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
                   >
                     <span className="mt-0.5 grid size-10 shrink-0 place-items-center rounded-full bg-sage/50 text-brand-700 transition-colors group-hover:bg-gold group-hover:text-forest">
