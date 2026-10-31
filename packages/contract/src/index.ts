@@ -2,6 +2,7 @@ export { contract, type Contract } from "./contracts";
 export { placeSchema, type Place } from "./contracts/places";
 export * from "./schemas/common";
 export * from "./schemas/booking";
+export * from "./schemas/blog";
 export * from "./schemas/admin";
 export * from "./schemas/course";
 export * from "./schemas/enquiry";

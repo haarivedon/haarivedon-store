@@ -2,6 +2,7 @@ import {
   contract,
   parseSiteContent,
   siteContentSchemas,
+  type AdminBlogPost,
   type AdminCourse,
   type AdminProduct,
   type AdminService,
@@ -14,6 +15,7 @@ import {
 import {
   prisma,
   type Prisma,
+  type BlogPost as BlogPostRecord,
   type Booking as BookingRecord,
   type Course as CourseRecord,
   type Enquiry as EnquiryRecord,
@@ -118,6 +120,21 @@ const testimonial = (r: TestimonialRecord): AdminTestimonial => ({
   quote: r.quote,
   rating: r.rating,
   location: r.location,
+  order: r.order,
+  published: r.published,
+  updatedBy: r.updatedBy,
+  updatedAt: r.updatedAt.toISOString(),
+});
+
+const blogPost = (r: BlogPostRecord): AdminBlogPost => ({
+  id: r.id,
+  title: r.title,
+  slug: r.slug,
+  excerpt: r.excerpt,
+  content: r.content,
+  coverImage: r.coverImage,
+  tags: r.tags,
+  publishedAt: r.publishedAt.toISOString(),
   order: r.order,
   published: r.published,
   updatedBy: r.updatedBy,
@@ -314,6 +331,18 @@ export const adminRouter = tsr.router(contract.admin, {
     serialize: testimonial,
     publishRequirements: (): Missing[] => [],
     paths: () => ["/"],
+  }),
+  blog: adminCollection<BlogPostRecord, AdminBlogPost>({
+    delegate: prisma.blogPost,
+    searchFields: ["title", "slug", "excerpt"],
+    orderBy: [{ publishedAt: "desc" }],
+    serialize: blogPost,
+    publishRequirements: (record): Missing[] => [
+      ...requireText(record.excerpt, "excerpt", "Add a short excerpt."),
+      ...requireText(record.content, "content", "Write the post."),
+      ...requireText(record.coverImage, "coverImage", "Add a cover image."),
+    ],
+    paths: (record) => ["/blog", `/blog/${record.slug}`],
   }),
 
   // ── Page copy ───────────────────────────────────────────────────────────

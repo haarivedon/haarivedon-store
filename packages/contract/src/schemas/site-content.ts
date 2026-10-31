@@ -71,6 +71,31 @@ export const siteContentSchemas = {
         "Personal and relationship guidance",
       ]),
     portrait: z.string().trim().max(500).default("/images/founder-about.jpg"),
+    faqs: z
+      .array(
+        z.object({
+          question: z.string().trim().max(300).default(""),
+          answer: z.string().trim().max(2000).default(""),
+        }),
+      )
+      .max(30)
+      .default([
+        {
+          question: "How do I prepare for a session?",
+          answer:
+            "Bring your exact date, time and place of birth, and the question you are carrying. The more specific the question, the more useful the session.",
+        },
+        {
+          question: "Do you consult online or in person?",
+          answer:
+            "Sessions are held over a call, so you can join from anywhere. We confirm a time that suits you after you book.",
+        },
+        {
+          question: "Which service is right for me?",
+          answer:
+            "If you are unsure, start with a personal consultation — we will listen first and guide you to the right approach, whether that is astrology, vastu, numerology or energy work.",
+        },
+      ]),
   }),
 
   "predictions.page": z.object({

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import type { SiteContentKey } from "@repo/contract";
 import { adminApi } from "@/lib/api/admin-client";
 import { copyFields, readPath, writePath } from "@/lib/admin/copy-fields";
@@ -182,6 +182,12 @@ function CopyField({
     );
   }
 
+  if (field.kind === "faq") {
+    const rows =
+      (value as { question: string; answer: string }[] | undefined) ?? [];
+    return shell(<FaqEditor rows={rows} onChange={onChange} />);
+  }
+
   return shell(
     <TextInput
       id={id}
@@ -189,5 +195,68 @@ function CopyField({
       placeholder={field.placeholder}
       onChange={(event) => onChange(event.target.value)}
     />,
+  );
+}
+
+type Faq = { question: string; answer: string };
+
+/** Repeater for question/answer pairs (the About page FAQs). */
+function FaqEditor({
+  rows,
+  onChange,
+}: {
+  rows: Faq[];
+  onChange: (value: Faq[]) => void;
+}) {
+  const update = (index: number, patch: Partial<Faq>) =>
+    onChange(rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  const remove = (index: number) =>
+    onChange(rows.filter((_, i) => i !== index));
+  const add = () => onChange([...rows, { question: "", answer: "" }]);
+
+  return (
+    <div className="flex flex-col gap-3">
+      {rows.length === 0 && (
+        <p className="border border-dashed border-border bg-[#faf9f3] px-4 py-3 text-xs text-muted-foreground">
+          No questions yet. Add one below.
+        </p>
+      )}
+      {rows.map((row, index) => (
+        <div
+          key={index}
+          className="flex flex-col gap-2 border border-border bg-[#faf9f3] p-3"
+        >
+          <div className="flex items-center gap-2">
+            <TextInput
+              value={row.question}
+              placeholder="Question"
+              onChange={(event) => update(index, { question: event.target.value })}
+            />
+            <button
+              type="button"
+              onClick={() => remove(index)}
+              className="grid size-9 shrink-0 place-items-center border border-border text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
+              aria-label="Remove question"
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
+          <TextArea
+            rows={3}
+            value={row.answer}
+            placeholder="Answer"
+            onChange={(event) => update(index, { answer: event.target.value })}
+          />
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={add}
+        className="inline-flex items-center gap-1.5 self-start border border-border px-3 py-2 text-sm font-medium text-charcoal transition-colors hover:border-brand-600"
+      >
+        <Plus className="size-4" />
+        Add question
+      </button>
+    </div>
   );
 }

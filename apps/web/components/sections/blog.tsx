@@ -1,8 +1,12 @@
 import { Section, SectionHeader } from "@/components/section";
 import { MediaCard, CardCta } from "@/components/cards";
-import { blogPosts } from "@/lib/content/site";
+import { getBlogPosts } from "@/lib/api/content";
 
-export function Blog() {
+export async function Blog() {
+  const posts = (await getBlogPosts()).slice(0, 3);
+  // Nothing published yet — don't render an empty section on the home page.
+  if (posts.length === 0) return null;
+
   return (
     <Section id="blog" background="cream">
       <SectionHeader
@@ -14,12 +18,12 @@ export function Blog() {
       />
 
       <div className="mt-10 grid gap-6 md:grid-cols-3">
-        {blogPosts.map((post) => (
+        {posts.map((post) => (
           <MediaCard
-            key={post.title}
-            href={post.href}
-            image={post.image}
-            alt={post.alt}
+            key={post.id}
+            href={`/blog/${post.slug}`}
+            image={post.coverImage}
+            alt={post.title}
             ariaLabel={post.title}
             aspect="video"
             sizes="(max-width: 768px) 100vw, 33vw"

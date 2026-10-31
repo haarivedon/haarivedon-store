@@ -157,3 +157,27 @@ export async function getSiteContent<K extends SiteContentKey>(
 /** Returns `fallback` whenever the client has left a field empty. */
 export const orFallback = (value: string | undefined, fallback: string) =>
   value && value.trim() ? value : fallback;
+
+export async function getBlogPosts(tag?: string) {
+  try {
+    const res = await api.blog.list({
+      query: { page: 1, perPage: 100, ...(tag ? { tag } : {}) },
+      fetchOptions: revalidate,
+    });
+    return res.status === 200 ? res.body.data : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getBlogPost(slug: string) {
+  try {
+    const res = await api.blog.getBySlug({
+      params: { slug },
+      fetchOptions: revalidate,
+    });
+    return res.status === 200 ? res.body : null;
+  } catch {
+    return null;
+  }
+}
