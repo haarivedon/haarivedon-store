@@ -58,7 +58,7 @@ export function BookingBand() {
       {/* Botanical + celestial motifs on the full-width canvas */}
       <LeafSprig
         aria-hidden="true"
-        className="pointer-events-none absolute -top-4 -left-6 w-40 -scale-x-100 opacity-90 sm:w-52"
+        className="pointer-events-none absolute -top-4 -left-6 hidden w-40 -scale-x-100 opacity-90 sm:block sm:w-52"
       />
       <span
         aria-hidden="true"
