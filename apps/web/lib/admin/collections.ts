@@ -13,6 +13,8 @@ import {
   productCategories,
   productFamilies,
   productFamilyLabels,
+  serviceCategories,
+  serviceCategoryLabels,
 } from "@repo/contract";
 
 /**
@@ -387,10 +389,29 @@ export const collections: Record<CollectionSpec["key"], CollectionSpec> = {
             hint: "A lucide icon name, e.g. Sparkles",
           },
           {
+            name: "category",
+            label: "Category",
+            kind: "select",
+            options: option(serviceCategories, serviceCategoryLabels),
+            hint: "Groups the service on the site. Use “Vastu” for the Vastu offerings.",
+          },
+          {
             name: "startingPrice",
-            label: "Starting price",
+            label: "Rate",
             kind: "price",
             hint: "Leave empty to show “Enquire for price”",
+          },
+          {
+            name: "discountedPrice",
+            label: "Discounted rate",
+            kind: "price",
+            hint: "Optional — shown alongside the Rate, which is struck through",
+          },
+          {
+            name: "featured",
+            label: "Feature at the top",
+            kind: "switch",
+            hint: "Highlights this as a button/offering above the grid (the Vastu pages)",
           },
         ],
       },
@@ -443,7 +464,10 @@ export const collections: Record<CollectionSpec["key"], CollectionSpec> = {
       title: "",
       slug: "",
       icon: "Sparkles",
+      category: "coaching",
       startingPrice: null,
+      discountedPrice: null,
+      featured: false,
       summary: "",
       description: "",
       highlights: [],

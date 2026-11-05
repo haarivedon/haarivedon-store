@@ -18,7 +18,6 @@ export default function Home() {
     <>
       <Hero />
       <TrustStrip />
-      <About />
       <Services />
       <FreeKundliBand />
       <Courses />
@@ -31,6 +30,8 @@ export default function Home() {
       <Testimonials />
       <Faq />
       {features.blog && <Blog />}
+      {/* About moved to the end of the page. */}
+      <About />
     </>
   );
 }

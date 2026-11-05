@@ -144,11 +144,18 @@ model Service {
   summary       String   @default("")
   description   String   @default("")
   icon          String   @default("Sparkles")
-  // null means "enquire for price".
+  // null means "enquire for price". This is the "Rate".
   startingPrice Int?
+  // null means no discount; shown struck-through against the Rate when set.
+  discountedPrice Int?
   currency      String   @default("INR")
   highlights    String[]
   image         String   @default("")
+  // Grouping for the services section: coaching | readings | energy | vastu | other.
+  // Optional so existing documents (missing the field) still read on MongoDB.
+  category      String?  @default("")
+  // Surfaced as a highlighted offering at the top of the section (the Vastu pages).
+  featured      Boolean? @default(false)
   order         Int      @default(0)
   published     Boolean  @default(false)
   updatedBy     String   @default("")

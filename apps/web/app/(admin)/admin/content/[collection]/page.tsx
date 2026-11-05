@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Plus } from "lucide-react";
+import { ArrowUpDown, Plus } from "lucide-react";
 import { collections, type CollectionSpec } from "@/lib/admin/collections";
 import { adminFetch, requireAdminUser } from "@/lib/admin/session";
 import { PageHeader, Panel } from "@/components/admin/page-header";
@@ -95,13 +95,25 @@ export default async function CollectionListPage({
 
       <Toolbar
         action={
-          <Link
-            href={`/admin/content/${spec.key}/new`}
-            className={cn(buttonVariants({ size: "sm" }), "h-10")}
-          >
-            <Plus className="size-4" />
-            New {spec.singular}
-          </Link>
+          <>
+            <Link
+              href={`/admin/content/${spec.key}/reorder`}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                "h-10",
+              )}
+            >
+              <ArrowUpDown className="size-4" />
+              Reorder
+            </Link>
+            <Link
+              href={`/admin/content/${spec.key}/new`}
+              className={cn(buttonVariants({ size: "sm" }), "h-10")}
+            >
+              <Plus className="size-4" />
+              New {spec.singular}
+            </Link>
+          </>
         }
       >
         <SearchField
