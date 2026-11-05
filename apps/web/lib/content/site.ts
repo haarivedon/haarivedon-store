@@ -10,7 +10,7 @@ import { features } from "@/lib/flags";
 export const site = {
   name: "Haarivedon",
   tagline: "Wisdom · Guidance · Transformation",
-  email: "harivedon@gmail.com",
+  email: "support@haarivedon.com",
   phone: "+91 92509 43774",
   phoneHref: "tel:+919250943774",
 } as const;
