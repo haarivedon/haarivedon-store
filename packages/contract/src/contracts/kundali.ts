@@ -1,6 +1,10 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import { errorSchema } from "../schemas/common";
+import {
+  kundaliPreviewInputSchema,
+  kundaliPreviewSchema,
+} from "../schemas/prediction";
 
 const c = initContract();
 
@@ -12,6 +16,23 @@ const c = initContract();
  * who submitted the form (docs/PLAN.md §3.2).
  */
 export const kundaliContract = c.router({
+  /**
+   * Free instant summary for the public "Get a Free Kundli" flow. Computed
+   * synchronously from the configured provider and never persisted — the
+   * detailed PDF and a booking are offered as the next step.
+   */
+  preview: {
+    method: "POST",
+    path: "/kundali/preview",
+    body: kundaliPreviewInputSchema,
+    responses: {
+      200: kundaliPreviewSchema,
+      422: errorSchema,
+      429: errorSchema,
+      503: errorSchema,
+    },
+    summary: "Compute a free instant Kundli summary (no PDF, not saved).",
+  },
   status: {
     method: "GET",
     path: "/kundali/:id/status",

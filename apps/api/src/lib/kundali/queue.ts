@@ -19,7 +19,7 @@ const ATTEMPTS = 3;
 const BACKOFF_MS = [0, 2_000, 10_000];
 
 /** Local wall-clock birth time -> UTC instant. */
-function toUtc(date: Date, time: string, tz: string): Date {
+export function toUtc(date: Date, time: string, tz: string): Date {
   const [hours, minutes] = time.split(":").map(Number);
   const local = new Date(
     Date.UTC(
