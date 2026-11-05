@@ -4,7 +4,6 @@ import { About } from "@/components/sections/about";
 import { Services } from "@/components/sections/services";
 import { FreeKundliBand } from "@/components/sections/free-kundli-band";
 import { Courses } from "@/components/sections/courses";
-import { PredictionBand } from "@/components/sections/prediction-band";
 import { BookingBand } from "@/components/sections/booking-band";
 import { Products } from "@/components/sections/products";
 import { EnergyTools } from "@/components/sections/energy-tools";
@@ -23,7 +22,6 @@ export default function Home() {
       <Services />
       <FreeKundliBand />
       <Courses />
-      <PredictionBand />
       <div className="bg-ivory py-6 sm:py-10">
         <BookingBand />
       </div>
