@@ -26,8 +26,34 @@ const focusLabels: Record<(typeof focusAreas)[number], string> = {
 
 type Submitted = { id: string; message: string; kundaliToken: string };
 
-export function PredictionForm() {
-  const [place, setPlace] = useState<BirthPlace>(emptyBirthPlace);
+/** Values carried over from the free Kundli so the reader need not retype them. */
+export type PredictionPrefill = {
+  name?: string;
+  dateOfBirth?: string;
+  timeOfBirth?: string;
+  placeOfBirth?: string;
+  birthLat?: number;
+  birthLng?: number;
+  birthTz?: string;
+};
+
+export function PredictionForm({ prefill }: { prefill?: PredictionPrefill }) {
+  const [place, setPlace] = useState<BirthPlace>(() =>
+    prefill?.birthLat != null && prefill?.birthLng != null
+      ? {
+          place: prefill.placeOfBirth ?? "",
+          lat: prefill.birthLat,
+          lng: prefill.birthLng,
+          tz: prefill.birthTz ?? emptyBirthPlace.tz,
+        }
+      : prefill?.placeOfBirth
+        ? {
+            ...emptyBirthPlace,
+            place: prefill.placeOfBirth,
+            tz: prefill.birthTz ?? emptyBirthPlace.tz,
+          }
+        : emptyBirthPlace,
+  );
   const [focusArea, setFocusArea] =
     useState<(typeof focusAreas)[number]>("general");
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -103,6 +129,7 @@ export function PredictionForm() {
             id="p-name"
             name="name"
             autoComplete="name"
+            defaultValue={prefill?.name}
             aria-invalid={Boolean(errors.name)}
             className={inputClass}
           />
@@ -144,6 +171,7 @@ export function PredictionForm() {
             type="date"
             min="1900-01-01"
             max={new Date().toISOString().slice(0, 10)}
+            defaultValue={prefill?.dateOfBirth}
             aria-invalid={Boolean(errors.dateOfBirth)}
             className={inputClass}
           />
@@ -158,6 +186,7 @@ export function PredictionForm() {
             id="p-tob"
             name="timeOfBirth"
             type="time"
+            defaultValue={prefill?.timeOfBirth}
             aria-invalid={Boolean(errors.timeOfBirth)}
             className={inputClass}
           />

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Icon } from "@/components/icon";
 import { Eyebrow } from "@/components/section-heading";
@@ -81,13 +81,14 @@ export async function Hero() {
                 <ArrowRight className="size-4" />
               </Link>
               <Link
-                href="/services"
+                href="/kundli"
                 className={cn(
                   buttonVariants({ variant: "outline", size: "lg" }),
                   "h-12 w-full justify-center px-6 text-sm font-semibold border-ivory/40 text-ivory hover:bg-ivory hover:text-forest sm:w-auto",
                 )}
               >
-                Explore Services
+                <Sparkles className="size-4" />
+                Get a Free Kundli
               </Link>
             </div>
 

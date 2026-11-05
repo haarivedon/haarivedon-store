@@ -109,6 +109,14 @@ packages/tsconfig/            # @repo/tsconfig — base / next / node presets
   **forest**.
 - **Server-first**: default to Server Components; add `"use client"` only for
   interactivity (forms, carousels, menus).
+- **URL-driven state**: any multi-step flow (wizards), filter, tab, or prefill
+  must live in the URL — a path segment or query param, never only in component
+  state. The URL is the single source of truth, so a step/filter is shareable
+  by link, survives refresh, and is never lost on browser Back/Forward. Reflect
+  every step change into the URL (and read it back on load), carry prefill data
+  as query params (e.g. Book-a-Session `?step=`, Free-Kundli → Predictions
+  `?name=&dob=…`), and gate sensitive steps with a token in the URL rather than
+  a flag held in memory.
 - **Accessibility floor**: 4.5:1 contrast, visible focus rings, keyboard nav,
   `prefers-reduced-motion` respected, alt text on imagery, 44px touch targets.
 - **Env**: repo-root `.env` feeds the API and Prisma (validated in

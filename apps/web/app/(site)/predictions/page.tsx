@@ -26,9 +26,32 @@ const receive = [
   "A written response you can return to",
 ];
 
-export default async function PredictionsPage() {
-  const copy = await getSiteContent("predictions.page");
+export default async function PredictionsPage({
+  searchParams,
+}: PageProps<"/predictions">) {
+  const [copy, params] = await Promise.all([
+    getSiteContent("predictions.page"),
+    searchParams,
+  ]);
   const items = copy.receive.length ? copy.receive : receive;
+
+  // Carried over from the free Kundli so a reader continuing to the detailed
+  // PDF only has to add their contact details.
+  const str = (v: string | string[] | undefined) =>
+    typeof v === "string" ? v : undefined;
+  const num = (v: string | string[] | undefined) => {
+    const n = Number(str(v));
+    return str(v) && Number.isFinite(n) ? n : undefined;
+  };
+  const prefill = {
+    name: str(params.name),
+    dateOfBirth: str(params.dob),
+    timeOfBirth: str(params.tob),
+    placeOfBirth: str(params.place),
+    birthLat: num(params.lat),
+    birthLng: num(params.lng),
+    birthTz: str(params.tz),
+  };
 
   return (
     <>
@@ -83,7 +106,7 @@ export default async function PredictionsPage() {
               The more precise your birth details, the more precise the reading.
             </p>
             <div className="mt-6">
-              <PredictionForm />
+              <PredictionForm prefill={prefill} />
             </div>
           </div>
         </div>

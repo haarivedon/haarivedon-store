@@ -2,6 +2,7 @@ import { Hero } from "@/components/sections/hero";
 import { TrustStrip } from "@/components/sections/trust-strip";
 import { About } from "@/components/sections/about";
 import { Services } from "@/components/sections/services";
+import { FreeKundliBand } from "@/components/sections/free-kundli-band";
 import { Courses } from "@/components/sections/courses";
 import { PredictionBand } from "@/components/sections/prediction-band";
 import { BookingBand } from "@/components/sections/booking-band";
@@ -20,6 +21,7 @@ export default function Home() {
       <TrustStrip />
       <About />
       <Services />
+      <FreeKundliBand />
       <Courses />
       <PredictionBand />
       <div className="bg-ivory py-6 sm:py-10">
