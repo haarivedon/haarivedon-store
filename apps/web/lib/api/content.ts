@@ -131,6 +131,18 @@ export async function getProduct(slug: string) {
   }
 }
 
+export async function getService(slug: string) {
+  try {
+    const res = await api.services.getBySlug({
+      params: { slug },
+      fetchOptions: revalidate,
+    });
+    return res.status === 200 ? res.body : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Editable page copy (CR-3).
  *

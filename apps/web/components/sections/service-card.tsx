@@ -7,13 +7,13 @@ import { ServicePrice } from "@/components/price";
 import { cn } from "@/lib/utils";
 
 /**
- * Services-page card — a warm "report card": image header, title, one-line
- * summary, the Rate struck through against the Discounted rate, and a full-width
- * Book CTA.
+ * Services-page card — a product-showcase card: the whole card links to the
+ * service's detail page. A warm "report card" with an image header, title,
+ * one-line summary, the Rate struck against the Discounted rate, and a Book
+ * call-to-action.
  *
  * Transparent product shots (PNG) are centred and float on the card's gradient;
  * photos that carry their own background (jpg/webp) fill the frame edge to edge.
- * Either way there is no wasted letterbox space.
  */
 export function ServiceCard({ service }: { service: Service }) {
   const off =
@@ -27,9 +27,9 @@ export function ServiceCard({ service }: { service: Service }) {
   const contain = /\.png(\?|$)/i.test(service.image);
 
   return (
-    <article
-      id={service.slug}
-      className="group flex h-full scroll-mt-28 flex-col overflow-hidden rounded-2xl bg-gradient-to-b from-cream to-soft-yellow/50 text-center shadow-sm ring-1 ring-gold/10 transition-shadow hover:shadow-md"
+    <Link
+      href={`/services/${service.slug}`}
+      className="group flex h-full scroll-mt-28 flex-col overflow-hidden rounded-2xl bg-gradient-to-b from-cream to-soft-yellow/50 text-center shadow-sm ring-1 ring-gold/10 transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden">
         {service.image ? (
@@ -42,7 +42,7 @@ export function ServiceCard({ service }: { service: Service }) {
               "transition-transform duration-500",
               contain
                 ? "object-contain p-4 drop-shadow-md group-hover:scale-[1.03]"
-                : "object-cover",
+                : "object-cover group-hover:scale-105",
             )}
           />
         ) : (
@@ -79,15 +79,12 @@ export function ServiceCard({ service }: { service: Service }) {
               />
             </div>
           )}
-          <Link
-            href={`/book?service=${encodeURIComponent(service.slug)}`}
-            className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-md bg-gold py-2 text-xs font-bold uppercase tracking-wide text-forest shadow-sm transition-colors hover:bg-gold/85"
-          >
+          <span className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-md bg-gold py-2 text-xs font-bold uppercase tracking-wide text-forest shadow-sm transition-colors group-hover:bg-gold/85">
             Book Now
             <ArrowRight className="size-3.5" />
-          </Link>
+          </span>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

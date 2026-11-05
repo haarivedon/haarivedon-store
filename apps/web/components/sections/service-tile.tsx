@@ -20,7 +20,7 @@ export function ServiceTile({ service }: { service: Service }) {
 
   return (
     <Link
-      href={`/services#${service.slug}`}
+      href={`/services/${service.slug}`}
       className="group relative block aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-sage/60 to-forest/20"
     >
       {service.image ? (

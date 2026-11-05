@@ -456,7 +456,7 @@ export const adminRouter = tsr.router(contract.admin, {
     publishRequirements: (record): Missing[] => [
       ...requireText(record.summary, "summary", "Add a short summary."),
     ],
-    paths: () => ["/services", "/"],
+    paths: (record) => ["/services", `/services/${record.slug}`, "/"],
   }),
 
   testimonials: adminCollection<TestimonialRecord, AdminTestimonial>({
