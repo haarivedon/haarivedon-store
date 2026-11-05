@@ -1,25 +1,39 @@
-import Link from "next/link";
-import { ArrowUpRight, Globe } from "lucide-react";
-import { Icon } from "@/components/icon";
+import { Globe } from "lucide-react";
+import {
+  serviceCategories,
+  serviceCategoryLabels,
+  type ServiceCategory,
+} from "@repo/contract";
+import { ServiceCard } from "@/components/sections/service-card";
 import { Section, SectionHeader } from "@/components/section";
 import { Mandala } from "@/components/decor";
-import { services, serviceCredentials } from "@/lib/content/site";
+import { serviceCredentials } from "@/lib/content/site";
+import { getServices } from "@/lib/api/content";
+
+/** Fold an unknown/empty category into "other" so every service has a home. */
+const normalize = (category: string): ServiceCategory =>
+  (serviceCategories as readonly string[]).includes(category)
+    ? (category as ServiceCategory)
+    : "other";
 
 /**
- * Home services, grouped into the practice's three domains rather than a flat
- * tile grid — the structure itself tells you the shape of the work. The
- * `services` array is authored in these three ordered groups of four, so a
- * slice keeps the content file as the single source of order and copy.
+ * Home services, grouped into the practice's domains. DB-backed and
+ * admin-editable, rendered as proper image cards; pricing, images and order
+ * stay manageable without a redeploy.
  */
-const pillars = [
-  { name: "Coaching & Therapy", items: services.slice(0, 4) },
-  { name: "Readings & Prediction", items: services.slice(4, 8) },
-  { name: "Energy Healing", items: services.slice(8, 12) },
-] as const;
+export async function Services() {
+  const services = await getServices();
 
-export function Services() {
+  const groups = serviceCategories
+    .map((category) => ({
+      category,
+      label: serviceCategoryLabels[category],
+      items: services.filter((s) => normalize(s.category) === category),
+    }))
+    .filter((group) => group.items.length > 0);
+
   return (
-    <Section id="services" background="cream" className="overflow-hidden">
+    <Section id="services" background="white" className="overflow-hidden">
       <Mandala
         aria-hidden="true"
         className="pointer-events-none absolute -top-20 -right-24 size-80 text-forest/[0.06]"
@@ -28,51 +42,45 @@ export function Services() {
       <SectionHeader
         eyebrow="Our Services"
         title="Healing, Guidance &amp; Transformation"
-        description="Twelve ways to work together, across three domains of the practice. Every session is one-to-one and shaped around what you bring."
+        description="Ways to work together, across the domains of the practice. Every session is one-to-one and shaped around what you bring."
         actionHref="/services"
         actionLabel="View All Services"
       />
 
-      <div className="mt-10 grid gap-x-10 gap-y-12 sm:mt-12 lg:grid-cols-3 lg:gap-x-0 lg:divide-x lg:divide-gold/30">
-        {pillars.map((pillar) => (
-          <div key={pillar.name} className="lg:px-9 lg:first:pl-0 lg:last:pr-0">
-            {/* Domain heading — a short gold rule marks each pillar. */}
-            <div className="flex items-center gap-3">
-              <span aria-hidden className="h-px w-8 shrink-0 bg-gold" />
-              <h3 className="font-display text-lg font-semibold tracking-tight text-forest">
-                {pillar.name}
-              </h3>
-            </div>
+      {/* Grouped into domains once services are categorised; until then a single
+          card grid keeps the section clean. */}
+      {groups.length > 1 ? (
+        <div className="mt-10 space-y-12 sm:mt-12">
+          {groups.map((group) => (
+            <div key={group.category}>
+              <div className="flex items-center gap-3">
+                <span aria-hidden className="h-px w-8 shrink-0 bg-gold" />
+                <h3 className="font-display text-lg font-semibold tracking-tight text-forest">
+                  {group.label}
+                </h3>
+              </div>
 
-            <ul className="mt-5 divide-y divide-border/60 border-t border-border/60">
-              {pillar.items.map((service) => (
-                <li key={service.title}>
-                  <Link
-                    href={`/book?service=${service.slug}`}
-                    className="group flex items-start gap-3.5 py-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
-                  >
-                    <span className="mt-0.5 grid size-10 shrink-0 place-items-center rounded-full bg-sage/50 text-brand-700 transition-colors group-hover:bg-gold group-hover:text-forest">
-                      <Icon name={service.icon} className="size-5" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center gap-1 font-display text-base font-semibold text-forest transition-colors group-hover:text-brand-700">
-                        {service.title}
-                        <ArrowUpRight
-                          aria-hidden
-                          className="size-4 -translate-x-1 text-gold opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100"
-                        />
-                      </span>
-                      <span className="mt-0.5 block text-sm leading-relaxed text-muted-foreground">
-                        {service.description}
-                      </span>
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
+              <ul className="mt-5 grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {group.items.map((service) => (
+                  <li key={service.id}>
+                    <ServiceCard service={service} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      ) : (
+        groups.length === 1 && (
+          <ul className="mt-10 grid gap-3 grid-cols-2 sm:mt-12 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {groups[0]!.items.map((service) => (
+              <li key={service.id}>
+                <ServiceCard service={service} />
+              </li>
+            ))}
+          </ul>
+        )
+      )}
 
       {/* Credentials strip — mirrors the brand asset. */}
       <div className="mt-12 flex flex-col items-center gap-4 border-t border-border/60 pt-8">

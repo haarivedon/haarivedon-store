@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { SectionHeading } from "@/components/section-heading";
 
 const backgrounds = {
+  white: "bg-white",
   ivory: "bg-ivory",
   cream: "bg-cream",
   sage: "bg-sage/40",

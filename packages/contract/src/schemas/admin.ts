@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { courseCategories, courseFormats, courseLevels } from "./course";
 import { productFamilies } from "./product";
+import { serviceCategories } from "./service";
 
 /** The signed-in admin, as returned by the session endpoint. */
 export const adminUserSchema = z.object({
@@ -84,9 +85,12 @@ export const adminServiceSchema = z.object({
   description: z.string(),
   icon: z.string(),
   startingPrice: z.number().int().nullable(),
+  discountedPrice: z.number().int().nullable(),
   currency: z.string(),
   highlights: z.array(z.string()),
   image: z.string(),
+  category: z.string(),
+  featured: z.boolean(),
   order: z.number().int(),
   ...adminFields,
 });
@@ -210,8 +214,11 @@ export const serviceWriteSchema = z.object({
   description: z.string().trim().max(8000).optional(),
   icon: z.string().trim().max(60).optional(),
   startingPrice: z.number().int().min(0).max(10_000_000).nullable().optional(),
+  discountedPrice: z.number().int().min(0).max(10_000_000).nullable().optional(),
   highlights: z.array(z.string().trim().min(1).max(200)).max(12).optional(),
   image: z.string().trim().max(500).optional(),
+  category: z.enum(serviceCategories).optional(),
+  featured: z.boolean().optional(),
   order: z.number().int().min(0).optional(),
   published: z.boolean().optional(),
 });
