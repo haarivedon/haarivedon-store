@@ -91,6 +91,8 @@ export const adminServiceSchema = z.object({
   image: z.string(),
   category: z.string(),
   featured: z.boolean(),
+  badge: z.string(),
+  showOnHome: z.boolean(),
   order: z.number().int(),
   ...adminFields,
 });
@@ -217,8 +219,11 @@ export const serviceWriteSchema = z.object({
   discountedPrice: z.number().int().min(0).max(10_000_000).nullable().optional(),
   highlights: z.array(z.string().trim().min(1).max(200)).max(12).optional(),
   image: z.string().trim().max(500).optional(),
-  category: z.enum(serviceCategories).optional(),
+  // Optional — "" means no category (the service stays ungrouped).
+  category: z.enum(serviceCategories).or(z.literal("")).optional(),
   featured: z.boolean().optional(),
+  badge: z.string().trim().max(40).optional(),
+  showOnHome: z.boolean().optional(),
   order: z.number().int().min(0).optional(),
   published: z.boolean().optional(),
 });

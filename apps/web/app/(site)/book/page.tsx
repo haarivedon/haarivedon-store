@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Section, SectionHeader } from "@/components/section";
 import { BookingWizard } from "@/components/forms/booking-wizard";
-import { getSiteContent, orFallback } from "@/lib/api/content";
+import { getSiteContent, getServices, orFallback } from "@/lib/api/content";
 
 export const metadata: Metadata = {
   title: "Book a Session",
@@ -17,13 +17,16 @@ const defaults = {
 };
 
 export default async function BookPage({ searchParams }: PageProps<"/book">) {
-  const [copy, params] = await Promise.all([
+  const [copy, params, services] = await Promise.all([
     getSiteContent("book.page"),
     searchParams,
+    getServices(),
   ]);
 
   // A booking can start from the Services page — carry the chosen service in.
   const serviceSlug = typeof params.service === "string" ? params.service : "";
+  // The dropdown mirrors the live, admin-managed services.
+  const serviceOptions = services.map((s) => ({ slug: s.slug, title: s.title }));
 
   return (
     <Section background="cream" containerClassName="py-8 sm:py-12">
@@ -44,7 +47,7 @@ export default async function BookPage({ searchParams }: PageProps<"/book">) {
         {/* The form itself is the first thing in view — the wizard carries its
             own Form → Schedule → Pay progress, so no separate steps block. */}
         <div className="mt-8 rounded-3xl border border-border/60 bg-ivory p-5 shadow-sm sm:p-7">
-          <BookingWizard selectedSlug={serviceSlug} />
+          <BookingWizard selectedSlug={serviceSlug} services={serviceOptions} />
         </div>
       </div>
     </Section>

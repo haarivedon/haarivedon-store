@@ -156,6 +156,10 @@ model Service {
   category      String?  @default("")
   // Surfaced as a highlighted offering at the top of the section (the Vastu pages).
   featured      Boolean? @default(false)
+  // Admin-set badge text shown on the card (e.g. "New", "Bestseller"). "" = none.
+  badge         String?  @default("")
+  // Whether this service appears in the home-page preview grid.
+  showOnHome    Boolean? @default(false)
   order         Int      @default(0)
   published     Boolean  @default(false)
   updatedBy     String   @default("")

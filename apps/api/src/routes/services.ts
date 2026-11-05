@@ -17,6 +17,8 @@ const serialize = (record: ServiceRecord): Service => ({
   image: record.image,
   category: record.category ?? "",
   featured: record.featured ?? false,
+  badge: record.badge ?? "",
+  showOnHome: record.showOnHome ?? false,
   order: record.order,
   createdAt: record.createdAt.toISOString(),
   updatedAt: record.updatedAt.toISOString(),

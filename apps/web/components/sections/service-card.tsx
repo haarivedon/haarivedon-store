@@ -4,14 +4,16 @@ import { ArrowRight } from "lucide-react";
 import type { Service } from "@repo/contract";
 import { Icon } from "@/components/icon";
 import { ServicePrice } from "@/components/price";
-import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
- * A service as a compact, square-cornered image card. Intentionally minimal —
- * short image, title and price only — so a long list stays scannable without
- * much scrolling. The image header falls back to a branded icon panel, and a
- * discount sets a gold "% off" tag over the image.
+ * Services-page card — a warm "report card": image header, title, one-line
+ * summary, the Rate struck through against the Discounted rate, and a full-width
+ * Book CTA.
+ *
+ * Transparent product shots (PNG) are centred and float on the card's gradient;
+ * photos that carry their own background (jpg/webp) fill the frame edge to edge.
+ * Either way there is no wasted letterbox space.
  */
 export function ServiceCard({ service }: { service: Service }) {
   const off =
@@ -20,54 +22,68 @@ export function ServiceCard({ service }: { service: Service }) {
     service.discountedPrice < service.startingPrice
       ? Math.round((1 - service.discountedPrice / service.startingPrice) * 100)
       : 0;
+  // Admin-set badge wins; otherwise fall back to the discount.
+  const badge = service.badge || (off > 0 ? `${off}% off` : null);
+  const contain = /\.png(\?|$)/i.test(service.image);
 
   return (
     <article
       id={service.slug}
-      className="group flex h-full scroll-mt-28 flex-col border border-sage/80 bg-cream transition-all hover:border-brand-600 hover:shadow-md"
+      className="group flex h-full scroll-mt-28 flex-col overflow-hidden rounded-2xl bg-gradient-to-b from-cream to-soft-yellow/50 text-center shadow-sm ring-1 ring-gold/10 transition-shadow hover:shadow-md"
     >
-      <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-sage/60 to-cream">
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
         {service.image ? (
           <Image
             src={service.image}
             alt=""
             fill
-            sizes="(max-width: 768px) 50vw, 220px"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 360px"
+            className={cn(
+              "transition-transform duration-500",
+              contain
+                ? "object-contain p-4 drop-shadow-md group-hover:scale-[1.03]"
+                : "object-cover",
+            )}
           />
         ) : (
           <span className="grid h-full place-items-center">
-            <Icon name={service.icon} className="size-8 text-brand-700/70" />
+            <Icon name={service.icon} className="size-14 text-brand-700/70" />
           </span>
         )}
-        {off > 0 && (
-          <span className="absolute left-0 top-0 bg-gold px-1.5 py-0.5 text-[0.65rem] font-semibold text-forest">
-            {off}% off
+        {badge && (
+          <span className="absolute left-2 top-2 rounded-full bg-terracotta px-2 py-0.5 text-[0.55rem] font-bold uppercase tracking-wide text-white shadow-sm">
+            {badge}
           </span>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-2.5">
-        <h3 className="line-clamp-2 font-display text-[0.8rem] font-semibold leading-snug text-forest">
+      <div className="flex flex-1 flex-col p-3">
+        <h3 className="font-display text-sm font-semibold leading-snug text-forest">
           {service.title}
         </h3>
+        {service.summary && (
+          <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-charcoal/70">
+            {service.summary}
+          </p>
+        )}
 
-        <div className="mt-auto space-y-2">
-          <ServicePrice
-            rate={service.startingPrice}
-            discounted={service.discountedPrice}
-            currency={service.currency}
-            showChip={false}
-          />
+        <div className="mt-auto pt-3">
+          {(service.startingPrice !== null ||
+            service.discountedPrice !== null) && (
+            <div className="flex items-center justify-center">
+              <ServicePrice
+                rate={service.startingPrice}
+                discounted={service.discountedPrice}
+                currency={service.currency}
+                showChip={false}
+              />
+            </div>
+          )}
           <Link
             href={`/book?service=${encodeURIComponent(service.slug)}`}
-            aria-label={`Book ${service.title}`}
-            className={cn(
-              buttonVariants({ size: "sm" }),
-              "h-8 w-full justify-center rounded-none text-xs",
-            )}
+            className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-md bg-gold py-2 text-xs font-bold uppercase tracking-wide text-forest shadow-sm transition-colors hover:bg-gold/85"
           >
-            Book
+            Book Now
             <ArrowRight className="size-3.5" />
           </Link>
         </div>

@@ -39,6 +39,10 @@ export const serviceSchema = z.object({
   category: z.string(),
   /** Highlighted at the top of the section (the Vastu offerings). */
   featured: z.boolean(),
+  /** Admin-set badge text shown on the card; "" means none. */
+  badge: z.string(),
+  /** Whether this service appears in the home-page preview grid. */
+  showOnHome: z.boolean(),
   order: z.number().int(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
