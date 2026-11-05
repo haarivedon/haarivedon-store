@@ -178,7 +178,7 @@ export const siteContentSchemas = {
   "site.contact": z.object({
     phone: z.string().trim().max(40).default("+91 92509 43774"),
     whatsapp: z.string().trim().max(40).default("+91 92509 43774"),
-    email: z.string().trim().max(120).default("harivedon@gmail.com"),
+    email: z.string().trim().max(120).default("support@haarivedon.com"),
     address: z.string().trim().max(300).default(""),
     hours: z.string().trim().max(200).default(""),
     instagram: z.string().trim().max(200).default(""),

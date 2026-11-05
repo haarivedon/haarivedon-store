@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { CalendarCheck, FileText, MessageCircle } from "lucide-react";
 import { Section, SectionHeader } from "@/components/section";
 import { BookingWizard } from "@/components/forms/booking-wizard";
 import { getSiteContent, orFallback } from "@/lib/api/content";
@@ -17,24 +16,6 @@ const defaults = {
     "Your birth details let us prepare your Kundali before we even speak — so the conversation starts with your actual chart, not with questions about it.",
 };
 
-const steps = [
-  {
-    icon: CalendarCheck,
-    title: "Share your details",
-    body: "Your name, mobile number, and exactly when and where you were born.",
-  },
-  {
-    icon: FileText,
-    title: "Get your Kundali",
-    body: "We prepare your birth chart as a PDF — yours to keep, whatever you decide next.",
-  },
-  {
-    icon: MessageCircle,
-    title: "We reach out",
-    body: "We call to confirm a time that suits you, and the session happens one-to-one.",
-  },
-];
-
 export default async function BookPage({ searchParams }: PageProps<"/book">) {
   const [copy, params] = await Promise.all([
     getSiteContent("book.page"),
@@ -45,46 +26,27 @@ export default async function BookPage({ searchParams }: PageProps<"/book">) {
   const serviceSlug = typeof params.service === "string" ? params.service : "";
 
   return (
-    <>
-      <Section background="cream" containerClassName="pb-8 sm:pb-10">
+    <Section background="cream" containerClassName="py-8 sm:py-12">
+      <div className="mx-auto max-w-2xl">
         <SectionHeader
           eyebrow="Book a Session"
           as="h1"
           title={orFallback(copy.heading, defaults.heading)}
           description={orFallback(copy.intro, defaults.intro)}
-          align="center"
         />
-        <ol className="mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-3">
-          {steps.map((step, index) => (
-            <li
-              key={step.title}
-              className="rounded-2xl border border-border/60 bg-ivory/70 p-5"
-            >
-              <step.icon className="size-6 text-brand-600" />
-              <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-brand-700">
-                Step {index + 1}
-              </p>
-              <h2 className="mt-1 font-display text-base font-semibold text-forest">
-                {step.title}
-              </h2>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                {step.body}
-              </p>
-            </li>
-          ))}
-        </ol>
-      </Section>
 
-      <Section background="ivory">
-        <div className="mx-auto max-w-2xl">
-          {copy.kundaliNote && (
-            <p className="mb-6 rounded-2xl bg-cream/70 p-4 text-sm leading-relaxed text-charcoal/80">
-              {copy.kundaliNote}
-            </p>
-          )}
+        {copy.kundaliNote && (
+          <p className="mt-6 rounded-2xl bg-ivory/70 p-4 text-sm leading-relaxed text-charcoal/80">
+            {copy.kundaliNote}
+          </p>
+        )}
+
+        {/* The form itself is the first thing in view — the wizard carries its
+            own Form → Schedule → Pay progress, so no separate steps block. */}
+        <div className="mt-8 rounded-3xl border border-border/60 bg-ivory p-5 shadow-sm sm:p-7">
           <BookingWizard selectedSlug={serviceSlug} />
         </div>
-      </Section>
-    </>
+      </div>
+    </Section>
   );
 }
