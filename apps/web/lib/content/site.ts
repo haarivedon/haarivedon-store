@@ -21,7 +21,8 @@ export const navLinks = [
   { label: "Services", href: "/services" },
   { label: "Courses", href: "/courses" },
   { label: "Products", href: "/products" },
-  { label: "Predictions", href: "/predictions" },
+  // The /predictions route stays (the Free-Kundli result links to it for the
+  // detailed PDF) but is no longer surfaced in the nav.
   // The blog is deferred, so its entry is filtered out rather than removed.
   ...(features.blog ? [{ label: "Blog", href: "/blog" }] : []),
 ] as const;

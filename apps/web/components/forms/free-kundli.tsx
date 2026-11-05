@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -216,7 +217,13 @@ function CastingState() {
     <div className="flex flex-col items-center gap-5 py-6 text-center">
       <div className="relative flex size-16 items-center justify-center">
         <Loader2 className="size-16 animate-spin text-gold/40" />
-        <Sparkles className="absolute size-6 text-gold" />
+        <Image
+          src="/images/logo.png"
+          alt=""
+          width={44}
+          height={44}
+          className="absolute size-9 motion-safe:animate-pulse"
+        />
       </div>
 
       <div>
