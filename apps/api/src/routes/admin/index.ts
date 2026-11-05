@@ -111,6 +111,8 @@ const service = (r: ServiceRecord): AdminService => ({
   image: r.image,
   category: r.category ?? "",
   featured: r.featured ?? false,
+  badge: r.badge ?? "",
+  showOnHome: r.showOnHome ?? false,
   order: r.order,
   published: r.published,
   updatedBy: r.updatedBy,

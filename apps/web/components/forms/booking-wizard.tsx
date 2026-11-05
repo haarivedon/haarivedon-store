@@ -14,25 +14,26 @@ import {
   type BirthPlace,
 } from "@/components/forms/city-select";
 import { BookingProgress } from "@/components/forms/booking-progress";
-import { services } from "@/lib/content/site";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-/** The service dropdown: the 12 services, plus a catch-all "Something else". */
+/** The service dropdown is built from the live services + a catch-all. */
 const OTHER = "__other__";
-const serviceOptions = [
-  ...services.map((s) => ({ value: s.slug, label: s.title })),
-  { value: OTHER, label: "Something else" },
-];
+type ServiceOption = { slug: string; title: string };
 
 /**
  * Step 1 of the booking flow: the details form. On submit it saves a draft and
  * hands off to /book/[id]?token=…&step=schedule for the schedule + pay steps.
+ *
+ * The service list is passed in from the page (fetched from the admin-managed
+ * services), so the dropdown always matches what the site actually offers.
  */
 export function BookingWizard({
   selectedSlug = "",
+  services = [],
 }: {
   selectedSlug?: string;
+  services?: ServiceOption[];
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -42,6 +43,11 @@ export function BookingWizard({
   const [serviceValue, setServiceValue] = useState<string>(
     services.some((s) => s.slug === selectedSlug) ? selectedSlug : OTHER,
   );
+
+  const serviceOptions = [
+    ...services.map((s) => ({ value: s.slug, label: s.title })),
+    { value: OTHER, label: "Something else" },
+  ];
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

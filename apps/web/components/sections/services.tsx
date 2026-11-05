@@ -1,36 +1,23 @@
+import Link from "next/link";
 import { Globe } from "lucide-react";
-import {
-  serviceCategories,
-  serviceCategoryLabels,
-  type ServiceCategory,
-} from "@repo/contract";
-import { ServiceCard } from "@/components/sections/service-card";
+import { ServiceTile } from "@/components/sections/service-tile";
 import { Section, SectionHeader } from "@/components/section";
 import { Mandala } from "@/components/decor";
+import { buttonVariants } from "@/components/ui/button";
 import { serviceCredentials } from "@/lib/content/site";
 import { getServices } from "@/lib/api/content";
+import { cn } from "@/lib/utils";
 
-/** Fold an unknown/empty category into "other" so every service has a home. */
-const normalize = (category: string): ServiceCategory =>
-  (serviceCategories as readonly string[]).includes(category)
-    ? (category as ServiceCategory)
-    : "other";
+/** The home is a teaser — a flat preview grid. The full, categorised list lives
+ *  on the Services page, so this never grows unbounded. */
+const HOME_LIMIT = 8;
 
-/**
- * Home services, grouped into the practice's domains. DB-backed and
- * admin-editable, rendered as proper image cards; pricing, images and order
- * stay manageable without a redeploy.
- */
 export async function Services() {
   const services = await getServices();
-
-  const groups = serviceCategories
-    .map((category) => ({
-      category,
-      label: serviceCategoryLabels[category],
-      items: services.filter((s) => normalize(s.category) === category),
-    }))
-    .filter((group) => group.items.length > 0);
+  // Admin picks what shows here via "Show on home page"; until any are picked,
+  // fall back to the first few so the section is never empty.
+  const picked = services.filter((s) => s.showOnHome);
+  const items = (picked.length ? picked : services).slice(0, HOME_LIMIT);
 
   return (
     <Section id="services" background="white" className="overflow-hidden">
@@ -43,44 +30,26 @@ export async function Services() {
         eyebrow="Our Services"
         title="Healing, Guidance &amp; Transformation"
         description="Ways to work together, across the domains of the practice. Every session is one-to-one and shaped around what you bring."
-        actionHref="/services"
-        actionLabel="View All Services"
       />
 
-      {/* Grouped into domains once services are categorised; until then a single
-          card grid keeps the section clean. */}
-      {groups.length > 1 ? (
-        <div className="mt-10 space-y-12 sm:mt-12">
-          {groups.map((group) => (
-            <div key={group.category}>
-              <div className="flex items-center gap-3">
-                <span aria-hidden className="h-px w-8 shrink-0 bg-gold" />
-                <h3 className="font-display text-lg font-semibold tracking-tight text-forest">
-                  {group.label}
-                </h3>
-              </div>
-
-              <ul className="mt-5 grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {group.items.map((service) => (
-                  <li key={service.id}>
-                    <ServiceCard service={service} />
-                  </li>
-                ))}
-              </ul>
-            </div>
+      {items.length > 0 && (
+        <ul className="mt-10 grid gap-4 grid-cols-2 sm:mt-12 lg:grid-cols-4">
+          {items.map((service) => (
+            <li key={service.id}>
+              <ServiceTile service={service} />
+            </li>
           ))}
-        </div>
-      ) : (
-        groups.length === 1 && (
-          <ul className="mt-10 grid gap-3 grid-cols-2 sm:mt-12 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {groups[0]!.items.map((service) => (
-              <li key={service.id}>
-                <ServiceCard service={service} />
-              </li>
-            ))}
-          </ul>
-        )
+        </ul>
       )}
+
+      <div className="mt-10 flex justify-center">
+        <Link
+          href="/services"
+          className={cn(buttonVariants({ variant: "outline", size: "lg" }), "px-8")}
+        >
+          View all services
+        </Link>
+      </div>
 
       {/* Credentials strip — mirrors the brand asset. */}
       <div className="mt-12 flex flex-col items-center gap-4 border-t border-border/60 pt-8">
