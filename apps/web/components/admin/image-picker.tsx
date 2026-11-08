@@ -16,6 +16,10 @@ import { cn } from "@/lib/utils";
  */
 const absolute = (url: string) => url;
 
+/** Upload ceiling — mirrors the server limit (apps/api .../upload.ts). */
+const MAX_UPLOAD_MB = 10;
+const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
+
 /**
  * Image picker: upload, pick from recent uploads, and describe the picture.
  *
@@ -62,14 +66,23 @@ export function ImagePicker({
 
   async function onFile(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    event.target.value = ""; // reset so re-picking the same file still fires
     if (!file) return;
+
+    // Stop oversized uploads before they leave the browser — instant feedback
+    // and no wasted bandwidth. The server enforces the same ceiling too.
+    if (file.size > MAX_UPLOAD_BYTES) {
+      const message = `That image is ${(file.size / 1024 / 1024).toFixed(1)} MB — please keep it under ${MAX_UPLOAD_MB} MB.`;
+      setError(message);
+      toast.error("Image too large", { description: message });
+      return;
+    }
 
     setBusy(true);
     setError(null);
     // Start from the record's title; it can be edited on the image after.
     const result = await uploadImage(file, (suggestedAlt ?? "").trim());
     setBusy(false);
-    event.target.value = "";
 
     if (!result.ok) {
       setError(result.error);
@@ -180,8 +193,9 @@ export function ImagePicker({
       </label>
 
       <p className="text-xs text-muted-foreground">
-        Recommended: 1600px or wider on the longest edge, up to 10 MB. JPEG, PNG
-        or WebP.
+        Recommended: landscape, about 1200–1600px wide and under 2 MB. We
+        optimise and convert to WebP automatically. JPEG, PNG or WebP · max{" "}
+        {MAX_UPLOAD_MB} MB.
       </p>
 
       {error && (

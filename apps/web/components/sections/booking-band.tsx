@@ -109,7 +109,7 @@ export function BookingBand() {
             className="pointer-events-none absolute top-1/2 left-1/2 hidden size-80 -translate-x-1/2 -translate-y-1/2 text-forest/12 lg:block"
           />
           <Image
-            src="/images/founder-reading.png"
+            src="/images/founder-reading.webp"
             alt="Neelam A. Singh reading, offering personalized guidance"
             width={1236}
             height={1500}

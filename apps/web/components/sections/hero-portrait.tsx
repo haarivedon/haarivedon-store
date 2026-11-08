@@ -6,13 +6,13 @@ import { cn } from "@/lib/utils";
 
 const slides = [
   {
-    src: "/images/founder-cutout.png",
+    src: "/images/founder-cutout.webp",
     alt: "Neelam A. Singh holding her book on healing methods",
     width: 1285,
     height: 1600,
   },
   {
-    src: "/images/founder-cutout-2.png",
+    src: "/images/founder-cutout-2.webp",
     alt: "Neelam A. Singh reading a rose quartz crystal sphere",
     width: 1067,
     height: 1600,
