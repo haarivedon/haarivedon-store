@@ -93,6 +93,18 @@ const envSchema = z.object({
   RAZORPAY_KEY_ID: z.string().optional(),
   RAZORPAY_KEY_SECRET: z.string().optional(),
   RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
+
+  // ── Udemy (courses sync) ────────────────────────────────────────────────
+  /**
+   * Udemy Affiliate API credentials. With no key pair the sync is disabled:
+   * the admin's "Sync from Udemy" button reports "not configured" and manual
+   * courses keep working. `UDEMY_SEARCH` is the query used to find the courses
+   * to import (e.g. the instructor/brand name).
+   */
+  UDEMY_CLIENT_ID: z.string().optional(),
+  UDEMY_CLIENT_SECRET: z.string().optional(),
+  UDEMY_SEARCH: z.string().default(""),
+  UDEMY_BASE_URL: z.string().default("https://www.udemy.com/api-2.0"),
 });
 
 const parsed = envSchema.safeParse(process.env);

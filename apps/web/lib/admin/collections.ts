@@ -146,6 +146,14 @@ export const collections: Record<CollectionSpec["key"], CollectionSpec> = {
             hint: "Leave empty to show “Enquire for price”",
           },
           {
+            name: "udemyUrl",
+            label: "Udemy URL",
+            kind: "text",
+            wide: true,
+            placeholder: "https://www.udemy.com/course/your-course/",
+            hint: "Paste the course link — the Enroll button opens it on Udemy.",
+          },
+          {
             name: "certificate",
             label: "Certificate on completion",
             kind: "switch",
@@ -238,6 +246,7 @@ export const collections: Record<CollectionSpec["key"], CollectionSpec> = {
       duration: "",
       language: "Hindi / English",
       price: null,
+      udemyUrl: "",
       summary: "",
       description: "",
       outline: [],

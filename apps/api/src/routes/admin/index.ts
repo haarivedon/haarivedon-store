@@ -49,6 +49,7 @@ import { deleteObject } from "../../lib/storage";
 import { queueKundali } from "../../lib/kundali/queue";
 import { clientIp } from "../../lib/rate-limit";
 import { revalidate } from "../../lib/revalidate";
+import { syncUdemyCourses } from "../../lib/udemy-sync";
 import { toPaginationMeta, toPrismaPage } from "../../lib/pagination";
 
 // ── Serializers ───────────────────────────────────────────────────────────
@@ -68,6 +69,9 @@ const course = (r: CourseRecord): AdminCourse => ({
   price: r.price,
   currency: r.currency,
   image: r.image,
+  udemyUrl: r.udemyUrl ?? "",
+  udemyId: r.udemyId ?? null,
+  source: r.source ?? "manual",
   relatedSlugs: r.relatedSlugs,
   certificate: r.certificate,
   featured: r.featured,
@@ -362,6 +366,13 @@ export const adminRouter = tsr.router(contract.admin, {
         })),
       },
     };
+  },
+
+  coursesSync: async (_input, { request }) => {
+    await requireAdmin(request.headers);
+    const result = await syncUdemyCourses();
+    if (result.imported > 0) revalidate(["/courses", "/"]);
+    return { status: 200 as const, body: result };
   },
 
   login: async ({ body }, { request, responseHeaders }) => {

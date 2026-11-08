@@ -2,7 +2,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BadgeCheck, Clock, Globe, GraduationCap } from "lucide-react";
+import {
+  ArrowLeft,
+  BadgeCheck,
+  Clock,
+  ExternalLink,
+  Globe,
+  GraduationCap,
+} from "lucide-react";
 import {
   courseCategoryLabels,
   courseFormatLabels,
@@ -13,6 +20,8 @@ import { EnquiryForm } from "@/components/enquiry-form";
 import { Price } from "@/components/price";
 import { getAllCourses, getCourse } from "@/lib/api/content";
 import { CourseJsonLd } from "@/components/seo/json-ld";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export async function generateStaticParams() {
   const courses = await getAllCourses();
@@ -197,18 +206,44 @@ export default async function CoursePage({
                   asButton={false}
                 />
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Leave your details and we will send you the schedule and how to
-                join.
-              </p>
-              <div className="mt-5">
-                <EnquiryForm
-                  kind="course"
-                  itemSlug={course.slug}
-                  itemTitle={course.title}
-                  submitLabel="Ask about this course"
-                />
-              </div>
+              {course.udemyUrl ? (
+                <>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    This course is hosted on Udemy — enrol there to start
+                    straight away.
+                  </p>
+                  <a
+                    href={course.udemyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      buttonVariants({ size: "lg" }),
+                      "mt-5 h-12 w-full justify-center px-6 text-sm font-semibold",
+                    )}
+                  >
+                    Enroll on Udemy
+                    <ExternalLink className="size-4" />
+                  </a>
+                  <p className="mt-3 text-center text-xs text-muted-foreground">
+                    You'll be taken to Udemy to complete your enrolment.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Leave your details and we will send you the schedule and how
+                    to join.
+                  </p>
+                  <div className="mt-5">
+                    <EnquiryForm
+                      kind="course"
+                      itemSlug={course.slug}
+                      itemTitle={course.title}
+                      submitLabel="Ask about this course"
+                    />
+                  </div>
+                </>
+              )}
             </div>
             <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
               Courses teach traditional practices and carry spiritual

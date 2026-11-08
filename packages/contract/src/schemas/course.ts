@@ -74,6 +74,12 @@ export const courseSchema = z.object({
   price: z.number().int().nullable(),
   currency: z.string(),
   image: z.string(),
+  /** Udemy course URL the Enroll button links to; "" means none. */
+  udemyUrl: z.string(),
+  /** Udemy numeric id (null unless synced from Udemy). */
+  udemyId: z.number().int().nullable(),
+  /** "manual" | "udemy" — how the course was added. */
+  source: z.string(),
   /** Basic/advanced siblings. Unpublished targets are dropped on render. */
   relatedSlugs: z.array(z.string()),
   certificate: z.boolean(),
