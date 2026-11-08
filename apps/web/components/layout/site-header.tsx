@@ -99,7 +99,7 @@ export function SiteHeader() {
               href="/book"
               className={cn(
                 buttonVariants({ size: "lg" }),
-                "h-10 px-5 text-sm font-semibold shadow-sm",
+                "h-10 bg-indigo px-5 text-sm font-semibold text-ivory shadow-sm transition-colors hover:bg-gold hover:text-forest",
               )}
             >
               Book a Session
@@ -137,7 +137,7 @@ export function SiteHeader() {
               onClick={() => setOpen(false)}
               className={cn(
                 buttonVariants({ size: "lg" }),
-                "mt-2 h-12 text-sm font-semibold",
+                "mt-2 h-12 bg-indigo text-sm font-semibold text-ivory transition-colors hover:bg-gold hover:text-forest",
               )}
             >
               Book a Session

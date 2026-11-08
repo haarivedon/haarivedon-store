@@ -125,6 +125,24 @@ export const adminContract = c.router({
     summary: "Dashboard metrics: totals, revenue, activity and breakdowns.",
   },
 
+  // ── Udemy sync ────────────────────────────────────────────────────────────
+  coursesSync: {
+    method: "POST",
+    path: "/admin/courses/sync",
+    body: z.object({}),
+    responses: {
+      200: z.object({
+        configured: z.boolean(),
+        found: z.number().int(),
+        imported: z.number().int(),
+        skipped: z.number().int(),
+        error: z.string().optional(),
+      }),
+      401: errorSchema,
+    },
+    summary: "Import courses from Udemy as drafts.",
+  },
+
   // ── Session ─────────────────────────────────────────────────────────────
   login: {
     method: "POST",

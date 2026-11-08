@@ -5,6 +5,7 @@ import { collections, type CollectionSpec } from "@/lib/admin/collections";
 import { adminFetch, requireAdminUser } from "@/lib/admin/session";
 import { PageHeader, Panel } from "@/components/admin/page-header";
 import { RowActions } from "@/components/admin/row-actions";
+import { SyncUdemyButton } from "@/components/admin/sync-udemy-button";
 import { SearchField, SegmentedFilter, Toolbar } from "@/components/admin/ui";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -96,6 +97,7 @@ export default async function CollectionListPage({
       <Toolbar
         action={
           <>
+            {spec.key === "courses" && <SyncUdemyButton />}
             <Link
               href={`/admin/content/${spec.key}/reorder`}
               className={cn(

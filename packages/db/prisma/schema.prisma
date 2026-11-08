@@ -230,6 +230,12 @@ model Course {
   price        Int?
   currency     String   @default("INR")
   image        String   @default("")
+  /// Udemy course URL; the Enroll button links here. "" = none (nullable for existing docs).
+  udemyUrl     String?  @default("")
+  /// Udemy numeric course id — the key the sync upserts on. null = not from Udemy.
+  udemyId      Int?
+  /// manual | udemy — how the course entered the catalogue.
+  source       String?  @default("manual")
   relatedSlugs String[]
   certificate  Boolean  @default(false)
   featured     Boolean  @default(false)
